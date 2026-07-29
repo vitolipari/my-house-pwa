@@ -76,7 +76,7 @@ export class SplashPage implements OnInit {
 
                 if( e === 'no-token' ) {
                     this.authService.clearLoginData();
-                    this.router.navigate(['/access/sign-in']);
+                    // this.router.navigate(['/access/sign-in']);
                 }
                 else {
                     this.router.navigate(
