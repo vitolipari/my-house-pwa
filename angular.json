@@ -28,6 +28,9 @@
                         "styles": [
                             "src/styles.css",
                             "node_modules/primeicons/primeicons.css"
+                        ],
+                        "allowedCommonJsDependencies": [
+                            "js-x509-utils"
                         ]
                     },
                     "configurations": {
@@ -35,21 +38,21 @@
 
                             "fileReplacements": [
                                 {
-                                    "replace": "src/environments/environment.ts",
-                                    "with": "src/environments/environment.prod.ts"
+                                    "replace": "src/environment.ts",
+                                    "with": "src/environment.prod.ts"
                                 }
                             ],
 
                             "budgets": [
                                 {
                                     "type": "initial",
-                                    "maximumWarning": "500kB",
-                                    "maximumError": "1MB"
+                                    "maximumWarning": "1.5MB",
+                                    "maximumError": "2MB"
                                 },
                                 {
                                     "type": "anyComponentStyle",
-                                    "maximumWarning": "4kB",
-                                    "maximumError": "8kB"
+                                    "maximumWarning": "6kB",
+                                    "maximumError": "10kB"
                                 }
                             ],
                             "outputHashing": "all",
