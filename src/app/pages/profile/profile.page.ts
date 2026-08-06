@@ -166,94 +166,55 @@ export class ProfilePage {
 
 
         this.inWaiting.set(true);
-        // this.message.set('');
-        // this.inWaiting = true;
-
-
-
+        this.message.set('');
+        this.errorMessage.set('');
 
         try {
-            // const response = await this.authService.signUp(value);
-            // console.log('response di signup');
-            // console.log( response );
+            const updatedUser = await this.authService.editProfile(value);
 
+            this.previewUrl = updatedUser.picture;
+            this.profileImageFile = null;
+            this.isInEdit = false;
+            this.isInChangePassword = false;
 
-            this.authService.editProfile(value)
-                .then((response: any) => {
-                    console.log('edit profile response');
-                    console.log(response);
+            this.form.patchValue({
+                fullName: updatedUser.username,
+                mobilenumber: updatedUser.mobile,
+                email: updatedUser.email,
+                currentPassword: '',
+                newPassword: '',
+                confirmPassword: ''
+            });
 
+            this.message.set('Profilo aggiornato.');
+        } catch (e: any) {
+            console.log('errore della modifica profilo');
+            console.log(e);
 
-                    // debugger;
+            const err = String(e?.code ?? e?.message ?? e ?? 'Errore durante la modifica del profilo');
+            const normalizedError = err.toLowerCase().trim();
 
-                    // this.authService.saveLoggedUser( response.user );
-                    // this.authService.saveToken( response.accessToken );
-
-                    this.authService.updateCurrentUser(value);
-
-                    this.inWaiting.set(false);
-                    this.isInEdit = false;
-
-                    // TODO
-
-                })
-                .catch((e: any) => {
-                    console.log('errore della promise di edit');
-                    console.log(e);
-
-                    let err = e;
-                    if( typeof e === 'string' ) {
-
-                    }
-                    else {
-                        if( !!e.code ) {
-                            err = e.code;
-                        }
-                    }
-
-
-                    // alert(err);
-                    if( err.toLowerCase().trim().indexOf('email') !== -1 ) {
-                        this.errors.email = err;
-                    }
-                    if( err.toLowerCase().trim().indexOf('phone') !== -1 ) {
-                        this.errors.mobilenumber = err;
-                    }
-                    if( err.toLowerCase().trim().indexOf('mobile') !== -1 ) {
-                        this.errors.mobilenumber = err;
-                    }
-                    if( err.toLowerCase().trim().indexOf('number') !== -1 ) {
-                        this.errors.mobilenumber = err;
-                    }
-                    if( err.toLowerCase().trim().indexOf('unique') !== -1 ) {
-                        this.errors.mobilenumber = 'Numero Esistente';
-                    }
-                    if( err.toLowerCase().trim().indexOf('password') !== -1 ) {
-                        this.errors.currentPassword = err;
-                    }
-
-
-                    // TODO controllo sessione scaduta
-
-                    // TODO controllo sessione inesistente
-
-
-                    // TODO gestire l'errore generale
-
-                    this.inWaiting.set(false);
-                })
-
-
-            // debugger;
-            // await this.router.navigate(['/access/confirm'], {
-            //     queryParams: {email: value.email}
-            // });
-
-        } catch {
-            console.log('errore');
-            this.message.set('Registrazione non riuscita.');
+            if (normalizedError.includes('email')) {
+                this.errors.email = err;
+            }
+            if (
+                normalizedError.includes('phone')
+                || normalizedError.includes('mobile')
+                || normalizedError.includes('number')
+            ) {
+                this.errors.mobilenumber = err;
+            }
+            if (normalizedError.includes('unique')) {
+                this.errors.mobilenumber = 'Numero Esistente';
+            }
+            if (normalizedError.includes('password')) {
+                this.errors.currentPassword = err;
+            }
+            if (Object.keys(this.errors).length === 0) {
+                this.errorMessage.set(err);
+            }
         } finally {
-            // this.inWaiting.set(false);
+            this.inWaiting.set(false);
         }
     }
 

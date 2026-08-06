@@ -1,7 +1,6 @@
 import {Routes} from '@angular/router';
 import {routeAccessGuard} from './guards/route-access.guard';
 import {guestGuard} from './guards/guest.guard';
-import {UsersPage} from './pages/users-page/users.page';
 
 
 export const routes: Routes = [
@@ -57,7 +56,7 @@ export const routes: Routes = [
     },
 
     {
-        path: 'users',
+        path: 'users-page',
         canActivate: [routeAccessGuard],
         data: {
             accessControl: {
@@ -69,6 +68,18 @@ export const routes: Routes = [
         },
         loadComponent: () =>
             import('./pages/users-page/users.page').then(m => m.UsersPage)
+    },
+
+    {
+        path: 'devices',
+        canActivate: [routeAccessGuard],
+        data: {
+            accessControl: {
+                permission: 'ACCESS_DASHBOARD'
+            }
+        },
+        loadComponent: () =>
+            import('./pages/devices/devices.page').then(m => m.DevicesPage)
     },
 
     {

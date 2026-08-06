@@ -12,6 +12,43 @@
     min-height: calc(100vh - var(--header-height));
 }
 
+.pwa-notice {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    max-width: 36rem;
+    margin-inline: auto;
+    padding: 0.8rem 1rem;
+    color: #ffffff;
+    background: #0f172a;
+    border: 1px solid rgb(255 255 255 / 18%);
+    border-radius: 0.9rem;
+    box-shadow: 0 0.75rem 2rem rgb(15 23 42 / 28%);
+}
+
+.pwa-notice button {
+    flex: 0 0 auto;
+    padding: 0.55rem 0.8rem;
+    color: #0f172a;
+    font: inherit;
+    font-weight: 700;
+    background: #ffffff;
+    border: 0;
+    border-radius: 0.65rem;
+    cursor: pointer;
+}
+
+.pwa-notice button:focus-visible {
+    outline: 3px solid #38bdf8;
+    outline-offset: 2px;
+}
+
 .drawer-handle {
     width: 48px;
     height: 5px;

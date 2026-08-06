@@ -2,6 +2,30 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.5.
 
+## PWA e versioni LipariOS
+
+La build di produzione include manifest, icone e service worker Angular. Quando
+il browser espone l'evento di installazione, l'app mostra il pulsante
+`Installa`.
+
+Ogni build viene marcata in `ngsw.json` e `pwa-version.json`. In assenza di una
+versione esplicita viene usata la versione di `package.json`:
+
+```bash
+npm run build
+```
+
+Il deploy LipariOS passa invece la versione dell'installer:
+
+```bash
+LIPARIOS_VERSION=2.0.11 npm run build
+```
+
+La PWA controlla gli aggiornamenti all'avvio, ogni cinque minuti, al ritorno in
+primo piano e quando torna disponibile la rete. Dopo avere scaricato la nuova
+versione mostra `Aggiorna ora`; il reload viene lasciato all'utente per non
+interrompere un'operazione in corso.
+
 ## Development server
 
 To start a local development server, run:

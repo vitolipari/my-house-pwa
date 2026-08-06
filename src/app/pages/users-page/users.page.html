@@ -1,12 +1,14 @@
-@if(!!isInWaiting) {
+<h2>Utenti</h2>
+
+
+@if(!!isInWaiting()) {
     <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
 } @else {
 
 
-    <h2>Utenti</h2>
 
     <div>
-        @for (user of users; track user) {
+        @for (user of users(); track user) {
             <user-block [user]="user"></user-block>
         }
     </div>

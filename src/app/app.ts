@@ -1,21 +1,20 @@
-import {Component, effect, inject, signal} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 import {NavigationEnd, Router, RouterOutlet} from '@angular/router';
 import {SwUpdateService} from './services/sw-update';
 import {DarkModeService} from './services/dark-mode-service';
 import {SvgSprite} from './ui/svg-sprite/svg-sprite';
 import {Header} from './components/header/header';
 import {AuthService} from './services/auth';
-import {LoggedUser} from './models/auth.models';
-import {JsonPipe} from '@angular/common';
 import {filter} from 'rxjs/operators';
 import { DrawerModule } from 'primeng/drawer';
 import {MobileMenuComponent} from './components/menu-component/mobile-menu.component';
+import {PwaInstallService} from './services/pwa-install';
 
 
 @Component({
     selector: 'app-root',
     standalone: true,
-    imports: [RouterOutlet, SvgSprite, Header, JsonPipe, DrawerModule, MobileMenuComponent],
+    imports: [RouterOutlet, SvgSprite, Header, DrawerModule, MobileMenuComponent],
     templateUrl: `./app.html`,
     styleUrl: './app.css',
 })
@@ -28,6 +27,9 @@ export class App {
     // user = this.authService.currentUser;
 
     private readonly swUpdateService = inject<SwUpdateService>(SwUpdateService);
+    private readonly pwaInstallService = inject(PwaInstallService);
+    readonly availableUpdate = this.swUpdateService.availableUpdate;
+    readonly canInstallPwa = this.pwaInstallService.canInstall;
     darkModeService = inject(DarkModeService);
 
     // user: LoggedUser | null;
@@ -43,6 +45,7 @@ export class App {
 
     constructor() {
         this.swUpdateService.init();
+        this.pwaInstallService.init();
 
         console.log('chiamo il getLoggedUser');
         // this.user = this.authService.currentUser;
@@ -63,6 +66,14 @@ export class App {
             });
 
 
+    }
+
+    installPwa(): void {
+        void this.pwaInstallService.install();
+    }
+
+    reloadWithUpdate(): void {
+        this.swUpdateService.reloadWithUpdate();
     }
 
 

@@ -5,7 +5,7 @@
 
 @if (hasPermission('LIST_USERS')) {
     <section
-        (click)="gotoPage('/users')"
+        (click)="gotoPage('/users-page')"
     >
         <svg
             class="svg-icon"
@@ -18,7 +18,7 @@
 }
 
 <section
-    (click)="gotoPage('')"
+    (click)="gotoPage('/devices')"
 >
     <svg
         class="svg-icon"
@@ -91,5 +91,4 @@
     </svg>
     <label>Impostazioni</label>
 </section>
-
 

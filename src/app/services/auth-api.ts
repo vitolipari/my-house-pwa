@@ -39,7 +39,7 @@ export class AuthApiService {
     //     this.authService.clearLoginData();
     //     return;
     // }
-    editProfile(payload: EditProfileRequestType) {
-        return this.http.put<void>(`/profile/${ payload.id }`, payload);
+    editProfile(payload: EditProfileRequestType): Observable<LoggedUser> {
+        return this.http.put<LoggedUser>(`/profile/${ payload.id }`, payload);
     }
 }

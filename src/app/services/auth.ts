@@ -64,19 +64,14 @@ export class AuthService {
         );
     }
 
-    editProfile(payload: EditProfileRequestType) {
-        return (
-            firstValueFrom(this.authApi.editProfile(payload))
-                .then((result: any) => {
-                    return result;
-                })
-                .catch((e: any) => {
-                    console.log('errore al editProfile di auth')
-                    console.log(e);
-                    debugger;
-                    return Promise.reject(e);
-                })
+    async editProfile(payload: EditProfileRequestType): Promise<LoggedUser> {
+        const updatedUser = await firstValueFrom(
+            this.authApi.editProfile(payload)
         );
+
+        this.currentUser.set(updatedUser);
+
+        return updatedUser;
     }
 
     // async confirm(payload: ConfirmRequest): Promise<void> {
@@ -194,18 +189,4 @@ export class AuthService {
     //         return null;
     //     }
     // }
-
-
-    updateCurrentUser(data: Partial<LoggedUser> | any): void {
-
-        if( !data.password ) delete data.password;
-        if( !data.currentPassword ) delete data.currentPassword;
-        if( !data.newPassword ) delete data.newPassword;
-
-        this.currentUser.update(user => ({
-            ...user!,
-            ...data
-        }));
-    }
-
 }
