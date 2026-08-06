@@ -2,12 +2,9 @@
 only screen
 and (min-width: 1024px)
 {
-    #tablet,
-    #mobile,
-    .device.tablet,
-    .device.mobile
-    {
-        display: none;
+    .device.desktop,
+    .debug-device#desktop {
+        display: revert;
     }
 
 

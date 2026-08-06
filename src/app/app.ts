@@ -16,7 +16,8 @@ import {MobileMenuComponent} from './components/menu-component/mobile-menu.compo
     selector: 'app-root',
     standalone: true,
     imports: [RouterOutlet, SvgSprite, Header, JsonPipe, DrawerModule, MobileMenuComponent],
-    templateUrl: `./app.html`
+    templateUrl: `./app.html`,
+    styleUrl: './app.css',
 })
 export class App {
 

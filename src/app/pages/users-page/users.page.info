@@ -1,0 +1,5 @@
+Questa pagina serve per mostrare tutti gli utenti che hanno fatto un accesso.
+Gli utenti vengono messi in lista raggruppati
+Per poter accedere a questa pagina devi aver il permesso LIST_USERS, e per leggere i dati completi
+di ogni utente presente nella lista serve il permesso READ_USERS
+

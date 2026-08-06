@@ -1,0 +1,84 @@
+:host {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background: var(--color-background-2);
+    border-radius: 4px;
+    margin: 0.2rem auto;
+    min-width: 90vw;
+    max-width: 95vw;
+    padding: 0.6rem;
+    height: 5rem;
+}
+
+
+
+.user-block-image {
+    /*display: flex;*/
+    /*flex-direction: row;*/
+    /*justify-self: flex-end;*/
+    /*border-radius: 100px;*/
+    height: 100%;
+    width: auto;
+    aspect-ratio: 1;
+    /*object-fit: cover;*/
+
+    display: block;
+    /*width: calc(var(--header-height) - 1rem);*/
+    /*height: calc(var(--header-height) - 1rem);*/
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* contenitore principale */
+.content-info {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    margin-left: 1rem;
+}
+
+/* contenitore dati */
+.content-info-data {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+
+/* contenitore icone */
+.content-icons {
+    display: flex;
+    flex-direction: row;
+}
+
+
+/* riga username */
+.username {
+    display: flex;
+    flex-direction: row;
+    font-weight: 600;
+    font-size: var(--main-medium-big-font-size);
+}
+
+/* riga contatti */
+.content-contacts {
+    display: flex;
+    flex-direction: row;
+}
+
+/* mail */
+.mail {
+    display: flex;
+    flex-direction: row;
+}
+
+/* phone */
+.phone {
+    display: flex;
+    flex-direction: row;
+    font-size: var(--small-font-size);
+    align-self: center;
+    margin-left: 1rem;
+}

@@ -1,15 +1,10 @@
 @media
 only screen
-and (min-width: 40px)
-and (max-width: 640px)
-and (orientation: portrait)
+and (max-width: 639.98px)
 {
-    #desktop,
-    #tablet,
-    .device.desktop,
-    .device.tablet
-    {
-        display: none;
+    .device.mobile,
+    .debug-device#mobile {
+        display: revert;
     }
 
     .field {

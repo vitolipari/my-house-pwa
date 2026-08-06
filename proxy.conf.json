@@ -1,41 +1,55 @@
 {
     "/test-free-path": {
-        "target": "https://localhost:9099",
+        "target": "http://127.0.0.1:9099",
         "secure": false,
         "changeOrigin": true
     },
     "/test-path": {
-        "target": "https://localhost:9099",
+        "target": "http://127.0.0.1:9099",
         "secure": false,
         "changeOrigin": true
     },
     "/test-body-path": {
-        "target": "https://localhost:9099",
+        "target": "http://127.0.0.1:9099",
         "secure": false,
         "changeOrigin": true
     },
     "/profile": {
-        "target": "https://localhost:9099",
+        "target": "http://127.0.0.1:9099",
         "secure": false,
         "changeOrigin": true,
         "logLevel": "debug"
     },
     "/test": {
-        "target": "https://localhost:9099",
+        "target": "http://127.0.0.1:9099",
         "secure": false,
         "changeOrigin": true,
         "logLevel": "debug"
     },
     "/health": {
-        "target": "https://localhost:9099",
+        "target": "http://127.0.0.1:9099",
         "secure": false,
         "changeOrigin": true,
         "logLevel": "debug"
     },
     "/me": {
-        "target": "https://localhost:9099",
+        "target": "http://127.0.0.1:9099",
         "secure": false,
         "changeOrigin": true,
         "logLevel": "debug"
+    },
+    "/session": {
+        "target": "http://127.0.0.1:9099",
+        "secure": false,
+        "changeOrigin": true,
+        "logLevel": "debug"
+    },
+    "/api/core": {
+        "target": "http://127.0.0.1:9099",
+        "secure": false,
+        "changeOrigin": true,
+        "pathRewrite": {
+            "^/api/core": ""
+        }
     }
 }

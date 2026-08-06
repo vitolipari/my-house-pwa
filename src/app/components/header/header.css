@@ -8,10 +8,14 @@
     justify-content: space-between;
     padding: 0.5rem;
     max-height: 6vh !important;
+    box-sizing: border-box;
+    height: var(--header-height);
 }
 
 :host > DIV {
     align-content: center;
+    flex: 0 0 auto;
+    height: 100%;
 }
 
 #header-profile-image,
@@ -23,6 +27,12 @@
     flex-direction: row;
     justify-self: flex-end;
     border-radius: 100px;
+
+    /*display: block;*/
+    width: auto;
+    height: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
 }
 
 #closer-header-profile-image-placeholder

@@ -2,7 +2,6 @@
 <app-svg-sprite></app-svg-sprite>
 
 
-<div>
     @if ( user(); as user ) {
         <app-header
             [user]="user"
@@ -17,18 +16,15 @@
                 Menu
             </div>
         }
-        <div>
             <router-outlet />
-        </div>
     </div>
 
-</div>
 
 
 
-<section class="base-text-style debug-device" id="mobile">mobile</section>
-<section class="base-text-style debug-device" id="tablet">tablet</section>
-<section class="base-text-style debug-device" id="desktop">desktop</section>
+<!--<section class="base-text-style debug-device" id="mobile">mobile</section>-->
+<!--<section class="base-text-style debug-device" id="tablet">tablet</section>-->
+<!--<section class="base-text-style debug-device" id="desktop">desktop</section>-->
 
 
 <p-drawer
@@ -45,5 +41,6 @@
 >
     <mobile-menu
         [user]="user()"
+        (menuClose)="drawerVisible = false"
     ></mobile-menu>
 </p-drawer>

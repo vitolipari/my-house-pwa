@@ -3,11 +3,12 @@
 <!--<div>{{ user | json }}</div>-->
 
 
-@if (hasPermission('READ_USERS')) {
-    <section>
+@if (hasPermission('LIST_USERS')) {
+    <section
+        (click)="gotoPage('/users')"
+    >
         <svg
             class="svg-icon"
-            (click)="gotoPage('')"
         >
             <!--            <use href="#utenti-icon-1"></use>-->
             <use href="#utenti-icon-2"></use>
@@ -16,10 +17,11 @@
     </section>
 }
 
-<section>
+<section
+    (click)="gotoPage('')"
+>
     <svg
         class="svg-icon"
-        (click)="gotoPage('')"
     >
         <use href="#devices-list-icon-1"></use>
         <!--                    <use href="#devices-list-icon-2"></use>-->
@@ -28,10 +30,11 @@
     <label>Dispositivi</label>
 </section>
 
-<section>
+<section
+    (click)="gotoPage('')"
+>
     <svg
         class="svg-icon"
-        (click)="gotoPage('')"
     >
         <use href="#timer_icon_1"></use>
         <!--                <use href="#timer_icon_2"></use>-->
@@ -39,10 +42,11 @@
     <label>Timer</label>
 </section>
 
-<section>
+<section
+    (click)="gotoPage('')"
+>
     <svg
         class="svg-icon"
-        (click)="gotoPage('')"
     >
         <use href="#scenario_icon_1"></use>
         <!--                <use href="#scenario_icon_2"></use>-->
@@ -51,10 +55,11 @@
     <label>Scenari</label>
 </section>
 
-<section>
+<section
+    (click)="gotoPage('')"
+>
     <svg
         class="svg-icon"
-        (click)="gotoPage('')"
     >
         <!--        <use href="#logs_icon_1"></use>-->
         <!--                <use href="#logs_icon_2"></use>-->
@@ -74,10 +79,11 @@
 }
 
 
-<section>
+<section
+    (click)="gotoPage('')"
+>
     <svg
         class="svg-icon"
-        (click)="gotoPage('')"
     >
         <!--        <use href="#settings_icon_1"></use>-->
         <use href="#settings_icon_2"></use>

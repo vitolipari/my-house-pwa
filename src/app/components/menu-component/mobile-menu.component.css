@@ -21,6 +21,7 @@ SECTION {
     aspect-ratio: 1;
     margin: 0.5rem;
     padding: 1rem;
+    cursor: pointer;
 }
 
 .svg-icon {

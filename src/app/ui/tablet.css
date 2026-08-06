@@ -1,14 +1,11 @@
 @media
 only screen
 and (min-width: 640px)
-and (max-width: 1024px)
+and (max-width: 1023.98px)
 {
-    #desktop,
-    #mobile,
-    .device.desktop,
-    .device.mobile
-    {
-        display: none;
+    .device.tablet,
+    .debug-device#tablet {
+        display: revert;
     }
 
     .field {

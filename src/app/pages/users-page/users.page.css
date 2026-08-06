@@ -1,0 +1,15 @@
+:host {
+    height: 100vh;
+}
+
+I {
+    display: flex;
+    width: 100px;
+    justify-content: center;
+    margin: 50% auto;
+}
+
+H2 {
+    margin: 2rem auto;
+    text-align: center;
+}

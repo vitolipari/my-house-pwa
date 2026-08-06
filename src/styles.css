@@ -15,6 +15,17 @@
 @import "primeicons/primeicons.css";
 /*@import "primeicons/primeicons.css";*/
 
+/*
+ * Responsive layout visibility
+ *
+ * Gli elementi specifici di un layout restano nascosti finché uno dei tre
+ * breakpoint definiti in mobile.css, tablet.css e desktop.css non li abilita.
+ */
+.device,
+.debug-device {
+    display: none;
+}
+
 :root {
 
     touch-action: none;
@@ -70,7 +81,7 @@
     --soft-blue-gray: #525f77;
 
 
-    --header-height: 2rem;
+    --header-height: 3rem;
 
     --max-panel-width: 1024px;
 

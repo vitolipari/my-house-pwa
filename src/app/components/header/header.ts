@@ -19,6 +19,7 @@ export class Header {
     @Output() menuToggle = new EventEmitter<boolean>();
 
     private router = inject(Router);
+    @Output() menuClose = new EventEmitter<boolean>();
 
 
     gotoProfilePage() {

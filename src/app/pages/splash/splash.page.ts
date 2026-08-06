@@ -72,23 +72,34 @@ export class SplashPage implements OnInit {
             })
             .catch((e: any) => {
                 console.log('errore');
+                console.log(e.message);
+                console.log(e);
                 console.error(e);
 
                 if( e === 'no-token' ) {
                     this.authService.clearLoginData();
-                    // this.router.navigate(['/access/sign-in']);
+                    this.router.navigate(['/access/sign-in']);
                 }
                 else {
-                    this.router.navigate(
-                        ['/error'],
-                        {
-                            state: {
-                                code: 'SPLASH_INIT_ERROR',
-                                message: e?.message || 'Errore durante inizializzazione',
-                                details: e
+
+                    if( e === 'user by token NON esistente!!' ) {
+                        this.authService.clearLoginData();
+                        this.router.navigate(['/access/sign-in']);
+                    }
+                    else {
+                        this.router.navigate(
+                            ['/error'],
+                            {
+                                state: {
+                                    code: 'SPLASH_INIT_ERROR',
+                                    message: e?.message || 'Errore durante inizializzazione',
+                                    details: e
+                                }
                             }
-                        }
-                    );
+                        );
+                    }
+
+
                 }
 
             })

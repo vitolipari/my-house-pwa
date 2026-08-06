@@ -1,0 +1,14 @@
+<img
+    class="user-block-image"
+    [src]="!!user ? user.picture : ''"
+>
+<div class="content-info">
+    <div class="content-info-data">
+        <div class="username">{{ user.username }}</div>
+        <div class="content-contacts">
+            <div class="mail">{{ user.email }}</div>
+            <div class="phone">{{ user.mobile }}</div>
+        </div>
+    </div>
+    <div class="content-icons"></div>
+</div>

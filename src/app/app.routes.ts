@@ -1,6 +1,7 @@
 import {Routes} from '@angular/router';
 import {routeAccessGuard} from './guards/route-access.guard';
 import {guestGuard} from './guards/guest.guard';
+import {UsersPage} from './pages/users-page/users.page';
 
 
 export const routes: Routes = [
@@ -45,7 +46,7 @@ export const routes: Routes = [
         canActivate: [routeAccessGuard],
         data: {
             accessControl: {
-                rolesAny: ['USER', 'EDITOR', 'MANAGER', 'ADMIN'],
+                rolesAny: [],
                 permission: 'ACCESS_DASHBOARD'
                 // requireEnabled: true,
                 // requireConfirmedEmail: true
@@ -53,6 +54,21 @@ export const routes: Routes = [
         },
         loadComponent: () =>
             import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage)
+    },
+
+    {
+        path: 'users',
+        canActivate: [routeAccessGuard],
+        data: {
+            accessControl: {
+                rolesAny: [],
+                permission: 'LIST_USERS'
+                // requireEnabled: true,
+                // requireConfirmedEmail: true
+            }
+        },
+        loadComponent: () =>
+            import('./pages/users-page/users.page').then(m => m.UsersPage)
     },
 
     {

@@ -16,6 +16,7 @@ export class MobileMenuComponent {
 
     private router = inject(Router);
     @Input() user!: LoggedUser | null;
+    @Output() menuClose = new EventEmitter<void>();
 
 
     hasPermission(permission: string) {
@@ -24,5 +25,17 @@ export class MobileMenuComponent {
 
     gotoPage(path: string) {
 
+        // TODO chiudere questa pagina tramite un emit
+        this.menuClose.emit();
+
+
+        this.router.navigate(
+            [path],
+            {
+                state: {
+                    from: 'mobileMenu'
+                }
+            }
+        );
     }
 }
