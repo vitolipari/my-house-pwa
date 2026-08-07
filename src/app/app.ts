@@ -29,6 +29,7 @@ export class App {
     private readonly swUpdateService = inject<SwUpdateService>(SwUpdateService);
     private readonly pwaInstallService = inject(PwaInstallService);
     readonly availableUpdate = this.swUpdateService.availableUpdate;
+    readonly secondsUntilReload = this.swUpdateService.secondsUntilReload;
     readonly canInstallPwa = this.pwaInstallService.canInstall;
     darkModeService = inject(DarkModeService);
 
@@ -71,10 +72,5 @@ export class App {
     installPwa(): void {
         void this.pwaInstallService.install();
     }
-
-    reloadWithUpdate(): void {
-        this.swUpdateService.reloadWithUpdate();
-    }
-
 
 }

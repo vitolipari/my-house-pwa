@@ -23,8 +23,8 @@ LIPARIOS_VERSION=2.0.11 npm run build
 
 La PWA controlla gli aggiornamenti all'avvio, ogni cinque minuti, al ritorno in
 primo piano e quando torna disponibile la rete. Dopo avere scaricato la nuova
-versione mostra `Aggiorna ora`; il reload viene lasciato all'utente per non
-interrompere un'operazione in corso.
+versione mostra un avviso con un conto alla rovescia di dieci secondi, quindi
+ricarica automaticamente l'app sulla nuova release.
 
 ## Development server
 

@@ -2,15 +2,16 @@
 <app-svg-sprite></app-svg-sprite>
 
 @if (availableUpdate(); as update) {
+    <!-- TODO layout e css da sistemare   -->
     <aside class="pwa-notice" role="status" aria-live="polite">
         <span>
             Nuova versione LipariOS{{ update.version ? ' ' + update.version : '' }} disponibile.
+            Aggiornamento automatico tra {{ secondsUntilReload() ?? 10 }} secondi.
         </span>
-        <button type="button" (click)="reloadWithUpdate()">Aggiorna ora</button>
     </aside>
 } @else if (canInstallPwa()) {
     <aside class="pwa-notice" role="status">
-        <span>Installa LipariOS su questo dispositivo.</span>
+        <span>Installa <b>Mobile App | LipariOS</b> su questo dispositivo.</span>
         <button type="button" (click)="installPwa()">Installa</button>
     </aside>
 }
