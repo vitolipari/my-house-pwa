@@ -1,0 +1,164 @@
+<!--413-->
+<page-title
+    [title]="'Aggiungi Dispositivo'"
+    [hasPlusButton]="false"
+    [iconID]="'icon-413'"
+></page-title>
+
+
+<p-accordion [(value)]="activeAccordionValue">
+    <p-accordion-panel value="0">
+        <p-accordion-header>
+            @if( step > 0 ) {
+                <svg class="greenOkIcon">
+                    <use
+                        [attr.href]="'#green-ok'"
+                        [attr.xlink:href]="'#green-ok'">
+                        >
+                    </use>
+                </svg>
+            }
+            @else {
+                <svg class="greenOkIcon">
+                    <use
+                        [attr.href]="'#icon-578'"
+                        [attr.xlink:href]="'#icon-578'">
+                        >
+                    </use>
+                </svg>
+            }
+            Accoppiamento
+        </p-accordion-header>
+        <p-accordion-content>
+
+            <div id="commisioning-type-step">
+
+
+                <div
+                    #knownDevice
+                    id="knownDevice"
+                    class="card"
+                    (click)="commisioningTypeSelected('knownDevice')"
+                >
+                    <svg #knownDeviceIcon>
+                        <use
+                            [attr.href]="'#icon-209'"
+                            [attr.xlink:href]="'#icon-209'">
+                            >
+                        </use>
+                    </svg>
+                    <div>Dispositivo configurato</div>
+                </div>
+                <div
+                    #newDevice
+                    id="newDevice"
+                    class="card"
+                    (click)="commisioningTypeSelected('newDevice')"
+                >
+                    <svg #newDeviceIcon>
+                        <use
+                            [attr.href]="'#icon-535'"
+                            [attr.xlink:href]="'#icon-535'">
+                            >
+                        </use>
+                    </svg>
+                    <div>Dispositivo da associare</div>
+                </div>
+            </div>
+
+        </p-accordion-content>
+    </p-accordion-panel>
+
+    <p-accordion-panel value="1" [disabled]="step < 1">
+        <p-accordion-header>
+            @if( step > 1 ) {
+                <svg class="greenOkIcon">
+                    <use
+                        [attr.href]="'#green-ok'"
+                        [attr.xlink:href]="'#green-ok'">
+                        >
+                    </use>
+                </svg>
+            }
+            @else {
+                <svg class="greenOkIcon">
+                    <use
+                        [attr.href]="'#icon-578'"
+                        [attr.xlink:href]="'#icon-578'">
+                        >
+                    </use>
+                </svg>
+            }
+            Discovery
+        </p-accordion-header>
+        <p-accordion-content>
+            <div id="phisical-device-step">
+                @if( deviceKnowledgeType === 'newDevice' ) {
+                    <div
+                        #newShelly
+                        id="newShelly"
+                        class="card"
+                        (click)="deviceVendorTypeSelected('newShelly')"
+                    >
+                        <svg #newShellyIcon>
+                            <use
+                                [attr.href]="'#icon-620'"
+                                [attr.xlink:href]="'#icon-620'">
+                                >
+                            </use>
+                        </svg>
+                        <div>Shelly</div>
+                    </div>
+                    <div
+                        #newTuya
+                        id="newTuya"
+                        class="card"
+                        (click)="deviceVendorTypeSelected('newTuya')"
+                    >
+                        <svg #newTuyaIcon>
+                            <use
+                                [attr.href]="'#icon-621'"
+                                [attr.xlink:href]="'#icon-621'">
+                                >
+                            </use>
+                        </svg>
+                        <div>Tuya</div>
+                    </div>
+                    <div
+                        #newMatter
+                        id="newMatter"
+                        class="card"
+                        (click)="deviceVendorTypeSelected('newMatter')"
+                    >
+                        <svg #newMatterIcon>
+                            <use
+                                [attr.href]="'#icon-615'"
+                                [attr.xlink:href]="'#icon-615'">
+                                >
+                            </use>
+                        </svg>
+                        <div>Matter</div>
+                    </div>
+                }
+                @else {
+
+                }
+            </div>
+        </p-accordion-content>
+    </p-accordion-panel>
+
+    <p-accordion-panel value="2" [disabled]="step < 2">
+        <p-accordion-header>step 3</p-accordion-header>
+        <p-accordion-content>
+            <p class="m-0">
+                Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam
+                rem
+                aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt
+                explicabo. Nemo
+                enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni
+                dolores eos
+                qui ratione voluptatem sequi nesciunt. Consectetur, adipisci velit, sed quia non numquam eius modi.
+            </p>
+        </p-accordion-content>
+    </p-accordion-panel>
+</p-accordion>

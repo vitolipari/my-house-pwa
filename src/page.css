@@ -1,0 +1,6 @@
+:host {
+    background:
+        radial-gradient(circle at 85% 5%, rgb(33 90 197 / 18%), transparent 32rem),
+        var(--color-background-1);
+
+}

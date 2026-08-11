@@ -1,0 +1,33 @@
+:host {
+    --title-height: 2rem;
+
+    height: var(--title-height);
+    width: 100vw;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    margin-bottom: 3rem;
+    margin-top: 2rem;
+
+}
+
+:host SVG, svg {
+    width: var(--title-height);
+    height: var(--title-height);
+    flex: 0 0 var(--title-height);
+    display: block;
+    aspect-ratio: 1;
+    object-fit: cover;
+}
+
+H2 {
+    margin: 0px;
+}
+
+#plus-button {
+
+}
+
+#page-title-spacer {
+
+}

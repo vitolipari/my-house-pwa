@@ -1,8 +1,73 @@
-<!--MobileMenu-->
-
-<!--<div>{{ user | json }}</div>-->
 
 
+<!-- scenari ------------------------------------------------------------------>
+<section
+    (click)="gotoPage('')"
+>
+    <svg
+        class="svg-icon"
+    >
+        <use href="#scenario_icon_1"></use>
+        <!--                <use href="#scenario_icon_2"></use>-->
+        <!--                <use href="#scenario_icon_3"></use>-->
+    </svg>
+    <label>Scenari</label>
+</section>
+
+
+
+<!-- dispositivi ----------------------------------------------------------------->
+<section
+    (click)="gotoPage('/devices-page')"
+>
+    <svg
+        class="svg-icon"
+    >
+<!--        <use href="#devices-list-icon-1"></use>-->
+        <use href="#icon-581"></use>
+        <!--                    <use href="#devices-list-icon-2"></use>-->
+        <!--                    <use href="#devices-list-icon-3"></use>-->
+    </svg>
+    <label>Dispositivi</label>
+</section>
+
+
+
+
+<!-- timer ------------------------------------------------------------------------->
+<section
+    (click)="gotoPage('')"
+>
+    <svg
+        class="svg-icon"
+    >
+        <use href="#timer_icon_1"></use>
+        <!--                <use href="#timer_icon_2"></use>-->
+    </svg>
+    <label>Timer</label>
+</section>
+
+
+
+
+<!-- stanze ------------------------------------------------------------------------->
+<section
+    (click)="gotoPage('')"
+>
+    <svg
+        class="svg-icon"
+    >
+        <use href="#timer_icon_1"></use>
+        <!--                <use href="#timer_icon_2"></use>-->
+    </svg>
+    <label>Stanze</label>
+</section>
+
+
+
+
+
+<!-- utenti ------------------------------------------------------------------------->
 @if (hasPermission('LIST_USERS')) {
     <section
         (click)="gotoPage('/users-page')"
@@ -17,57 +82,47 @@
     </section>
 }
 
-<section
-    (click)="gotoPage('/devices')"
->
-    <svg
-        class="svg-icon"
-    >
-        <use href="#devices-list-icon-1"></use>
-        <!--                    <use href="#devices-list-icon-2"></use>-->
-        <!--                    <use href="#devices-list-icon-3"></use>-->
-    </svg>
-    <label>Dispositivi</label>
-</section>
 
-<section
-    (click)="gotoPage('')"
->
-    <svg
-        class="svg-icon"
-    >
-        <use href="#timer_icon_1"></use>
-        <!--                <use href="#timer_icon_2"></use>-->
-    </svg>
-    <label>Timer</label>
-</section>
 
-<section
-    (click)="gotoPage('')"
->
-    <svg
-        class="svg-icon"
-    >
-        <use href="#scenario_icon_1"></use>
-        <!--                <use href="#scenario_icon_2"></use>-->
-        <!--                <use href="#scenario_icon_3"></use>-->
-    </svg>
-    <label>Scenari</label>
-</section>
 
+<!--<section-->
+<!--    (click)="gotoPage('')"-->
+<!--&gt;-->
+<!--    <svg-->
+<!--        class="svg-icon"-->
+<!--    >-->
+<!--        &lt;!&ndash;        <use href="#logs_icon_1"></use>&ndash;&gt;-->
+<!--        &lt;!&ndash;                <use href="#logs_icon_2"></use>&ndash;&gt;-->
+<!--        <use href="#logs_icon_3"></use>-->
+<!--        &lt;!&ndash;                <use href="#scenario_icon_3"></use>&ndash;&gt;-->
+<!--        &lt;!&ndash;                <use href="#logs_icon_4"></use>&ndash;&gt;-->
+<!--    </svg>-->
+<!--    <label>Log</label>-->
+<!--</section>-->
+
+
+
+
+
+<!--profilo-->
 <section
-    (click)="gotoPage('')"
+    (click)="gotoPage('/profile/page')"
 >
-    <svg
-        class="svg-icon"
-    >
-        <!--        <use href="#logs_icon_1"></use>-->
-        <!--                <use href="#logs_icon_2"></use>-->
-        <use href="#logs_icon_3"></use>
-        <!--                <use href="#scenario_icon_3"></use>-->
-        <!--                <use href="#logs_icon_4"></use>-->
-    </svg>
-    <label>Log</label>
+    @if( !!user ) {
+        <img
+            id="header-profile-image"
+            [src]="!!user ? user.picture : ''"
+        />
+    }
+    @else {
+        <svg
+            class="svg-icon"
+            id="header-profile-image-placeholder"
+        >
+            <use href="#header-profile-image-placeholder"></use>
+        </svg>
+    }
+    <label>Profilo</label>
 </section>
 
 <!--  solo per test -->
@@ -79,6 +134,13 @@
 }
 
 
+
+
+<!--stanze-->
+
+
+
+<!--impostazioni-->
 <section
     (click)="gotoPage('')"
 >
@@ -90,5 +152,16 @@
         <!--                <use href="#settings_icon_3"></use>-->
     </svg>
     <label>Impostazioni</label>
+</section>
+
+
+
+
+<!--credentials-->
+<section
+    (click)="gotoPage('')"
+>
+    <span>{{ coffe }}</span>
+    <label>LiparOS</label>
 </section>
 

@@ -1,0 +1,21 @@
+<!--    class="svg-icon"-->
+<svg>
+    <use
+        [attr.href]="'#' + iconID"
+        [attr.xlink:href]="'#' + iconID">
+    ></use>
+</svg>
+<h2>{{ title }}</h2>
+@if( !!hasPlusButton ) {
+    <svg
+        (click)="plusButtonCallback()"
+    >
+        <use
+            [attr.href]="'#icon-112'"
+            [attr.xlink:href]="'#icon-112'">
+            ></use>
+    </svg>
+}
+@else {
+    <div id="page-title-spacer"></div>
+}

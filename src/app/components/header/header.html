@@ -1,58 +1,57 @@
-<!--<p>KKK header works!</p>-->
-<!--<div>{{ user | json }}</div>-->
-<!--<div>-->
-    <div>
-        <div class="device mobile">
-            <i
-                style="font-size: 1.5rem !important;"
-                class="pi pi-bars primeicons"
-                (click)="openMobileMenu()"
-            ></i>
-        </div>
-    </div>
-
+<div>
+    <svg
+        id="navigation-back"
+        (click)="goBack()"
+    >
+        <use href="#icon-591"></use>
+    </svg>
+</div>
 
 <div>
-    <section class="base-text-style debug-device" id="mobile">mobile</section>
-    <section class="base-text-style debug-device" id="tablet">tablet</section>
-    <section class="base-text-style debug-device" id="desktop">desktop</section>
+    <section class="base-text-style debug-device" id="mobile">LipariOS | mobile</section>
+    <section class="base-text-style debug-device" id="tablet">LipariOS</section>
+    <section class="base-text-style debug-device" id="desktop">LipariOS | desktop</section>
 </div>
 
 
-    <div>
 
-        @if( !!isInProfilePage ) {
-<!--            <svg-->
-<!--                class="svg-icon"-->
-<!--                id="closer-header-profile-image-placeholder"-->
-<!--                (click)="gotoPreviousPage()"-->
-<!--            >-->
-<!--                <use href="#x-closer-circle-filled"></use>-->
-<!--            </svg>-->
-
-            <i
-                class="pi pi-times-circle svg-icon primeicons"
-                (click)="goBack()"
-            ></i>
-        }
-        @else {
-            @if( !!user ) {
-                <img
-                    id="header-profile-image"
-                    [src]="!!user ? user.picture : ''"
-                    (click)="gotoProfilePage()"
-                />
-            }
-            @else {
-                <svg
-                    class="svg-icon"
-                    id="header-profile-image-placeholder"
-                    (click)="gotoProfilePage()"
-                >
-                    <use href="#header-profile-image-placeholder"></use>
-                </svg>
-            }
-        }
-
+<div>
+    <div class="device mobile">
+        <i
+            style="font-size: 1.5rem !important;"
+            class="pi pi-bars primeicons"
+            (click)="openMobileMenu()"
+        ></i>
     </div>
-<!--</div>-->
+</div>
+
+
+
+        <!--    <div>-->
+
+<!--        @if( !!isInProfilePage ) {-->
+<!--            <i-->
+<!--                class="pi pi-times-circle svg-icon primeicons"-->
+<!--                (click)="goBack()"-->
+<!--            ></i>-->
+<!--        }-->
+<!--        @else {-->
+<!--            @if( !!user ) {-->
+<!--                <img-->
+<!--                    id="header-profile-image"-->
+<!--                    [src]="!!user ? user.picture : ''"-->
+<!--                    (click)="gotoProfilePage()"-->
+<!--                />-->
+<!--            }-->
+<!--            @else {-->
+<!--                <svg-->
+<!--                    class="svg-icon"-->
+<!--                    id="header-profile-image-placeholder"-->
+<!--                    (click)="gotoProfilePage()"-->
+<!--                >-->
+<!--                    <use href="#header-profile-image-placeholder"></use>-->
+<!--                </svg>-->
+<!--            }-->
+<!--        }-->
+
+<!--    </div>-->

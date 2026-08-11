@@ -115,6 +115,29 @@ BODY {
     background: var(--color-background-1);
 }
 
+H1, H2, H3, H4, H5, H6 {
+    font-family: var(--page-font);
+    color: var(--color-text-2);
+}
+
+DIV {
+    font-family: var(--page-font);
+    font-size: var(--main-font-size);
+    /*color: var(--color-text-2);*/
+}
+
+LABEL {
+
+}
+
+SPAN {
+
+}
+
+PRE {
+
+}
+
 
 .primeicons {
     /*font-size: var(--main-font-size);*/
@@ -352,4 +375,51 @@ A > DIV {
     margin-top: -2rem;
     justify-self: center;
     max-width: 640px;
+}
+
+
+
+.heartbeat-flash {
+    /*background: #1677ff;*/
+    transform-origin: center;
+    animation: heartbeat-flash 1.5s linear infinite;
+}
+
+@keyframes heartbeat-flash {
+    0% {
+        opacity: 0.3;
+        /*transform: scale(1);*/
+    }
+
+    8% {
+        opacity: 1;
+        /*transform: scale(1.04);*/
+        /*box-shadow: 0 0 24px #1677ff;*/
+    }
+
+    16% {
+        opacity: 0.3;
+        /*transform: scale(1);*/
+        /*box-shadow: none;*/
+    }
+
+    24% {
+        opacity: 1;
+        /*transform: scale(1.025);*/
+        /*box-shadow: 0 0 18px #1677ff;*/
+    }
+
+    34%,
+    100% {
+        opacity: 0.3;
+        /*transform: scale(1);*/
+        /*box-shadow: none;*/
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .heartbeat-flash {
+        animation: none;
+        opacity: 1;
+    }
 }

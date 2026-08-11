@@ -1,0 +1,15 @@
+<svg>
+    <use
+        [attr.href]="'#' + deviceTypeIcon"
+        [attr.xlink:href]="'#' + deviceTypeIcon">
+    ></use>
+</svg>
+<div class="ipdevice-info {{ !!ipDevice.privateMac ? 'private-wifi': '' }}">
+    <div class="ipdevice-vendor">
+        {{ displayName }}
+    </div>
+    <div class="ipdevice-data">
+        <div class="dhcp">{{ ipDevice.ip }}</div>
+        <div class="mac-address">{{ ipDevice.mac }}</div>
+    </div>
+</div>

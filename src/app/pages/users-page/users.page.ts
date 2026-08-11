@@ -3,15 +3,17 @@ import {ApiUrlService} from '../../services/api-url-service';
 import {firstValueFrom} from 'rxjs';
 import {JsonPipe} from '@angular/common';
 import {UserBlockComponent} from '../../components/user-block.component/user-block.component';
+import {PageTitleComponent} from '../../components/page-title.component/page-title.component';
 
 @Component({
     selector: 'app-users-page',
     imports: [
         JsonPipe,
-        UserBlockComponent
+        UserBlockComponent,
+        PageTitleComponent
     ],
     templateUrl: './users.page.html',
-    styleUrl: './users.page.css',
+    styleUrls: ['../../../page.css', './users.page.css'],
     standalone: true
 })
 export class UsersPage implements OnInit {

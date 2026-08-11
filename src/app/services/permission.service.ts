@@ -21,10 +21,24 @@ export class PermissionService {
     return roles.some(role => user.roles.includes(role));
   }
 
-  hasPermission(permission: string): boolean {
-    const user = this.authService.getLoggedUser();
-    return !!user?.permissions?.includes(permission);
-  }
+    hasPermission(permission: string): boolean {
+        const user = this.authService.getLoggedUser();
+
+        if (!user) {
+            return false;
+        }
+
+        const permissions = Array.isArray(user.permissions)
+            ? user.permissions
+            : [user.permissions];
+
+        const authorizations = Array.isArray(user.authorizations)
+            ? user.authorizations
+            : [user.authorizations];
+
+        return permissions.includes(permission)
+            || authorizations.includes(permission);
+    }
 
   hasAnyPermission(permissions: string[]): boolean {
     const user = this.authService.getLoggedUser();

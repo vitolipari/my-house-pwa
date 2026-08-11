@@ -1,0 +1,67 @@
+
+.card {
+    background: var(--color-background-3);
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: calc(50% - 2rem );
+    text-align: center;
+    color: var(--color-text-0);
+}
+
+.card > DIV {
+
+}
+
+.card > SVG, svg {
+    --svg-dimansion: 4rem;
+    width: var(--svg-dimansion);
+    height: var(--svg-dimansion);
+    flex: 0 0 var(--svg-dimansion);
+    display: block;
+    aspect-ratio: 1;
+    object-fit: cover;
+    margin: 1rem;
+    opacity: 0.3;
+}
+
+#commisioning-type-step,
+#phisical-device-step
+{
+    display: flex;
+    flex-direction: row;
+    min-width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+
+:host p-accordion-content {
+    /*display: flex;*/
+    /*flex-direction: row;*/
+    /*min-width: 100%;*/
+}
+p-accordion,
+p-accordion-panel,
+p-accordion-header,
+p-accordion-content,
+.p-accordion-content,
+.p-accordioncontent-content,
+.p-accordioncontent-content > DIV,
+:host .p-accordioncontent-content,
+p-accordion-content > DIV,
+.p-accordion-content > DIV
+{
+    background: transparent !important;
+}
+
+
+.greenOkIcon {
+    width: 14px;
+    max-width: 14px;
+    height: 14px;
+    opacity: 1;
+}

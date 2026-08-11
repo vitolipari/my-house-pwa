@@ -42,3 +42,14 @@
 /*padding-right: 50px;*/
     box-sizing: border-box;
 }
+
+
+#navigation-back {
+    /*width: var(--header-height);*/
+    width: auto;
+    height: calc(var(--header-height) * 0.55);
+    flex: 0 0 var(--header-height);
+    display: block;
+    aspect-ratio: 1;
+    object-fit: cover;
+}

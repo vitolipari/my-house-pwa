@@ -14,6 +14,7 @@ import {Button, ButtonModule} from 'primeng/button';
     imports: [CommonModule, ReactiveFormsModule, RouterLink, InputTextModule, FormsModule, Button],
     templateUrl: './signin.page.html',
     styleUrls: [
+        '../../../page.css',
         './signin.page.css'
         , '../sign-up/signup.page.css'
         , '../profile/profile.page.css'

@@ -21,6 +21,7 @@ export const routeAccessGuard: CanActivateFn = async (
     console.log('caso route-access.guard');
     const config = route.data['accessControl'] as RouteAccessConfig | undefined;
 
+
     return (
         authService.ensureUserLoaded()
             .then((user: LoggedUser) => {

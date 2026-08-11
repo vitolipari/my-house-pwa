@@ -1,180 +1,108 @@
-<main class="devices-page">
-    <header class="hero">
-        <div>
-            <p class="eyebrow">LipariOS Core</p>
-            <h1>Dispositivi</h1>
-            <p class="intro">
-                Un solo registro per dispositivi Matter nativi e dispositivi non-Matter esposti dal bridge.
-            </p>
-        </div>
-        <button type="button" class="secondary" (click)="refresh()" [disabled]="loading()">
-            <i class="pi pi-refresh"></i>
-            Aggiorna
-        </button>
-    </header>
 
-    @if (message()) {
-        <p class="notice success">{{ message() }}</p>
-    }
-    @if (error()) {
-        <p class="notice error">{{ error() }}</p>
-    }
+<page-title
+    [title]="'Dispositivi'"
+    [hasPlusButton]="true"
+    [iconID]="'icon-521'"
+    (plusButtonClick)="addDevice()"
+></page-title>
 
-    <section class="integration-strip" aria-label="Stato integrazioni">
-        @for (integration of integrations(); track integration.id) {
-            <article class="integration" [class.ready]="integration.ready">
-                <span class="status-dot"></span>
-                <strong>{{ integration.id }}</strong>
-                <span>{{ integration.ready ? 'pronto' : (integration.reason || 'non disponibile') }}</span>
-            </article>
-        }
-    </section>
 
-    <section class="panel">
-        <div class="section-heading">
+<p-tabs value="device">
+    <p-tablist>
+        <p-tab value="device" (click)="activeTab('device')">
             <div>
-                <p class="eyebrow">Registro unificato</p>
-                <h2>I dispositivi della casa</h2>
-            </div>
-            <span class="counter">{{ devices().length }}</span>
-        </div>
-
-        @if (loading()) {
-            <p class="empty"><i class="pi pi-spin pi-spinner"></i> Sincronizzazione in corso…</p>
-        } @else if (devices().length === 0) {
-            <p class="empty">Nessun dispositivo registrato.</p>
-        } @else {
-            <div class="device-grid">
-                @for (device of devices(); track device.id) {
-                    <article class="device-card">
-                        <div class="device-icon"><i class="pi pi-microchip"></i></div>
-                        <div class="device-main">
-                            <div class="device-title">
-                                <h3>{{ device.name }}</h3>
-                                <span class="badge" [class.online]="device.status === 'ONLINE'">
-                                    {{ device.status }}
-                                </span>
-                            </div>
-                            <p>{{ device.place || 'Posizione non indicata' }}</p>
-                            <dl>
-                                <div><dt>Protocollo</dt><dd>{{ device.protocol }}</dd></div>
-                                <div><dt>Integrazione</dt><dd>{{ device.integration }}</dd></div>
-                                @if (device.address) {
-                                    <div><dt>Indirizzo</dt><dd>{{ device.address }}</dd></div>
-                                }
-                                @if (device.matterNodeId) {
-                                    <div><dt>Matter node</dt><dd>{{ device.matterNodeId }}</dd></div>
-                                }
-                            </dl>
-                        </div>
-                    </article>
+                <svg>
+                    <use
+                        [attr.href]="'#icon-587'"
+                        [attr.xlink:href]="'#icon-587'">
+                        ></use>
+                </svg>
+                @if( value === 'device' ) {
+                    <b>Dispositivi</b>
+                }
+                @else {
+                    <span>Dispositivi</span>
                 }
             </div>
-        }
-    </section>
-
-    @if (canManage) {
-        <section class="panel discovery-panel">
-            <div class="section-heading">
-                <div>
-                    <p class="eyebrow">Rete locale</p>
-                    <h2>Trova dispositivi Matter</h2>
-                </div>
-                <button type="button" (click)="discover()" [disabled]="discovering()">
-                    <i class="pi" [class.pi-spin]="discovering()" [class.pi-spinner]="discovering()"
-                       [class.pi-search]="!discovering()"></i>
-                    {{ discovering() ? 'Ricerca…' : 'Cerca in rete' }}
-                </button>
+        </p-tab>
+        <p-tab value="groups" (click)="activeTab('groups')">
+            <div>
+                <svg>
+                    <use
+                        [attr.href]="'#icon-541'"
+                        [attr.xlink:href]="'#icon-541'">
+                        ></use>
+                </svg>
+                @if( value === 'groups' ) {
+                    <b>Gruppi</b>
+                }
+                @else {
+                    <span>Gruppi</span>
+                }
             </div>
-            <p class="help">
-                La ricerca mostra i nodi già nella fabric LipariOS e i dispositivi IP con una finestra di
-                commissioning aperta. Per un dispositivo gestito da un’altra app, abilita prima il multi-admin
-                nell’app che lo controlla.
-            </p>
+        </p-tab>
+        <p-tab
+            value="network"
+            (click)="startScan()"
+            (click)="activeTab('network')"
+            [disabled]="(!hasPermission('READ_NETWORK_DEVICES'))"
+        >
+            <div>
+                <svg>
+                    <use
+                        [attr.href]="'#icon-585'"
+                        [attr.xlink:href]="'#icon-585'">
+                        ></use>
+                </svg>
+                @if( value === 'network' ) {
+                    <b>Rete</b>
+                }
+                @else {
+                    <span>Rete</span>
+                }
+                @if (!hasPermission('READ_NETWORK_DEVICES')) {
+                    <img
+                        class="tab-locked-image"
+                        [src]="lockedImage()"
+                    >
+                }
 
-            @if (discovered().length > 0) {
-                <div class="discovered-list">
-                    @for (device of discovered(); track device.discoveryId) {
-                        <article>
-                            <div>
-                                <strong>{{ device.name }}</strong>
-                                <span>{{ device.address || 'Indirizzo non pubblicato' }}</span>
-                            </div>
-                            <span class="badge" [class.online]="device.alreadyCommissioned">
-                                {{ device.alreadyCommissioned ? 'già aggiunto' : 'abbinabile' }}
-                            </span>
-                        </article>
+            </div>
+        </p-tab>
+    </p-tablist>
+    <p-tabpanels>
+        <p-tabpanel value="device">
+            device dell'app
+        </p-tabpanel>
+        <p-tabpanel value="groups">
+            gruppi dell'app
+        </p-tabpanel>
+        <p-tabpanel
+            value="network"
+        >
+            <div>
+                <H4>dispositivi in rete</H4>
+                @if( !!isInScanning() ){
+                    <div class="heartbeat-flash">scanning...</div>
+                }
+                @else {
+                    @for (ipDevice of ipDevices; track ipDevice) {
+                        <device-ip-block
+                            [ipDevice]="ipDevice"
+                        >
+                        </device-ip-block>
                     }
-                </div>
-            }
-        </section>
-
-        <div class="management-grid">
-            <section class="panel">
-                <p class="eyebrow">Matter commissioner</p>
-                <h2>Abbina un dispositivo</h2>
-                <p class="help">Inserisci il codice manuale Matter oppure il payload che inizia con <code>MT:</code>.</p>
-                <form (ngSubmit)="commissionMatter()" class="form-grid">
-                    <label>
-                        Codice di abbinamento
-                        <input name="pairingCode" type="password" autocomplete="off"
-                               [(ngModel)]="matterForm.pairingCode" required>
-                    </label>
-                    <label>
-                        Nome (facoltativo)
-                        <input name="matterName" [(ngModel)]="matterForm.name">
-                    </label>
-                    <label>
-                        Stanza (facoltativa)
-                        <input name="matterPlace" [(ngModel)]="matterForm.place">
-                    </label>
-                    <button type="submit" [disabled]="commissioning()?.status === 'PENDING' || commissioning()?.status === 'RUNNING'">
-                        Avvia commissioning
-                    </button>
-                </form>
-                @if (commissioning()) {
-                    <p class="job-state">Operazione {{ commissioning()!.status.toLowerCase() }}</p>
                 }
-            </section>
+            </div>
+        </p-tabpanel>
+    </p-tabpanels>
+</p-tabs>
 
-            <section class="panel">
-                <p class="eyebrow">Registro adapter</p>
-                <h2>Aggiungi manualmente</h2>
-                <p class="help">
-                    Registra l’identità del dispositivo. Il controllo Shelly/Tuya si attiverà quando il relativo
-                    adapter sarà configurato.
-                </p>
-                <form (ngSubmit)="addManual()" class="form-grid">
-                    <label>
-                        Protocollo
-                        <select name="protocol" [ngModel]="manualForm.protocol"
-                                (ngModelChange)="changeManualProtocol($event)">
-                            <option value="manual">Manuale</option>
-                            <option value="shelly">Shelly</option>
-                            <option value="tuya">Tuya</option>
-                        </select>
-                    </label>
-                    <label>
-                        Nome
-                        <input name="manualName" [(ngModel)]="manualForm.name" required>
-                    </label>
-                    <label>
-                        ID nel sistema sorgente
-                        <input name="externalId" [(ngModel)]="manualForm.externalId" required>
-                    </label>
-                    <label>
-                        Indirizzo IP / host
-                        <input name="address" [(ngModel)]="manualForm.address">
-                    </label>
-                    <label>
-                        Stanza
-                        <input name="manualPlace" [(ngModel)]="manualForm.place">
-                    </label>
-                    <button type="submit" [disabled]="saving()">{{ saving() ? 'Salvataggio…' : 'Aggiungi' }}</button>
-                </form>
-            </section>
-        </div>
-    } @else {
-        <p class="notice">Discovery e aggiunta sono riservate ai profili MASTER e OWNER.</p>
-    }
-</main>
+
+
+
+    <!--    Dispositivi del sistema -->
+    <!--    Dispositivi tramite IP (DHCP) -->
+    <!--    Dispositivi tramite loro accessPoint -->
+
+

@@ -34,3 +34,30 @@ LABEL {
     font-size: var(--main-font-size);
     font-family: var(--page-font);
 }
+
+
+/* portato qui da header */
+#header-profile-image,
+#header-profile-image-placeholder,
+#closer-header-profile-image-placeholder
+{
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-self: flex-end;
+    border-radius: 100px;
+
+    /*display: block;*/
+    width: auto;
+    height: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+}
+
+#closer-header-profile-image-placeholder
+{
+    grid-area: 1 / 1;
+    width: 100%;
+    /*padding-right: 50px;*/
+    box-sizing: border-box;
+}

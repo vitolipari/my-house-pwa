@@ -1,6 +1,7 @@
 import {Routes} from '@angular/router';
 import {routeAccessGuard} from './guards/route-access.guard';
 import {guestGuard} from './guards/guest.guard';
+import {NewDevicePage} from './pages/new-device/new-device.page';
 
 
 export const routes: Routes = [
@@ -71,15 +72,27 @@ export const routes: Routes = [
     },
 
     {
-        path: 'devices',
+        path: 'devices-page',
         canActivate: [routeAccessGuard],
         data: {
             accessControl: {
-                permission: 'ACCESS_DASHBOARD'
+                permission: '' // 'READ_HOUSE_DEVICES'    TODO
             }
         },
         loadComponent: () =>
             import('./pages/devices/devices.page').then(m => m.DevicesPage)
+    },
+
+    {
+        path: 'new-device',
+        canActivate: [routeAccessGuard],
+        data: {
+            accessControl: {
+                permission: '' // 'ADD_HOUSE_DEVICES'   TODO
+            }
+        },
+        loadComponent: () =>
+            import('./pages/new-device/new-device.page').then(m => m.NewDevicePage)
     },
 
     {

@@ -13,7 +13,7 @@ import { InputTextModule } from 'primeng/inputtext';
     standalone: true,
     imports: [CommonModule, ReactiveFormsModule, RouterLink, InputTextModule, FormsModule, Button],
     templateUrl: './signup.page.html',
-    styleUrls: ['../sign-in/signin.page.css', './signup.page.css']
+    styleUrls: ['../../../page.css', '../sign-in/signin.page.css', './signup.page.css']
 })
 export class SignUpPage {
     private readonly fb = inject(FormBuilder);

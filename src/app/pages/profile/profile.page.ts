@@ -14,6 +14,7 @@ import {HttpClient} from '@angular/common/http';
     imports: [CommonModule, ReactiveFormsModule, RouterLink, Button, InputTextModule],
     templateUrl: './profile.page.html',
     styleUrls: [
+        '../../../page.css',
         './profile.page.css',
         // '../sign-in/signin.page.css',
         '../sign-up/signup.page.css'

@@ -18,4 +18,7 @@ export class ApiUrlService {
         return this.http.get<any[]>('/api/core/users')
     }
 
+    netScan(): Observable<any[]>  {
+        return this.http.get<any[]>('/api/core/netscan');
+    }
 }

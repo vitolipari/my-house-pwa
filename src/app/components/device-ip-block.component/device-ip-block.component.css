@@ -1,0 +1,69 @@
+:host {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--color-background-3);
+    border-radius: 4px;
+    margin: 0.5rem auto;
+    min-width: 90vw;
+    max-width: 95vw;
+    padding: 0.6rem;
+    height: 4rem;
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+}
+
+SVG, svg {
+    flex: 1;
+    opacity: 0.25;
+    width: 80%;
+    height: 80%;
+}
+
+/* contenitore principale */
+.ipdevice-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin-left: 1rem;
+    align-items: flex-start;
+    align-self: center;
+    flex: 5;
+}
+
+
+/* contenitore dati */
+.ipdevice-data {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+
+/* riga name */
+.ipdevice-vendor {
+    display: flex;
+    flex-direction: row;
+    font-weight: 600;
+    font-size: var(--main-font-section-size);
+}
+
+.dhcp {
+    display: flex;
+    flex-direction: row;
+}
+
+.mac-address {
+    display: flex;
+    flex-direction: row;
+    font-size: var(--small-font-size);
+    align-self: center;
+    margin-right: 1rem;
+}
+
+.private-wifi {
+    font-style: italic;
+    color: var(--small-black-color) !important;
+}

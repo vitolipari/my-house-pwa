@@ -85,3 +85,96 @@ export interface CommissioningJob {
     device?: DeviceRecord;
     error?: string;
 }
+
+
+// dallo schema v1 /////////////////////////////////////////////////////////////////////////
+
+export type ShellyType = {
+    id: number | string;
+    name: string;
+    gen: string;
+    wifiAccessPointName: string;
+    systemConfig: {};
+    systemStatus: {};
+    wifiConfig: {};
+    wifiStatus: {};
+    cloudConfig: {};
+    cloudStatus: {};
+};
+
+export type TuyaType = {
+    id: number | string;
+    localKey: string;
+};
+
+export type MatterType = {
+    id: number | string;
+    nodeID: string;
+    fabricID: string;
+    endpointIDs: number[];
+    bridgeEndpointIDs: number[];
+};
+
+export type DeviceType = {
+    id: number;
+    family: ShellyType | TuyaType;
+    matter: MatterType;
+    name: string;
+    ip: string;
+    mac: string;
+    status: string;
+    where: string;
+    onMap: string;
+    description: string;
+    signalStatus: number;
+    cloud: string;
+    firmware: string;
+    availability: string;
+};
+
+export type ActuatorType = DeviceType & {};
+
+export type SensorActuatorType = DeviceType & {
+    unit: string[];
+    value: number[] | string[];
+    minThreshold: number[] | string[];
+    maxThreshod: number[] | string[];
+};
+
+export type SensorType = DeviceType & {
+    unit: string[];
+    value: number[] | string[];
+    minThreshold: number[] | string[];
+    maxThreshod: number[] | string[];
+};
+
+export type ClimaType = ActuatorType & {
+    mode: string;
+    temperature: number;
+    fan: number | string;
+    airFlowVertical: number | string;
+    airFlowHorizontal: number | string;
+};
+
+export type SwitchType = ActuatorType & {}
+
+export type DimmerType = ActuatorType & {}
+
+export type CurtainType = ActuatorType & {}
+
+export type TermostateType = SensorActuatorType & {
+    mode: string;
+    temperature: number;
+}
+
+export type PowerMeterType = SensorActuatorType & {}
+
+export type TemperatureHumiditySensorType = SensorType & {}
+
+export type LightSensorType = SensorType & {}
+
+export type MovementSensorType = SensorType & {}
+
+export type WayerLevelSensorType = SensorType & {}
+
+

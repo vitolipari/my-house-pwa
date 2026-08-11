@@ -10,7 +10,8 @@ import {firstValueFrom} from 'rxjs';
     selector: 'app-dashboard',
     standalone: true,
     imports: [CommonModule, ReactiveFormsModule, RouterLink],
-    templateUrl: './dashboard.page.html'
+    templateUrl: './dashboard.page.html',
+    styleUrls: ['../../../page.css', 'dashboard.page.css']
 })
 export class DashboardPage implements OnInit {
 
