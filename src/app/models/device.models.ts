@@ -125,26 +125,16 @@ export interface CommissioningJob {
 export type DevicePropertyKind = 'STATE' | 'SETTING' | 'MEASUREMENT';
 export type DevicePropertyAccess = 'READ' | 'WRITE' | 'READ_WRITE';
 
-export interface DevicePropertyValue {
-    id: string;
-    kind: DevicePropertyKind;
-    access: DevicePropertyAccess;
-    value: number | string | boolean | null;
-    unit: string | null;
-    channelIndex?: number;
-    minThreshold?: number | string | null;
-    maxThreshold?: number | string | null;
+export interface SensorData {
+    unit: string[];
+    value: Array<number | string>;
+    minThreshold: Array<number | string | null>;
+    maxThreshold: Array<number | string | null>;
 }
 
 export type ActuatorDevice = DeviceRecord & {category: 'ACTUATOR'};
-export type SensorDevice = DeviceRecord & {
-    category: 'SENSOR';
-    measurements: DevicePropertyValue[];
-};
-export type SensorActuatorDevice = DeviceRecord & {
-    category: 'SENSOR_ACTUATOR';
-    measurements: DevicePropertyValue[];
-};
+export type SensorDevice = DeviceRecord & SensorData & {category: 'SENSOR'};
+export type SensorActuatorDevice = DeviceRecord & SensorData & {category: 'SENSOR_ACTUATOR'};
 
 export type ClassifiedDevice = ActuatorDevice | SensorDevice | SensorActuatorDevice;
 
@@ -155,4 +145,3 @@ export type SensingAirConditionerDevice = SensorActuatorDevice & {
 };
 export type ThermostatDevice = SensorActuatorDevice & {functionalType: 'THERMOSTAT'};
 export type GameConsoleDevice = ActuatorDevice & {functionalType: 'GAME_CONSOLE'};
-
