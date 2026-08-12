@@ -4,7 +4,7 @@ import {FormsModule} from '@angular/forms';
 import {firstValueFrom} from 'rxjs';
 import {PageTitleComponent} from '../../components/page-title.component/page-title.component';
 import {Accordion, AccordionContent, AccordionHeader, AccordionModule, AccordionPanel} from 'primeng/accordion';
-import {DeviceTaxonomy, DeviceTypeDefinition} from '../../models/device.models';
+import {DeviceCatalogItem, DeviceTaxonomy, DeviceTypeDefinition} from '../../models/device.models';
 import {DeviceApiService} from '../../services/device-api';
 
 
@@ -36,6 +36,8 @@ export class NewDevicePage implements OnInit {
     integration: string = '';
     selectedFunctionalType: string = '';
     selectedUsage: string = '';
+    selectedCatalogItemId: string = '';
+    readonly catalog = signal<DeviceCatalogItem[]>([]);
     readonly taxonomy = signal<DeviceTaxonomy>({categories: [], types: [], usages: []});
     readonly taxonomyLoading = signal(true);
     readonly taxonomyError = signal<string | null>(null);
@@ -46,7 +48,12 @@ export class NewDevicePage implements OnInit {
 
     async ngOnInit(): Promise<void> {
         try {
-            this.taxonomy.set(await firstValueFrom(this.deviceApi.taxonomy()));
+            const [taxonomy, catalog] = await Promise.all([
+                firstValueFrom(this.deviceApi.taxonomy()),
+                firstValueFrom(this.deviceApi.catalog())
+            ]);
+            this.taxonomy.set(taxonomy);
+            this.catalog.set(catalog);
         } catch (error) {
             const candidate = error as {error?: {error?: string}; message?: string};
             this.taxonomyError.set(
@@ -86,6 +93,7 @@ export class NewDevicePage implements OnInit {
         this.integration = family;
         this.selectedFunctionalType = '';
         this.selectedUsage = '';
+        this.selectedCatalogItemId = '';
         this.step = 2;
         this.activeAccordionValue = ''+ this.step;
     }
@@ -94,16 +102,34 @@ export class NewDevicePage implements OnInit {
         return this.taxonomy().types.find(type => type.id === this.selectedFunctionalType) ?? null;
     }
 
+    selectedCatalogItem(): DeviceCatalogItem | null {
+        return this.catalog().find(item => item.id === this.selectedCatalogItemId) ?? null;
+    }
+
+    compatibleTypeDefinitions(): DeviceTypeDefinition[] {
+        const compatibleTypes = this.selectedCatalogItem()?.compatibleTypes ?? [];
+        return compatibleTypes
+            .map(id => this.taxonomy().types.find(type => type.id === id))
+            .filter((type): type is DeviceTypeDefinition => type !== undefined);
+    }
+
+    catalogItemSelected(): void {
+        this.selectedFunctionalType = '';
+        this.selectedUsage = this.selectedCatalogItem()?.usage ?? '';
+    }
+
     typeSupportsUsage(): boolean {
         return [
             'SWITCH',
             'METERED_SWITCH',
             'DIMMER',
-            'METERED_DIMMER'
+            'METERED_DIMMER',
+            'COLOR_DIMMER',
+            'POWER_METER'
         ].includes(this.selectedFunctionalType);
     }
 
     functionalTypeSelected(): void {
-        if (!this.typeSupportsUsage()) this.selectedUsage = '';
+        this.selectedUsage = this.selectedCatalogItem()?.usage ?? '';
     }
 }

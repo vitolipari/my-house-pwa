@@ -6,6 +6,7 @@ import {
     CommissioningJob,
     CommissionMatterRequest,
     DeviceIntegrationStatus,
+    DeviceCatalogItem,
     DeviceRecord,
     DeviceTaxonomy,
     DiscoveryResult
@@ -26,6 +27,10 @@ export class DeviceApiService {
 
     taxonomy(): Observable<DeviceTaxonomy> {
         return this.http.get<DeviceTaxonomy>(`${this.baseUrl}/taxonomy`);
+    }
+
+    catalog(): Observable<DeviceCatalogItem[]> {
+        return this.http.get<DeviceCatalogItem[]>(`${this.baseUrl}/catalog`);
     }
 
     discover(timeoutSeconds = 8): Observable<DiscoveryResult> {

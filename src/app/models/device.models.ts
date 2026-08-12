@@ -1,4 +1,4 @@
-export type DeviceProtocol = 'matter' | 'shelly' | 'tuya' | 'remotenow' | 'manual';
+export type DeviceProtocol = 'matter' | 'shelly' | 'tuya' | 'bluetooth' | 'remotenow' | 'manual';
 
 export type DeviceCategoryId = 'ACTUATOR' | 'SENSOR' | 'SENSOR_ACTUATOR';
 
@@ -66,6 +66,16 @@ export interface DeviceTaxonomy {
     usages: DeviceUsageDefinition[];
 }
 
+export interface DeviceCatalogItem {
+    id: string;
+    name: string;
+    icon: string;
+    description: string | null;
+    source: 'USAGE' | 'TYPE';
+    usage: string | null;
+    compatibleTypes: string[];
+}
+
 export interface DiscoveredDevice {
     discoveryId: string;
     protocol: DeviceProtocol;
@@ -103,6 +113,7 @@ export interface AddDeviceRequest {
     functionalType?: string | null;
     usage?: string | null;
     detectedDeviceType?: string | null;
+    catalogItemId?: string | null;
 }
 
 export interface CommissionMatterRequest {
@@ -145,3 +156,19 @@ export type SensingAirConditionerDevice = SensorActuatorDevice & {
 };
 export type ThermostatDevice = SensorActuatorDevice & {functionalType: 'THERMOSTAT'};
 export type GameConsoleDevice = ActuatorDevice & {functionalType: 'GAME_CONSOLE'};
+export type PrinterDevice = ActuatorDevice & {functionalType: 'PRINTER'};
+export type ThreeDPrinterDevice = SensorActuatorDevice & {functionalType: 'THREE_D_PRINTER'};
+export type PowerMeterDevice = SensorActuatorDevice & {functionalType: 'POWER_METER'};
+export type EnergyMeterDevice = SensorDevice & {functionalType: 'ENERGY_METER'};
+export type SolarSystemMonitorDevice = SensorDevice & {functionalType: 'SOLAR_SYSTEM_MONITOR'};
+export type HeadphonesDevice = ActuatorDevice & {functionalType: 'HEADPHONES'};
+export type SpeakerDevice = ActuatorDevice & {functionalType: 'SPEAKER'};
+export type ColorDimmerDevice = ActuatorDevice & {functionalType: 'COLOR_DIMMER'};
+export type GateDevice = ActuatorDevice & {functionalType: 'GATE'};
+export type DoorDevice = ActuatorDevice & {functionalType: 'DOOR'};
+export type CarDevice = SensorActuatorDevice & {functionalType: 'CAR'};
+export type ElectricCarDevice = SensorActuatorDevice & {functionalType: 'ELECTRIC_CAR'};
+export type MotorcycleDevice = SensorActuatorDevice & {functionalType: 'MOTORCYCLE'};
+export type ElectricScooterDevice = SensorActuatorDevice & {functionalType: 'ELECTRIC_SCOOTER'};
+export type ElectricBicycleDevice = SensorActuatorDevice & {functionalType: 'ELECTRIC_BICYCLE'};
+export type GpsTagDevice = SensorDevice & {functionalType: 'GPS_TAG'};

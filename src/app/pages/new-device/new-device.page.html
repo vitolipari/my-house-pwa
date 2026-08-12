@@ -136,6 +136,20 @@
                     <div>Matter</div>
                 </div>
                 <div
+                    id="newBluetooth"
+                    class="card"
+                    (click)="deviceVendorTypeSelected('bluetooth')"
+                >
+                    <svg>
+                        <use
+                            [attr.href]="'#icon-bluetooth'"
+                            [attr.xlink:href]="'#icon-bluetooth'">
+                            >
+                        </use>
+                    </svg>
+                    <div>Bluetooth</div>
+                </div>
+                <div
                     id="newRemoteNow"
                     class="card"
                     (click)="deviceVendorTypeSelected('hisense-remotenow')"
@@ -168,18 +182,39 @@
                     <p class="taxonomy-error">{{ taxonomyError() }}</p>
                 } @else {
                     <label>
-                        Tipo funzionale
+                        Dispositivo
                         <select
-                            name="functionalType"
-                            [(ngModel)]="selectedFunctionalType"
-                            (ngModelChange)="functionalTypeSelected()"
+                            name="catalogItem"
+                            [(ngModel)]="selectedCatalogItemId"
+                            (ngModelChange)="catalogItemSelected()"
                         >
-                            <option value="">Seleziona un tipo</option>
-                            @for (type of taxonomy().types; track type.id) {
-                                <option [value]="type.id">{{ type.name }} — {{ type.category }}</option>
+                            <option value="">Seleziona un dispositivo</option>
+                            @for (item of catalog(); track item.id) {
+                                <option [value]="item.id">{{ item.name }}</option>
                             }
                         </select>
                     </label>
+
+                    @if (selectedCatalogItem()) {
+                        <div class="classification-summary">
+                            <strong>{{ selectedCatalogItem()!.name }}</strong>
+                            <span>Icona: {{ selectedCatalogItem()!.icon }}</span>
+                            <p>{{ selectedCatalogItem()!.description }}</p>
+                        </div>
+                        <label>
+                            Tipo funzionale
+                            <select
+                                name="functionalType"
+                                [(ngModel)]="selectedFunctionalType"
+                                (ngModelChange)="functionalTypeSelected()"
+                            >
+                                <option value="">Seleziona una funzionalità</option>
+                                @for (type of compatibleTypeDefinitions(); track type.id) {
+                                    <option [value]="type.id">{{ type.name }} — {{ type.category }}</option>
+                                }
+                            </select>
+                        </label>
+                    }
 
                     @if (selectedTypeDefinition()) {
                         <div class="classification-summary">
@@ -189,19 +224,9 @@
                         </div>
                     }
 
-                    @if (typeSupportsUsage()) {
-                        <label>
-                            Uso del carico (facoltativo)
-                            <select name="deviceUsage" [(ngModel)]="selectedUsage">
-                                <option value="">Non specificato</option>
-                                @for (usage of taxonomy().usages; track usage.id) {
-                                    <option [value]="usage.id">{{ usage.name }}</option>
-                                }
-                            </select>
-                        </label>
+                    @if (selectedCatalogItem()?.usage) {
                         <small>
-                            L’uso serve per carichi collegati a relè, come lampade, ventole e valvole. TV,
-                            climatizzatori e termostati usano invece il proprio tipo funzionale diretto.
+                            Uso assegnato automaticamente: {{ selectedCatalogItem()!.name }}.
                         </small>
                     }
                 }
