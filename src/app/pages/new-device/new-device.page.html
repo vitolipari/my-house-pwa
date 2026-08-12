@@ -93,72 +93,119 @@
         </p-accordion-header>
         <p-accordion-content>
             <div id="phisical-device-step">
-                @if( deviceKnowledgeType === 'newDevice' ) {
-                    <div
-                        #newShelly
-                        id="newShelly"
-                        class="card"
-                        (click)="deviceVendorTypeSelected('newShelly')"
-                    >
-                        <svg #newShellyIcon>
-                            <use
-                                [attr.href]="'#icon-620'"
-                                [attr.xlink:href]="'#icon-620'">
-                                >
-                            </use>
-                        </svg>
-                        <div>Shelly</div>
-                    </div>
-                    <div
-                        #newTuya
-                        id="newTuya"
-                        class="card"
-                        (click)="deviceVendorTypeSelected('newTuya')"
-                    >
-                        <svg #newTuyaIcon>
-                            <use
-                                [attr.href]="'#icon-621'"
-                                [attr.xlink:href]="'#icon-621'">
-                                >
-                            </use>
-                        </svg>
-                        <div>Tuya</div>
-                    </div>
-                    <div
-                        #newMatter
-                        id="newMatter"
-                        class="card"
-                        (click)="deviceVendorTypeSelected('newMatter')"
-                    >
-                        <svg #newMatterIcon>
-                            <use
-                                [attr.href]="'#icon-615'"
-                                [attr.xlink:href]="'#icon-615'">
-                                >
-                            </use>
-                        </svg>
-                        <div>Matter</div>
-                    </div>
-                }
-                @else {
-
-                }
+                <div
+                    id="newShelly"
+                    class="card"
+                    (click)="deviceVendorTypeSelected('shelly')"
+                >
+                    <svg>
+                        <use
+                            [attr.href]="'#icon-620'"
+                            [attr.xlink:href]="'#icon-620'">
+                            >
+                        </use>
+                    </svg>
+                    <div>Shelly</div>
+                </div>
+                <div
+                    id="newTuya"
+                    class="card"
+                    (click)="deviceVendorTypeSelected('tuya')"
+                >
+                    <svg>
+                        <use
+                            [attr.href]="'#icon-621'"
+                            [attr.xlink:href]="'#icon-621'">
+                            >
+                        </use>
+                    </svg>
+                    <div>Tuya</div>
+                </div>
+                <div
+                    id="newMatter"
+                    class="card"
+                    (click)="deviceVendorTypeSelected('matter')"
+                >
+                    <svg>
+                        <use
+                            [attr.href]="'#icon-615'"
+                            [attr.xlink:href]="'#icon-615'">
+                            >
+                        </use>
+                    </svg>
+                    <div>Matter</div>
+                </div>
+                <div
+                    id="newRemoteNow"
+                    class="card"
+                    (click)="deviceVendorTypeSelected('hisense-remotenow')"
+                >
+                    <svg>
+                        <use
+                            [attr.href]="'#icon-587'"
+                            [attr.xlink:href]="'#icon-587'">
+                            >
+                        </use>
+                    </svg>
+                    <div>Hisense / VIDAA</div>
+                </div>
             </div>
         </p-accordion-content>
     </p-accordion-panel>
 
     <p-accordion-panel value="2" [disabled]="step < 2">
-        <p-accordion-header>step 3</p-accordion-header>
+        <p-accordion-header>Tipologia</p-accordion-header>
         <p-accordion-content>
-            <p class="m-0">
-                Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam
-                rem
-                aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt
-                explicabo. Nemo
-                enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni
-                dolores eos
-                qui ratione voluptatem sequi nesciunt. Consectetur, adipisci velit, sed quia non numquam eius modi.
-            </p>
+            <div class="taxonomy-step">
+                <p class="taxonomy-intro">
+                    Integrazione selezionata: <strong>{{ integration }}</strong>. Il tipo descrive il comportamento
+                    del dispositivo; protocollo e adapter restano indipendenti dalla categoria.
+                </p>
+
+                @if (taxonomyLoading()) {
+                    <p>Caricamento dei tipi disponibili…</p>
+                } @else if (taxonomyError()) {
+                    <p class="taxonomy-error">{{ taxonomyError() }}</p>
+                } @else {
+                    <label>
+                        Tipo funzionale
+                        <select
+                            name="functionalType"
+                            [(ngModel)]="selectedFunctionalType"
+                            (ngModelChange)="functionalTypeSelected()"
+                        >
+                            <option value="">Seleziona un tipo</option>
+                            @for (type of taxonomy().types; track type.id) {
+                                <option [value]="type.id">{{ type.name }} — {{ type.category }}</option>
+                            }
+                        </select>
+                    </label>
+
+                    @if (selectedTypeDefinition()) {
+                        <div class="classification-summary">
+                            <strong>{{ selectedTypeDefinition()!.name }}</strong>
+                            <span>Categoria: {{ selectedTypeDefinition()!.category }}</span>
+                            <p>{{ selectedTypeDefinition()!.description }}</p>
+                        </div>
+                    }
+
+                    @if (typeSupportsUsage()) {
+                        <label>
+                            Uso del carico (facoltativo)
+                            <select name="deviceUsage" [(ngModel)]="selectedUsage">
+                                <option value="">Non specificato</option>
+                                @for (usage of taxonomy().usages; track usage.id) {
+                                    <option [value]="usage.id">{{ usage.name }}</option>
+                                }
+                            </select>
+                        </label>
+                        <small>
+                            L’uso serve per carichi collegati a relè, come lampade, ventole e valvole. TV,
+                            climatizzatori e termostati usano invece il proprio tipo funzionale diretto.
+                        </small>
+                    }
+                }
+            </div>
         </p-accordion-content>
     </p-accordion-panel>
 </p-accordion>

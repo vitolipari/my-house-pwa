@@ -1,4 +1,6 @@
-export type DeviceProtocol = 'matter' | 'shelly' | 'tuya' | 'manual';
+export type DeviceProtocol = 'matter' | 'shelly' | 'tuya' | 'remotenow' | 'manual';
+
+export type DeviceCategoryId = 'ACTUATOR' | 'SENSOR' | 'SENSOR_ACTUATOR';
 
 export interface DeviceRecord {
     id: number;
@@ -14,7 +16,13 @@ export interface DeviceRecord {
     matterFabricId: string | null;
     status: 'DISCOVERED' | 'COMMISSIONING' | 'ONLINE' | 'OFFLINE' | 'UNAVAILABLE' | 'ERROR';
     reachable: boolean | null;
-    deviceType: string | null;
+    category: DeviceCategoryId | null;
+    categoryName: string | null;
+    functionalType: string | null;
+    functionalTypeName: string | null;
+    usage: string | null;
+    usageName: string | null;
+    detectedDeviceType: string | null;
     vendorId: number | null;
     productId: number | null;
     capabilities: string[];
@@ -33,6 +41,31 @@ export interface DeviceIntegrationStatus {
     commissioningOverBle?: boolean;
 }
 
+export interface DeviceCategoryDefinition {
+    id: DeviceCategoryId;
+    name: string;
+    description: string | null;
+}
+
+export interface DeviceTypeDefinition {
+    id: string;
+    name: string;
+    category: DeviceCategoryId;
+    description: string | null;
+}
+
+export interface DeviceUsageDefinition {
+    id: string;
+    name: string;
+    description: string | null;
+}
+
+export interface DeviceTaxonomy {
+    categories: DeviceCategoryDefinition[];
+    types: DeviceTypeDefinition[];
+    usages: DeviceUsageDefinition[];
+}
+
 export interface DiscoveredDevice {
     discoveryId: string;
     protocol: DeviceProtocol;
@@ -41,7 +74,7 @@ export interface DiscoveredDevice {
     name: string;
     address: string | null;
     matterNodeId: string | null;
-    deviceType: string | null;
+    detectedDeviceType: string | null;
     vendorId: number | null;
     productId: number | null;
     commissionable: boolean;
@@ -67,7 +100,9 @@ export interface AddDeviceRequest {
     place?: string | null;
     description?: string | null;
     mac?: string | null;
-    deviceType?: string | null;
+    functionalType?: string | null;
+    usage?: string | null;
+    detectedDeviceType?: string | null;
 }
 
 export interface CommissionMatterRequest {
@@ -87,94 +122,37 @@ export interface CommissioningJob {
 }
 
 
-// dallo schema v1 /////////////////////////////////////////////////////////////////////////
+export type DevicePropertyKind = 'STATE' | 'SETTING' | 'MEASUREMENT';
+export type DevicePropertyAccess = 'READ' | 'WRITE' | 'READ_WRITE';
 
-export type ShellyType = {
-    id: number | string;
-    name: string;
-    gen: string;
-    wifiAccessPointName: string;
-    systemConfig: {};
-    systemStatus: {};
-    wifiConfig: {};
-    wifiStatus: {};
-    cloudConfig: {};
-    cloudStatus: {};
-};
-
-export type TuyaType = {
-    id: number | string;
-    localKey: string;
-};
-
-export type MatterType = {
-    id: number | string;
-    nodeID: string;
-    fabricID: string;
-    endpointIDs: number[];
-    bridgeEndpointIDs: number[];
-};
-
-export type DeviceType = {
-    id: number;
-    family: ShellyType | TuyaType;
-    matter: MatterType;
-    name: string;
-    ip: string;
-    mac: string;
-    status: string;
-    where: string;
-    onMap: string;
-    description: string;
-    signalStatus: number;
-    cloud: string;
-    firmware: string;
-    availability: string;
-};
-
-export type ActuatorType = DeviceType & {};
-
-export type SensorActuatorType = DeviceType & {
-    unit: string[];
-    value: number[] | string[];
-    minThreshold: number[] | string[];
-    maxThreshod: number[] | string[];
-};
-
-export type SensorType = DeviceType & {
-    unit: string[];
-    value: number[] | string[];
-    minThreshold: number[] | string[];
-    maxThreshod: number[] | string[];
-};
-
-export type ClimaType = ActuatorType & {
-    mode: string;
-    temperature: number;
-    fan: number | string;
-    airFlowVertical: number | string;
-    airFlowHorizontal: number | string;
-};
-
-export type SwitchType = ActuatorType & {}
-
-export type DimmerType = ActuatorType & {}
-
-export type CurtainType = ActuatorType & {}
-
-export type TermostateType = SensorActuatorType & {
-    mode: string;
-    temperature: number;
+export interface DevicePropertyValue {
+    id: string;
+    kind: DevicePropertyKind;
+    access: DevicePropertyAccess;
+    value: number | string | boolean | null;
+    unit: string | null;
+    channelIndex?: number;
+    minThreshold?: number | string | null;
+    maxThreshold?: number | string | null;
 }
 
-export type PowerMeterType = SensorActuatorType & {}
+export type ActuatorDevice = DeviceRecord & {category: 'ACTUATOR'};
+export type SensorDevice = DeviceRecord & {
+    category: 'SENSOR';
+    measurements: DevicePropertyValue[];
+};
+export type SensorActuatorDevice = DeviceRecord & {
+    category: 'SENSOR_ACTUATOR';
+    measurements: DevicePropertyValue[];
+};
 
-export type TemperatureHumiditySensorType = SensorType & {}
+export type ClassifiedDevice = ActuatorDevice | SensorDevice | SensorActuatorDevice;
 
-export type LightSensorType = SensorType & {}
-
-export type MovementSensorType = SensorType & {}
-
-export type WayerLevelSensorType = SensorType & {}
-
+export type TvDevice = ActuatorDevice & {functionalType: 'TV'};
+export type AirConditionerDevice = ActuatorDevice & {functionalType: 'AIR_CONDITIONER'};
+export type SensingAirConditionerDevice = SensorActuatorDevice & {
+    functionalType: 'SENSING_AIR_CONDITIONER';
+};
+export type ThermostatDevice = SensorActuatorDevice & {functionalType: 'THERMOSTAT'};
+export type GameConsoleDevice = ActuatorDevice & {functionalType: 'GAME_CONSOLE'};
 

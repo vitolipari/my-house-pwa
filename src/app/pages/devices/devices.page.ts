@@ -37,10 +37,14 @@ export class DevicesPage implements OnInit {
     isInWaiting = signal(true);
     isInScanning = signal(true);
     ipDevices: NetworkIdentity[] = [];
+    readonly devices = signal<DeviceRecord[]>([]);
+    readonly devicesLoading = signal(true);
+    readonly devicesError = signal<string | null>(null);
 
     value: string | number = "device";
 
     private readonly api = inject<ApiUrlService>(ApiUrlService);
+    private readonly deviceApi = inject(DeviceApiService);
     private router = inject(Router);
     private readonly permissionService = inject(PermissionService);
     private readonly darkModeService = inject(DarkModeService);
@@ -52,7 +56,22 @@ export class DevicesPage implements OnInit {
     );
 
     ngOnInit(): void {
+        void this.loadDevices();
+    }
 
+    private async loadDevices(): Promise<void> {
+        this.devicesLoading.set(true);
+        this.devicesError.set(null);
+        try {
+            this.devices.set(await firstValueFrom(this.deviceApi.list()));
+        } catch (error) {
+            const candidate = error as {error?: {error?: string}; message?: string};
+            this.devicesError.set(
+                candidate.error?.error ?? candidate.message ?? 'Impossibile caricare i dispositivi'
+            );
+        } finally {
+            this.devicesLoading.set(false);
+        }
     }
 
     hasPermission(permission: string): boolean {

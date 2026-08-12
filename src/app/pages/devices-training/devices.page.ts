@@ -8,6 +8,7 @@ import {
     DeviceIntegrationStatus,
     DeviceProtocol,
     DeviceRecord,
+    DeviceTaxonomy,
     DiscoveredDevice
 } from '../../models/device.models';
 import {AuthService} from '../../services/auth';
@@ -28,6 +29,7 @@ export class DevicesPageTraining implements OnInit, OnDestroy {
     readonly devices = signal<DeviceRecord[]>([]);
     readonly discovered = signal<DiscoveredDevice[]>([]);
     readonly integrations = signal<DeviceIntegrationStatus[]>([]);
+    readonly taxonomy = signal<DeviceTaxonomy>({categories: [], types: [], usages: []});
     readonly loading = signal(false);
     readonly discovering = signal(false);
     readonly saving = signal(false);
@@ -48,7 +50,9 @@ export class DevicesPageTraining implements OnInit, OnDestroy {
         externalId: '',
         address: '',
         place: '',
-        description: ''
+        description: '',
+        functionalType: '',
+        usage: ''
     };
 
     get canManage(): boolean {
@@ -71,12 +75,14 @@ export class DevicesPageTraining implements OnInit, OnDestroy {
         this.loading.set(true);
         this.clearFeedback();
         try {
-            const [devices, integrations] = await Promise.all([
+            const [devices, integrations, taxonomy] = await Promise.all([
                 firstValueFrom(this.api.list()),
-                firstValueFrom(this.api.integrations())
+                firstValueFrom(this.api.integrations()),
+                firstValueFrom(this.api.taxonomy())
             ]);
             this.devices.set(devices);
             this.integrations.set(integrations);
+            this.taxonomy.set(taxonomy);
         } catch (error) {
             this.error.set(this.errorMessage(error));
         } finally {
@@ -138,7 +144,9 @@ export class DevicesPageTraining implements OnInit, OnDestroy {
                 externalId: '',
                 address: '',
                 place: '',
-                description: ''
+                description: '',
+                functionalType: '',
+                usage: ''
             };
         } catch (error) {
             this.error.set(this.errorMessage(error));

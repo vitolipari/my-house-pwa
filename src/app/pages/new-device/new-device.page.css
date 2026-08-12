@@ -65,3 +65,44 @@ p-accordion-content > DIV,
     height: 14px;
     opacity: 1;
 }
+
+.taxonomy-step {
+    display: grid;
+    gap: 1rem;
+    width: 100%;
+}
+
+.taxonomy-intro,
+.classification-summary p {
+    margin: 0;
+}
+
+.taxonomy-step label,
+.classification-summary {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.taxonomy-step select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--color-background-3);
+    border-radius: 8px;
+    background: var(--color-background-2);
+    color: var(--color-text-0);
+}
+
+.classification-summary {
+    padding: 1rem;
+    border-radius: 8px;
+    background: var(--color-background-3);
+}
+
+.classification-summary span,
+.taxonomy-step small {
+    color: var(--color-text-2);
+}
+
+.taxonomy-error {
+    color: var(--color-error, #c62828);
+}

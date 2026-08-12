@@ -72,7 +72,32 @@
     </p-tablist>
     <p-tabpanels>
         <p-tabpanel value="device">
-            device dell'app
+            @if (devicesLoading()) {
+                <p>Caricamento dispositivi…</p>
+            } @else if (devicesError()) {
+                <p class="devices-error">{{ devicesError() }}</p>
+            } @else if (devices().length === 0) {
+                <p>Nessun dispositivo registrato.</p>
+            } @else {
+                <div class="registered-devices">
+                    @for (device of devices(); track device.id) {
+                        <article class="registered-device">
+                            <div>
+                                <strong>{{ device.name }}</strong>
+                                <span>{{ device.place || 'Posizione non indicata' }}</span>
+                            </div>
+                            <dl>
+                                <div><dt>Categoria</dt><dd>{{ device.categoryName || device.category || 'Non classificato' }}</dd></div>
+                                <div><dt>Tipo</dt><dd>{{ device.functionalTypeName || device.functionalType || 'Non classificato' }}</dd></div>
+                                @if (device.usage) {
+                                    <div><dt>Uso</dt><dd>{{ device.usageName || device.usage }}</dd></div>
+                                }
+                                <div><dt>Integrazione</dt><dd>{{ device.integration }}</dd></div>
+                            </dl>
+                        </article>
+                    }
+                </div>
+            }
         </p-tabpanel>
         <p-tabpanel value="groups">
             gruppi dell'app
@@ -104,5 +129,4 @@
     <!--    Dispositivi del sistema -->
     <!--    Dispositivi tramite IP (DHCP) -->
     <!--    Dispositivi tramite loro accessPoint -->
-
 

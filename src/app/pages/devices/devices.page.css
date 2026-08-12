@@ -40,3 +40,45 @@ p-tab > DIV > SPAN, B {
     margin-left: 0.3rem;
 }
 
+.registered-devices {
+    display: grid;
+    gap: 1rem;
+}
+
+.registered-device {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    background: var(--color-background-3);
+}
+
+.registered-device > div,
+.registered-device dl div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.registered-device > div {
+    flex-direction: column;
+}
+
+.registered-device dl {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.registered-device dt,
+.registered-device dd {
+    margin: 0;
+}
+
+.registered-device dt {
+    color: var(--color-text-2);
+}
+
+.devices-error {
+    color: var(--color-error, #c62828);
+}

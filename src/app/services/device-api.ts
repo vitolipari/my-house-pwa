@@ -7,6 +7,7 @@ import {
     CommissionMatterRequest,
     DeviceIntegrationStatus,
     DeviceRecord,
+    DeviceTaxonomy,
     DiscoveryResult
 } from '../models/device.models';
 
@@ -21,6 +22,10 @@ export class DeviceApiService {
 
     integrations(): Observable<DeviceIntegrationStatus[]> {
         return this.http.get<DeviceIntegrationStatus[]>(`${this.baseUrl}/integrations`);
+    }
+
+    taxonomy(): Observable<DeviceTaxonomy> {
+        return this.http.get<DeviceTaxonomy>(`${this.baseUrl}/taxonomy`);
     }
 
     discover(timeoutSeconds = 8): Observable<DiscoveryResult> {
