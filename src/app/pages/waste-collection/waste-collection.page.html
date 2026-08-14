@@ -1,0 +1,64 @@
+<page-title
+    [title]="'Raccolta rifiuti'"
+    [hasPlusButton]="false"
+    [iconID]="'timer_icon_1'"
+></page-title>
+
+<main class="waste-page">
+    <header>
+        <p>Configura cosa viene ritirato in ogni giorno della settimana.</p>
+        <p class="hint">Le richieste «stasera» e «domani» usano la raccolta del giorno successivo.</p>
+    </header>
+
+    @if (error()) {
+        <p class="message error" role="alert">{{ error() }}</p>
+    }
+
+    @if (loading()) {
+        <p class="message">Caricamento calendario…</p>
+    } @else {
+        <section class="schedule" aria-label="Calendario settimanale della raccolta">
+            @for (entry of schedule(); track entry.day) {
+                <article class="day-card">
+                    <div class="day-copy">
+                        <strong>{{ dayLabel(entry.day) }}</strong>
+                        @if (!canEdit()) {
+                            <span>{{ entry.material || 'Nessuna raccolta configurata' }}</span>
+                        }
+                    </div>
+
+                    @if (canEdit()) {
+                        <label>
+                            <span class="visually-hidden">Materiale per {{ dayLabel(entry.day) }}</span>
+                            <input
+                                type="text"
+                                maxlength="80"
+                                placeholder="es. umido"
+                                [(ngModel)]="materials[entry.day]"
+                                [disabled]="savingDay() !== null"
+                            >
+                        </label>
+                        <button
+                            type="button"
+                            (click)="save(entry.day)"
+                            [disabled]="savingDay() !== null"
+                        >
+                            @if (savingDay() === entry.day) {
+                                Salvataggio…
+                            } @else {
+                                Salva
+                            }
+                        </button>
+                        @if (savedDay() === entry.day) {
+                            <span class="saved" role="status">Salvato</span>
+                        }
+                    }
+                </article>
+            }
+        </section>
+    }
+
+    @if (!loading() && !canEdit()) {
+        <p class="hint">Solo i profili MASTER e OWNER possono modificare il calendario.</p>
+    }
+</main>

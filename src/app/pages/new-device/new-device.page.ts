@@ -49,9 +49,16 @@ export class NewDevicePage implements OnInit {
     async ngOnInit(): Promise<void> {
         try {
             const [taxonomy, catalog] = await Promise.all([
-                firstValueFrom(this.deviceApi.taxonomy()),
+            firstValueFrom(this.deviceApi.taxonomy()),
                 firstValueFrom(this.deviceApi.catalog())
             ]);
+
+            console.log('response di taxonomy');
+            console.log(taxonomy);
+
+            console.log('response di catalog');
+            console.log(catalog);
+
             this.taxonomy.set(taxonomy);
             this.catalog.set(catalog);
         } catch (error) {
@@ -131,5 +138,9 @@ export class NewDevicePage implements OnInit {
 
     functionalTypeSelected(): void {
         this.selectedUsage = this.selectedCatalogItem()?.usage ?? '';
+    }
+
+    selectCatalogItemId(id: string) {
+        this.selectedCatalogItemId = id;
     }
 }

@@ -96,6 +96,13 @@ export const routes: Routes = [
     },
 
     {
+        path: 'waste-collection',
+        canActivate: [routeAccessGuard],
+        loadComponent: () =>
+            import('./pages/waste-collection/waste-collection.page').then(m => m.WasteCollectionPage)
+    },
+
+    {
         path: 'admin',
         canActivate: [routeAccessGuard],
         data: {
