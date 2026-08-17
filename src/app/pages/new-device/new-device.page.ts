@@ -59,6 +59,7 @@ export class NewDevicePage implements OnInit {
             console.log('response di catalog');
             console.log(catalog);
 
+
             this.taxonomy.set(taxonomy);
             this.catalog.set(catalog);
         } catch (error) {
