@@ -69,7 +69,9 @@ export interface DeviceTaxonomy {
 export interface DeviceCatalogItem {
     id: string;
     name: string;
-    icon: string;
+    svgIcon: string | null;
+    emojIcon: string | null;
+    imgIcon: string | null;
     description: string | null;
     source: 'USAGE' | 'TYPE';
     usage: string | null;
@@ -168,6 +170,8 @@ export type SmartWatchDevice = SensorActuatorDevice & {functionalType: 'SMART_WA
 export type HeadphonesDevice = ActuatorDevice & {functionalType: 'HEADPHONES'};
 export type SpeakerDevice = ActuatorDevice & {functionalType: 'SPEAKER'};
 export type ColorDimmerDevice = ActuatorDevice & {functionalType: 'COLOR_DIMMER'};
+export type MotorizedCanopyDevice = ActuatorDevice & {functionalType: 'MOTORIZED_CANOPY'};
+export type MotorizedDynamicCanopyDevice = ActuatorDevice & {functionalType: 'MOTORIZED_DYNAMIC_CANOPY'};
 export type GateDevice = ActuatorDevice & {functionalType: 'GATE'};
 export type DoorDevice = ActuatorDevice & {functionalType: 'DOOR'};
 export type CarDevice = SensorActuatorDevice & {functionalType: 'CAR'};
