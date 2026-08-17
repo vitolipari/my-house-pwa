@@ -93,6 +93,7 @@ export class AuthService {
 
         if (!this.hasToken()) {
             console.log('manca il token in authService.ensureUserLoaded()');
+            this.clearLoginData();
             return Promise.reject('no-token');
         }
 

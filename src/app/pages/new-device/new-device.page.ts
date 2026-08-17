@@ -6,6 +6,8 @@ import {PageTitleComponent} from '../../components/page-title.component/page-tit
 import {Accordion, AccordionContent, AccordionHeader, AccordionModule, AccordionPanel} from 'primeng/accordion';
 import {DeviceCatalogItem, DeviceTaxonomy, DeviceTypeDefinition} from '../../models/device.models';
 import {DeviceApiService} from '../../services/device-api';
+import {emoj} from '../../utils/string-utils';
+import {RadioButton, RadioButtonModule} from 'primeng/radiobutton';
 
 
 @Component({
@@ -17,7 +19,8 @@ import {DeviceApiService} from '../../services/device-api';
         Accordion,
         AccordionPanel,
         AccordionHeader,
-        AccordionContent
+        AccordionContent,
+        RadioButton
     ],
     templateUrl: './new-device.page.html',
     styleUrls: [
@@ -34,7 +37,9 @@ export class NewDevicePage implements OnInit {
     step: number = 0;
     deviceKnowledgeType: string = '';
     integration: string = '';
+    // selectedType: any;
     selectedFunctionalType: string = '';
+    selectedFunctionalTypeObj: any;
     selectedUsage: string = '';
     selectedCatalogItemId: string = '';
     readonly catalog = signal<DeviceCatalogItem[]>([]);
@@ -114,6 +119,14 @@ export class NewDevicePage implements OnInit {
         return this.catalog().find(item => item.id === this.selectedCatalogItemId) ?? null;
     }
 
+    selectedCatalogItemEmoj(): string {
+        let catalogItem: DeviceCatalogItem | null = this.selectedCatalogItem();
+        if( !!catalogItem ) {
+            return emoj( catalogItem.emojIcon || '' );
+        }
+        return '';
+    }
+
     compatibleTypeDefinitions(): DeviceTypeDefinition[] {
         const compatibleTypes = this.selectedCatalogItem()?.compatibleTypes ?? [];
         return compatibleTypes
@@ -139,9 +152,16 @@ export class NewDevicePage implements OnInit {
 
     functionalTypeSelected(): void {
         this.selectedUsage = this.selectedCatalogItem()?.usage ?? '';
+
+        this.step = 4;
+        this.activeAccordionValue = ''+ this.step;
+
+
     }
 
     selectCatalogItemId(id: string) {
         this.selectedCatalogItemId = id;
+        this.step = 3;
+        this.activeAccordionValue = ''+ this.step;
     }
 }

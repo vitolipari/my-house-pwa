@@ -17,10 +17,10 @@
 }
 
 .card > SVG, svg {
-    --svg-dimansion: 4rem;
-    width: var(--svg-dimansion);
-    height: var(--svg-dimansion);
-    flex: 0 0 var(--svg-dimansion);
+    --svg-dimension: 4rem;
+    width: var(--svg-dimension);
+    height: var(--svg-dimension);
+    flex: 0 0 var(--svg-dimension);
     display: block;
     aspect-ratio: 1;
     object-fit: cover;
@@ -72,13 +72,15 @@ p-accordion-content > DIV,
     width: 100%;
 }
 
-.taxonomy-intro,
-.classification-summary p {
+.taxonomy-intro
+/*.classification-summary p */
+{
     margin: 0;
 }
 
-.taxonomy-step label,
-.classification-summary {
+.taxonomy-step label
+/*.classification-summary */
+{
     display: grid;
     gap: 0.5rem;
 }
@@ -93,16 +95,109 @@ p-accordion-content > DIV,
 }
 
 .classification-summary {
-    padding: 1rem;
-    border-radius: 8px;
-    background: var(--color-background-3);
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin-top: 0rem;
+    margin-bottom: 1rem;
+    padding-top: 1rem;
+    align-items: center;
 }
 
-.classification-summary span,
+.classification-summary > DIV#classification-emoj {
+    font-size: 3rem;
+    margin-right: 1rem;
+}
+
+
+.classification-summary > DIV {
+
+}
+
+
+
+
+
+/*.classification-summary span,*/
 .taxonomy-step small {
     color: var(--color-text-2);
 }
 
+
+.radio-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+    background: var(--color-background-1);
+    padding: 0.5rem;
+    border-radius: 8px;
+}
+
+.usage-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    margin-left: 1rem;
+    /*margin-top: 0rem;*/
+    /*padding-top: 1rem;*/
+    /*align-items: center;*/
+}
+
+.usage-container > DIV {
+
+}
+
+.usage-container {
+
+}
+
+
 .taxonomy-error {
     color: var(--color-error, #c62828);
+}
+
+
+#device-taxonomy-container {
+    max-height: 30vh;
+    overflow: auto;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    align-self: center;
+    width: 100%;
+    justify-self: center;
+    justify-content: center;
+    height: auto;
+}
+
+
+.small-card {
+    background: var(--color-background-3);
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 0.3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: calc(30% - 0rem);
+    text-align: center;
+    color: var(--color-text-0);
+    min-height: 5.5rem;
+}
+
+.small-card > SVG,
+.small-card > svg
+{
+    width: 64px;
+    height: 64px;
+    max-height: 64px;
+    margin: 0rem;
+    margin-bottom: 0.5rem;
+}
+
+.small-card > DIV {
+
 }

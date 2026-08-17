@@ -220,148 +220,25 @@
                     <p class="taxonomy-error">{{ taxonomyError() }}</p>
                 } @else {
 
-                    <div>
+                    <div id="device-taxonomy-container">
                         @for (item of catalog(); track item.id) {
                             <div
                                 class="small-card"
                                 id="catalog-{{ item.id }}"
                                 (click)="selectCatalogItemId( item.id )"
                             >
-                                <!--
-                                lamp/led strip
-                                    emoj - light_bulb
-                                    svg - Icon-325
-                                    svg - Icon-65
-                                dimmerable lamp/led strip
-                                    svg - Icon-66
-
-                                socket
-                                    emoj - high_voltage
-                                    svg - Icon-272
-                                fan
-                                    svg - Icon-490
-
-                                curtain
-                                    emoj - window
-                                    emoj - city_scape
-                                    svg - Icon-11
-                                    svg - Icon-498
-
-                                Irrigazione
-
-                                Livello Cisterna
-
-                                valve
-                                    emoj - potable_water
-                                    svg - icon-566
-                                    svg - icon-123
-                                pump
-
-                                gate
-                                    emoj - shinto_shrine
-
-                                door
-                                    emoj - door
-                                tv
-                                airConditioner
-                                    emoj - ice
-                                    emoj - snow_flake
-                                    svg - Icon-119
-                                termostat
-                                headphone
-                                speacker
-                                gameConsole
-                                    emoj - joystick
-                                    emoj - video_game
-                                printer
-                                3Dprinter
-                                MovementSensor
-                                LightSensor
-                                EnergyMeter
-                                SolarSystemMonitor
-                                Car
-                                ElectricCar
-                                MotorCycle
-                                ElectricScooter
-                                ElectricBicyle
-                                GPSTag
-
-
-                                    emoj -  water_wave
-                                            watch
-
-                                            thought_balloon
-                                            thermometer
-                                            sweat_droplets
-                                            speech_balloon
-                                            shower
-                                            seedling
-                                            round_pushpin
-                                            rolled_up_newspaper
-                                            police_car_light
-                                            palm_tree
-                                            newspaper
-
-                                            handshake
-                                            fire
-                                            desert
-                                            control_knobs
-                                            cactus
-                                            bathtub
-                                            bed
-                                            deciduous_tree
-
-
-
-
-
-
-                                -->
                                 <svg>
                                     <use
-                                        [attr.href]="'#icon-602'"
-                                        [attr.xlink:href]="'#icon-602'">
+                                        [attr.href]="'#' + (item.svgIcon ?? 'icon-602')"
+                                        [attr.xlink:href]="'#' + (item.svgIcon ?? 'icon-602')">
                                         >
                                     </use>
                                 </svg>
-                                <div>{{ item.id +' - '+ item.name }}</div>
+                                <div>{{ item.name }}</div>
                             </div>
                         }
                     </div>
 
-<!--                    <label>-->
-<!--                        Dispositivo-->
-<!--                        <select-->
-<!--                            name="catalogItem"-->
-<!--                            [(ngModel)]="selectedCatalogItemId"-->
-<!--                            (ngModelChange)="catalogItemSelected()"-->
-<!--                        >-->
-<!--                            <option value="">Seleziona un dispositivo</option>-->
-<!--                            @for (item of catalog(); track item.id) {-->
-<!--                                <option [value]="item.id">{{ item.name }}</option>-->
-<!--                            }-->
-<!--                        </select>-->
-<!--                    </label>-->
-
-                    @if (selectedCatalogItem()) {
-                        <div class="classification-summary">
-                            <strong>{{ selectedCatalogItem()!.name }}</strong>
-                            <p>{{ selectedCatalogItem()!.description }}</p>
-                        </div>
-                        <label>
-                            Tipo funzionale
-                            <select
-                                name="functionalType"
-                                [(ngModel)]="selectedFunctionalType"
-                                (ngModelChange)="functionalTypeSelected()"
-                            >
-                                <option value="">Seleziona una funzionalità</option>
-                                @for (type of compatibleTypeDefinitions(); track type.id) {
-                                    <option [value]="type.id">{{ type.name }} — {{ type.category }}</option>
-                                }
-                            </select>
-                        </label>
-                    }
 
                     @if (selectedTypeDefinition()) {
                         <div class="classification-summary">
@@ -401,10 +278,98 @@
                     </use>
                 </svg>
             }
+            Features
+        </p-accordion-header>
+        <p-accordion-content>
+            <div>
+
+                @if (selectedCatalogItem()) {
+
+                    <div class="classification-summary">
+                        <div id="classification-emoj">{{ selectedCatalogItemEmoj() }}</div>
+                        <div>
+                            <strong>{{ selectedCatalogItem()!.name }}</strong>
+                            <div>{{ selectedCatalogItem()!.description }}</div>
+                        </div>
+                    </div>
+
+                    <div id="">
+
+                        @for (type of compatibleTypeDefinitions(); track type.id) {
+                            <div class="radio-container">
+                                <p-radiobutton
+                                    [inputId]="type.id"
+                                    name="type"
+                                    [value]="type"
+                                    [(ngModel)]="selectedFunctionalTypeObj"
+                                    (ngModelChange)="functionalTypeSelected()"
+                                    variant="filled"
+                                />
+                                <div
+                                    class="usage-container"
+                                >
+                                    <strong>{{ type.name }}</strong>
+                                    <div>{{ type.description }}</div>
+                                </div>
+
+                            </div>
+                        }
+
+                    </div>
+
+                }
+
+            </div>
+        </p-accordion-content>
+    </p-accordion-panel>
+
+    <p-accordion-panel value="4" [disabled]="step > 6">
+        <p-accordion-header>
+            @if( step > 4 ) {
+                <svg class="greenOkIcon">
+                    <use
+                        [attr.href]="'#green-ok'"
+                        [attr.xlink:href]="'#green-ok'">
+                        >
+                    </use>
+                </svg>
+            }
+            @else {
+                <svg class="greenOkIcon">
+                    <use
+                        [attr.href]="'#icon-578'"
+                        [attr.xlink:href]="'#icon-578'">
+                        >
+                    </use>
+                </svg>
+            }
             Discovery & Selection
         </p-accordion-header>
         <p-accordion-content>
-            content
+            <div>Status:</div>
+            <div>
+                <label>In uso / Nuovo</label>
+                <span>&nbsp;{{ deviceKnowledgeType }}</span>
+            </div>
+            <div>
+                <label>Famiglia</label>
+                <span>&nbsp;{{ integration }}</span>
+            </div>
+            <div>
+                <label>Tipologia</label>
+<!--                <span>&nbsp;{{ selectedFunctionalType | json }}</span>-->
+                <span>&nbsp;{{ !!selectedFunctionalTypeObj ? selectedFunctionalTypeObj.name : '' }}</span>
+<!--                <span>&nbsp;{{ selectedUsage.name }}</span>-->
+<!--                <span>&nbsp;{{ selectedUsage | json }}</span>-->
+            </div>
+            <div>
+                <label>Funzione</label>
+                <span>&nbsp;{{ selectedUsage }}</span>
+            </div>
+<!--            <div>-->
+<!--                <label>Catalogo</label>-->
+<!--                <span>&nbsp;{{ selectedCatalogItemId }}</span>-->
+<!--            </div>-->
         </p-accordion-content>
     </p-accordion-panel>
 </p-accordion>
