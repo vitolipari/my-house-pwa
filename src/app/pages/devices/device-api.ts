@@ -10,7 +10,7 @@ import {
     DeviceRecord,
     DeviceTaxonomy,
     DiscoveryResult
-} from '../models/device.models';
+} from './devices.models';
 
 @Injectable({providedIn: 'root'})
 export class DeviceApiService {

@@ -180,3 +180,149 @@ export type MotorcycleDevice = SensorActuatorDevice & {functionalType: 'MOTORCYC
 export type ElectricScooterDevice = SensorActuatorDevice & {functionalType: 'ELECTRIC_SCOOTER'};
 export type ElectricBicycleDevice = SensorActuatorDevice & {functionalType: 'ELECTRIC_BICYCLE'};
 export type GpsTagDevice = SensorDevice & {functionalType: 'GPS_TAG'};
+export type BinaryStateSensorDevice = SensorDevice & {functionalType: 'BINARY_STATE_SENSOR'};
+
+
+
+// dallo schema
+
+export type DeviceFamilyType = {
+
+}
+
+export type TuyaFamilyType = DeviceFamilyType & {
+    id: number | string;
+    localKey: number | string;
+}
+
+export type ShellySystemConfig = {}
+export type ShellySystemStatus = {}
+export type ShellyWifiConfig = {}
+export type ShellyWifiStatus = {}
+export type ShellyCloudConfig = {}
+export type ShellyCloudStatus = {}
+
+export type ShellyFamilyType = DeviceFamilyType & {
+    id: number | string;
+    name: string;
+    gen: string;
+    systemConfig: ShellySystemConfig;
+    systemStatus: ShellySystemStatus;
+    wifiConfig: ShellyWifiConfig;
+    wifiStatus: ShellyWifiStatus;
+    cloudConfig: ShellyCloudConfig;
+    cloudStatus: ShellyCloudStatus;
+}
+
+export type MatterType = {
+    id: number | string;
+    mode: string;
+    nodeID: number | string;
+    fabricID: number | string;
+    endpiontIDs: Array<number | string | boolean | null>;
+    bridgeEndpiontIDs: Array<number | string | boolean | null>;
+}
+
+
+export type DeviceTipology = {
+    id: number | string;
+    name: string;
+    description: string;
+}
+
+export type DeviceCategory = {
+    id: number | string;
+    name: string;
+    description: string;
+}
+
+export type ZoneType = {
+    id: number | string;
+    name: string;
+    picture: string;
+}
+
+export type DeviceType = {
+    id: number | string;
+    family: string;
+    hardware: DeviceFamilyType;
+    model: string;
+    matter: MatterType;
+    name: string;
+    ip: string;
+    mac: string;
+    where: ZoneType;
+    onMap: string;
+    description: string;
+    signalStatus: number;
+    cloud: string;
+    firmware: string;
+    availability: string;
+    catalogItemId: string;
+    type: DeviceTipology;
+    category: DeviceCategory;
+    svgIcon: string;
+    emoj: string;
+    imgIcon: string;
+    picture: string;
+    channel: string[];
+    status: Array<number | string | boolean | null>;
+    lastTime: Array<number | string | null>;
+}
+
+export type ActuatorType = DeviceType & {}
+
+export type SensorType = DeviceType & {
+    unit: string[] | null;
+    value: Array<number | string | boolean | null>;
+    minThreshold: Array<number | string | boolean | null>;
+    maxThreshold: Array<number | string | boolean | null>;
+}
+
+export type SensorActuatorType = ActuatorType & SensorType & {}
+
+export type ClimaType = ActuatorType & {
+    mode: string;
+    temperature: number;
+    fan: number | string;
+    airFlowVertical: number | string;
+    airFlowHorizontal: number | string;
+}
+
+export type SwitchType = ActuatorType & {}
+
+export type DimmerType = ActuatorType & {}
+
+export type CurtainType = ActuatorType & {
+    movement: string;
+    targetPosition: number;
+}
+
+export type TVType = ActuatorType & {
+    volume: number | string;
+    input: number | string;
+    app: number | string;
+}
+
+export type MeteredSwitchType = SensorActuatorType & {}
+export type MeteredDimmerType = SensorActuatorType & {}
+export type MeteredCurtainType = SensorActuatorType & CurtainType & {}
+
+export type TermostateType = SensorActuatorType & {
+    mode: string;
+    temperature: number;
+}
+
+export type PowerMeterType = SensorActuatorType & {}
+
+
+export type TemperatureHumiditySensor = SensorType & {}
+
+export type LightSensor = SensorType & {}
+
+export type MovementSensor = SensorType & {}
+
+export type WaterLevelSensor = SensorType & {}
+
+export type BinaryStateSensor = SensorType & {}
+

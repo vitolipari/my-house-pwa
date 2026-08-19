@@ -346,30 +346,100 @@
             Discovery & Selection
         </p-accordion-header>
         <p-accordion-content>
-            <div>Status:</div>
+
             <div>
-                <label>In uso / Nuovo</label>
-                <span>&nbsp;{{ deviceKnowledgeType }}</span>
+                <div>
+                    <div>Status:</div>
+                    <div>
+                        <label>In uso / Nuovo</label>
+                        <span>&nbsp;{{ deviceKnowledgeType }}</span>
+                    </div>
+                    <div>
+                        <label>Famiglia</label>
+                        <span>&nbsp;{{ integration }}</span>
+                    </div>
+                    <div>
+                        <label>Tipologia</label>
+                        <!--                <span>&nbsp;{{ selectedFunctionalType | json }}</span>-->
+                        <span>&nbsp;{{ !!selectedFunctionalTypeObj ? selectedFunctionalTypeObj.name : '' }}</span>
+                        <!--                <span>&nbsp;{{ selectedUsage.name }}</span>-->
+                        <!--                <span>&nbsp;{{ selectedUsage | json }}</span>-->
+                    </div>
+                    <div>
+                        <label>Funzione</label>
+                        <span>&nbsp;{{ selectedUsage }}</span>
+                    </div>
+                    <!--            <div>-->
+                    <!--                <label>Catalogo</label>-->
+                    <!--                <span>&nbsp;{{ selectedCatalogItemId }}</span>-->
+                    <!--            </div>-->
+                </div>
+                <div>
+                    @if( deviceKnowledgeType === 'knownDevice' )  {
+
+                        <div>questi diventeranno degli input</div>
+                        <div>nome</div>
+                        <div>ip scritto a mano o dalla sezione di un dispositivo nella lista di sotto</div>
+
+                        @if(!selectedIpDevice) {
+                            <div>
+                                @if( devicesLoading() ) {
+                                    <div class="heartbeat-flash">scanning...</div>
+                                }
+                                @else {
+                                    <!--                         credo che non vada bene -->
+                                    <p-listbox
+                                        [options]="devices()"
+                                        [(ngModel)]="selectedIpDevice"
+                                        optionLabel="ip"
+                                        [filter]="true"
+                                        [filterFields]="['ip', 'mac', 'producName']"
+                                        class="w-full md:w-56"
+                                    >
+                                        <ng-template #item let-device>
+                                            <device-ip-block
+                                                [ipDevice]="device"
+                                            />
+                                        </ng-template>
+                                    </p-listbox>
+
+                                }
+                            </div>
+                        }
+                        @else {
+                            dispositivo scelto
+                        }
+
+
+
+                        <!-- dispositivo già in rete -->
+                        @switch ( integration ) {
+                            @case ('shelly') {
+                                <div>
+                                    <label>ip da cercare</label>
+                                    <span></span>
+                                </div>
+                                <div>
+                                    <label>lista filtrata</label>
+                                    <span></span>
+                                </div>
+                                <div>
+                                    <label>alla selzione step successivo</label>
+                                    <span></span>
+                                </div>
+
+                            }
+                        }
+                    }
+                    @else {
+
+                    }
+                </div>
             </div>
-            <div>
-                <label>Famiglia</label>
-                <span>&nbsp;{{ integration }}</span>
-            </div>
-            <div>
-                <label>Tipologia</label>
-<!--                <span>&nbsp;{{ selectedFunctionalType | json }}</span>-->
-                <span>&nbsp;{{ !!selectedFunctionalTypeObj ? selectedFunctionalTypeObj.name : '' }}</span>
-<!--                <span>&nbsp;{{ selectedUsage.name }}</span>-->
-<!--                <span>&nbsp;{{ selectedUsage | json }}</span>-->
-            </div>
-            <div>
-                <label>Funzione</label>
-                <span>&nbsp;{{ selectedUsage }}</span>
-            </div>
-<!--            <div>-->
-<!--                <label>Catalogo</label>-->
-<!--                <span>&nbsp;{{ selectedCatalogItemId }}</span>-->
-<!--            </div>-->
+
+
+
+
         </p-accordion-content>
     </p-accordion-panel>
 </p-accordion>

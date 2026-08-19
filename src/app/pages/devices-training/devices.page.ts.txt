@@ -10,7 +10,7 @@ import {
     DeviceRecord,
     DeviceTaxonomy,
     DiscoveredDevice
-} from '../../models/device.models';
+} from '../devices/device.models';
 import {AuthService} from '../../services/auth';
 import {DeviceApiService} from '../../services/device-api';
 

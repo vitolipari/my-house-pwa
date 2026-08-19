@@ -9,9 +9,9 @@ import {
     DeviceProtocol,
     DeviceRecord,
     DiscoveredDevice
-} from '../../models/device.models';
+} from './devices.models';
 import {AuthService} from '../../services/auth';
-import {DeviceApiService} from '../../services/device-api';
+import {DeviceApiService} from './device-api';
 import {UserBlockComponent} from "../../components/user-block.component/user-block.component";
 import {ApiUrlService} from '../../services/api-url-service';
 import {
