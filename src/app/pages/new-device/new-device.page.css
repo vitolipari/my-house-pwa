@@ -111,7 +111,8 @@ p-accordion-content > DIV,
     align-items: center;
 }
 
-.classification-summary > DIV#classification-emoj {
+.classification-summary > DIV.classification-emoj
+{
     font-size: 3rem;
     margin-right: 1rem;
 }
@@ -220,4 +221,79 @@ device-ip-block {
     min-width: 10px !important;
     margin-bottom: 0rem;
     margin-top: 0rem;
+}
+
+
+.row-field {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    max-width: 96%;
+    width: 96%;
+    margin: 0.3rem auto;
+    background: var(--color-background-1);
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    align-items: center;
+}
+
+.fixed-value-input {
+    max-width: 50%;
+}
+
+.floating-panel-backpan {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    min-width: 100vw;
+    width: 100vw;
+    max-width: 100vw;
+    min-height: 100vh;
+    height: 100vh;
+    max-height: 100vh;
+    /*display: flex;*/
+    /*flex-direction: */
+    background: var(--middle-opacity-inverse-theme-color);
+    backdrop-filter: blur(6px);
+    padding: 10%;
+}
+
+.floating-panel {
+    margin: 10vh auto;
+    padding: 1rem;
+    background: var(--middle-opacity-theme-color);
+    border-radius: 10px;
+    overflow-y: auto;
+    height: calc(90vh - 1rem);
+}
+
+.floating-panel > DIV {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    min-width: 100%;
+}
+
+.floating-panel > DIV > SVG,
+.floating-panel > DIV > svg
+{
+    height: 24px;
+    margin: 0px;
+    max-width: 24px;
+}
+
+
+.floating-panel > PRE
+{
+    font-size: var(--small-font-size);
+    /*overflow-y: auto;*/
+}
+
+
+#open-newDevice-data-tree-panel-button-icon
+{
+    width: 30px;
+    height: 30px;
+    align-self: flex-start;
+    margin: 0px;
 }

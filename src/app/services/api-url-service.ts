@@ -4,6 +4,7 @@ import {from, Observable, switchMap} from 'rxjs';
 
 import {catchError, firstValueFrom, of, timeout} from 'rxjs';
 import {environment} from '../../environments';
+import {DeviceType} from '../pages/devices/devices.models';
 
 @Injectable({ providedIn: 'root' })
 export class ApiUrlService {
@@ -20,5 +21,9 @@ export class ApiUrlService {
 
     netScan(): Observable<any[]>  {
         return this.http.get<any[]>('/api/core/netscan');
+    }
+
+    addNewDevice(newDevice: DeviceType) {
+        return this.http.post<any>(`/api/core/device/${ newDevice.family }`, newDevice);
     }
 }

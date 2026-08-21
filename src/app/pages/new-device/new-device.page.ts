@@ -1,6 +1,6 @@
 import {CommonModule} from '@angular/common';
 import {Component, ElementRef, inject, OnInit, signal, ViewChild} from '@angular/core';
-import {FormsModule} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {firstValueFrom} from 'rxjs';
 import {PageTitleComponent} from '../../components/page-title.component/page-title.component';
 import {Accordion, AccordionContent, AccordionHeader, AccordionModule, AccordionPanel} from 'primeng/accordion';
@@ -13,8 +13,8 @@ import {
     DeviceCatalogItem, DeviceCategory, DeviceRecord,
     DeviceTaxonomy, DeviceTipology,
     DeviceType,
-    DeviceTypeDefinition, ShellyFamilyType,
-    SwitchType
+    DeviceTypeDefinition, MeteredSwitchType, ShellyFamilyType,
+    SwitchType, VOID_DEVICE, VOID_METRED_SWITCH, VOID_SHELLY_FAMILY
 } from '../devices/devices.models';
 import {Listbox, ListboxModule} from 'primeng/listbox';
 import {
@@ -22,6 +22,8 @@ import {
     NetworkIdentity
 } from '../../components/device-ip-block.component/device-ip-block.component';
 import {ApiUrlService} from '../../services/api-url-service';
+import {InputText, InputTextModule} from 'primeng/inputtext';
+import {Button, ButtonModule} from 'primeng/button';
 
 
 /*
@@ -780,12 +782,17 @@ taxonomy =
         AccordionContent,
         RadioButton,
         DeviceIpBlockComponent,
-        Listbox
+        Listbox,
+        InputText,
+        ReactiveFormsModule,
+        Button
     ],
     templateUrl: './new-device.page.html',
     styleUrls: [
         // '../../components/page-title.component/page-title.component.css',
-        './new-device.page.css'
+        '../sign-in/signin.page.css'
+        , '../sign-up/signup.page.css'
+        , './new-device.page.css'
     ],
     standalone: true
 })
@@ -798,28 +805,43 @@ export class NewDevicePage implements OnInit {
     integration: string = '';
     // selectedType: any;
     selectedFunctionalType: string = '';
-    selectedFunctionalTypeObj: any;
+    selectedFunctionalTypeObj: any = {name: '', description: ''};
     selectedUsage: string = '';
     selectedCatalogItemId: string = '';
 
     isInScanning = signal(true);
     ipDevices: NetworkIdentity[] = [];
     selectedIpDevice!: NetworkIdentity;
+
     readonly devices = signal<NetworkIdentity[]>([]);
     readonly devicesLoading = signal(true);
     readonly devicesError = signal<string | null>(null);
-
-
-    newDevice!: DeviceType;
-    deviceReady: any;
-
-    private readonly deviceApi = inject(DeviceApiService);
-    private readonly api = inject<ApiUrlService>(ApiUrlService);
     readonly catalog = signal<DeviceCatalogItem[]>([]);
     readonly taxonomy = signal<DeviceTaxonomy>({categories: [], types: [], usages: []});
     readonly taxonomyLoading = signal(true);
     readonly taxonomyError = signal<string | null>(null);
-    @ViewChild("newDevice", {static: true, read: ElementRef}) newDeviceElement!: ElementRef<HTMLDivElement>;
+    readonly newDevice = signal<DeviceType>(VOID_DEVICE);
+    readonly newDeviceDataTreePanelOpen = signal<boolean>(false);
+    readonly isCopied = signal<boolean>(false);
+    readonly inWaiting = signal<boolean>(false);
+
+    private readonly fb = inject(FormBuilder);
+    private readonly deviceApi = inject(DeviceApiService);
+    private readonly api = inject<ApiUrlService>(ApiUrlService);
+
+
+
+    readonly shellyDeviceForm = this.fb.nonNullable.group({
+        deviceName: ['', [Validators.required]],
+        deviceIp: ['', [Validators.required]]
+    });
+
+    // shellyDeviceForm = new FormGroup({
+    //     deviceName: new FormControl(),
+    //     deviceIp: new FormControl()
+    // });
+
+    @ViewChild("newDeviceCard", {static: true, read: ElementRef}) newDeviceElement!: ElementRef<HTMLDivElement>;
     @ViewChild("newDeviceIcon", {static: true, read: ElementRef}) newDeviceIcon!: ElementRef<SVGElement>;
     @ViewChild("knownDevice", {static: true, read: ElementRef}) knownDeviceElement!: ElementRef<HTMLDivElement>;
     @ViewChild("knownDeviceIcon", {static: true, read: ElementRef}) knownDeviceIcon!: ElementRef<SVGElement>;
@@ -850,6 +872,8 @@ export class NewDevicePage implements OnInit {
         }
     }
 
+
+    // # 00 > 01
     commisioningTypeSelected(deviceKnowledge: string) {
         // this.step = (this.step === 0 ) ? 1 : this.step;
         this.step = 1;
@@ -874,7 +898,7 @@ export class NewDevicePage implements OnInit {
 
     }
 
-
+    // # 01 > 02
     deviceVendorTypeSelected(family: string) {
         this.integration = family;
         this.selectedFunctionalType = '';
@@ -884,45 +908,18 @@ export class NewDevicePage implements OnInit {
         this.activeAccordionValue = ''+ this.step;
     }
 
-    selectedTypeDefinition(): DeviceTypeDefinition | null {
-        return this.taxonomy().types.find(type => type.id === this.selectedFunctionalType) ?? null;
+
+
+    // # 02 > 03
+    selectCatalogItemId(id: string) {
+        this.selectedCatalogItemId = id;
+        this.step = 3;
+        this.activeAccordionValue = ''+ this.step;
+
     }
 
-    selectedCatalogItem(): DeviceCatalogItem | null {
-        return this.catalog().find(item => item.id === this.selectedCatalogItemId) ?? null;
-    }
 
-    selectedCatalogItemEmoj(): string {
-        let catalogItem: DeviceCatalogItem | null = this.selectedCatalogItem();
-        if( !!catalogItem ) {
-            return emoj( catalogItem.emojIcon || '' );
-        }
-        return '';
-    }
-
-    compatibleTypeDefinitions(): DeviceTypeDefinition[] {
-        const compatibleTypes = this.selectedCatalogItem()?.compatibleTypes ?? [];
-        return compatibleTypes
-            .map(id => this.taxonomy().types.find(type => type.id === id))
-            .filter((type): type is DeviceTypeDefinition => type !== undefined);
-    }
-
-    catalogItemSelected(): void {
-        this.selectedFunctionalType = '';
-        this.selectedUsage = this.selectedCatalogItem()?.usage ?? '';
-    }
-
-    typeSupportsUsage(): boolean {
-        return [
-            'SWITCH',
-            'METERED_SWITCH',
-            'DIMMER',
-            'METERED_DIMMER',
-            'COLOR_DIMMER',
-            'POWER_METER'
-        ].includes(this.selectedFunctionalType);
-    }
-
+    // # 03 > 04
     functionalTypeSelected(): void {
         this.selectedUsage = this.selectedCatalogItem()?.usage ?? '';
 
@@ -981,45 +978,50 @@ export class NewDevicePage implements OnInit {
         }
          */
 
-        this.deviceReady = {};
-        this.deviceReady = {...this.deviceReady, family: this.integration};
-        switch(this.integration) {
-            case 'shelly':
-                this.deviceReady.hardware = {
-                    id: 0,
-                    name: '',
-                    gen: '',
-                    systemConfig: {},
-                    systemStatus: {},
-                    wifiConfig: {},
-                    wifiStatus: {},
-                    cloudConfig: {},
-                    cloudStatus: {}
-                };
-
-                break;
-        }
-
         switch (catalogType!.id) {
             case 'SWITCH':
             case 'METERED_SWITCH':
-                this.deviceReady = {...this.deviceReady};
+                this.newDevice.set( VOID_METRED_SWITCH );
 
                 break;
 
         }
 
-        this.deviceReady.category = catalogCategory;
-        this.deviceReady.type = catalogType;
-        this.deviceReady.svgIcon = catalogCorrispondent!.svgIcon || '';
-        this.deviceReady.emoj = catalogCorrispondent!.emojIcon || '';
-        this.deviceReady.imgIcon = catalogCorrispondent!.imgIcon || '';
+        this.newDevice.set({
+            ...this.newDevice(),
+            name: catalogUsage!.name
+        });
+
+        this.shellyDeviceForm.controls.deviceName.setValue(catalogUsage!.name || '');
+
+        switch(this.integration) {
+            case 'shelly':
+                this.newDevice.set({
+                    ...this.newDevice(),
+                    family: this.integration,
+                    hardware: VOID_SHELLY_FAMILY,
+                    category: {
+                        id: catalogCategory!.id,
+                        name: catalogCategory!.name,
+                        description: catalogCategory!.description || '',
+                    },
+                    type: {
+                        id: catalogType!.id,
+                        name: catalogType!.name,
+                        description: catalogType!.description || '',
+                    },
+                    svgIcon: catalogCorrispondent!.svgIcon || '',
+                    emoj: catalogCorrispondent!.emojIcon || '',
+                    imgIcon: catalogCorrispondent!.imgIcon || ''
+                });
+
+                break;
+        }
 
 
-        console.log( this.deviceReady );
 
-        // this.newDevice =
-
+        console.log('newDevice');
+        console.log(this.newDevice);
 
         this.loadDevices();
         this.step = 4;
@@ -1027,11 +1029,307 @@ export class NewDevicePage implements OnInit {
 
     }
 
-    selectCatalogItemId(id: string) {
-        this.selectedCatalogItemId = id;
-        this.step = 3;
+
+    onIpDeviceChange(device: NetworkIdentity): void {
+        this.selectedIpDevice = device;
+
+        this.shellyDeviceForm.controls.deviceIp.setValue(device.ip);
+
+        console.log('Nuovo valore:', this.selectedIpDevice);
+        /*
+        {
+          "ip": "192.168.1.9",
+          "mac": "30:30:F9:E6:7B:C0",
+          "vendor": "Espressif",
+          "privateMac": false,
+          "deviceManufacturer": "Shelly",
+          "productName": "Shelly Mini 1PM Gen3",
+          "hostname": "shelly1pmminig3-3030f9e67bc0",
+          "deviceType": "IoT device",
+          "operatingSystem": null,
+          "httpTitle": null,
+          "identificationSource": "shelly-api",
+          "shelly": {
+            "name": null,
+            "id": "shelly1pmminig3-3030f9e67bc0",
+            "mac": "30:30:F9:E6:7B:C0",
+            "model": "S3SW-001P8EU",
+            "type": null,
+            "app": "Mini1PMG3",
+            "generation": 3,
+            "firmware": "1.1.99-minig3prod1"
+          },
+          "services": [
+            {
+              "port": 80,
+              "protocol": "tcp",
+              "name": "http",
+              "product": "Shelly Mini 1PM Gen3",
+              "version": "1.1.99-minig3prod1",
+              "extraInfo": "Shelly Gen3",
+              "hostname": "shelly1pmminig3-3030f9e67bc0",
+              "tunnel": null,
+              "deviceType": "IoT device",
+              "operatingSystem": null,
+              "cpe": [],
+              "httpTitle": null
+            }
+          ]
+        }
+         */
+
+
+        this.newDevice.set({
+            ...this.newDevice(),
+            ip: device.ip,
+            mac: device.mac,
+            hardware: {
+                ...this.newDevice().hardware,
+                id: device.shelly!.id,   // ATTENZIONE
+                name: '',
+                gen: device.shelly!.generation,
+                model: device.shelly!.model
+            },
+            model: device.shelly!.model || '',
+            firmware: device.shelly!.firmware || '',
+            productName: device.productName || '',
+            hostName: device.hostname || '',
+            name: this.shellyDeviceForm.controls.deviceName.value || device.productName || ''
+        });
+
+        /*
+            "productName": "Shelly Mini 1PM Gen3",
+            "hostname": "shelly1pmminig3-3030f9e67bc0",
+            "shelly": {
+                "id": "shelly1pmminig3-3030f9e67bc0",
+                "model": "S3SW-001P8EU",
+                "generation": 3,
+                "firmware": "1.1.99-minig3prod1"
+        */
+
+        /*
+        {
+          "name": "",
+          "ip": "",
+          "mac": "",
+          "where": {
+            "id": 0,
+            "name": "",
+            "picture": ""
+          },
+          "onMap": "",
+          "description": "",
+          "picture": "",
+        }
+         */
+
+        console.log('newDevice');
+        console.log(this.newDevice());
+
+
+
+        /*
+        {
+              "id": 0,
+              "family": "shelly",
+              "hardware": {
+                "id": 0,
+                "name": "",
+                "gen": "",
+                "systemConfig": {
+                  "device": {
+                    "name": "",
+                    "mac": "",
+                    "fw_id": "",
+                    "discoverable": true,
+                    "eco_mode": false
+                  },
+                  "location": {
+                    "tz": "",
+                    "lat": 0,
+                    "lon": 0
+                  },
+                  "debug": {
+                    "level": 0,
+                    "file_level": {},
+                    "mqtt": {},
+                    "websocket": {},
+                    "udp": {}
+                  },
+                  "ui_data": {},
+                  "rpc_udp": {
+                    "dst_addr": "",
+                    "listen_port": ""
+                  },
+                  "sntp": {
+                    "server": ""
+                  },
+                  "cfg_rev": 0
+                },
+                "systemStatus": {
+                  "mac": "",
+                  "restart_required": false,
+                  "time": "",
+                  "unixtime": 0,
+                  "uptime": 0,
+                  "ram_size": 0,
+                  "ram_free": 0,
+                  "fs_size": 0,
+                  "fs_free": 0,
+                  "cfg_rev": 0,
+                  "kvs_rev": 0,
+                  "schedule_rev": 0,
+                  "webhook_rev": 0,
+                  "available_updates": {
+                    "stable": {}
+                  },
+                  "reset_reason": 0
+                },
+                "wifiConfig": {
+                  "ap": {
+                    "ssid": "",
+                    "is_open": true,
+                    "enable": true,
+                    "range_extender": {}
+                  },
+                  "sta": {
+                    "ssid": "",
+                    "is_open": true,
+                    "enable": true,
+                    "ipv4mode": "",
+                    "ip": {},
+                    "netmask": {},
+                    "gw": {},
+                    "nameserver": {}
+                  },
+                  "sta1": {
+                    "ssid": "",
+                    "is_open": true,
+                    "enable": true,
+                    "ipv4mode": "",
+                    "ip": {},
+                    "netmask": {},
+                    "gw": {},
+                    "nameserver": {}
+                  },
+                  "roam": {
+                    "rssi_thr": 0,
+                    "interval": 0
+                  }
+                },
+                "wifiStatus": {
+                  "sta_ip": "",
+                  "status": "",
+                  "ssid": "",
+                  "rssi": 0
+                },
+                "cloudConfig": {
+                  "enable": true,
+                  "server": ""
+                },
+                "cloudStatus": {
+                  "connected": false
+                }
+              },
+              "model": "",
+              "matter": {
+                "id": 0,
+                "mode": "",
+                "nodeID": 0,
+                "fabricID": 0,
+                "endpiontIDs": [
+                  0
+                ],
+                "bridgeEndpiontIDs": [
+                  0
+                ]
+              },
+              "name": "",
+              "ip": "",
+              "mac": "",
+              "where": {
+                "id": 0,
+                "name": "",
+                "picture": ""
+              },
+              "onMap": "",
+              "description": "",
+              "signalStatus": 0,
+              "cloud": "",
+              "firmware": "",
+              "availability": "",
+              "catalogItemId": "",
+              "type": {
+                "id": "METERED_SWITCH",
+                "name": "Interruttore ON/OFF con misura",
+                "description": "Comando ON/OFF e misura della potenza o energia"
+              },
+              "category": {
+                "id": "SENSOR_ACTUATOR",
+                "name": "Sensore e attuatore",
+                "description": "Produce misure e riceve comandi funzionali"
+              },
+              "svgIcon": "",
+              "emoj": "",
+              "imgIcon": "",
+              "picture": "",
+              "channel": [
+                ""
+              ],
+              "status": [
+                ""
+              ],
+              "lastTime": [
+                ""
+              ],
+              "unit": [
+                ""
+              ],
+              "value": [
+                ""
+              ],
+              "minThreshold": [
+                ""
+              ],
+              "maxThreshold": [
+                ""
+              ]
+            }
+         */
+
+        this.step = 5;
         this.activeAccordionValue = ''+ this.step;
 
+
+        console.log('controllo il selectedUsage');
+        console.log(this.selectedUsage);
+        console.log(this.selectedFunctionalTypeObj.description);
+        console.log(this.selectedCatalogItemId);
+
+
+    }
+
+    selectedTypeDefinition(): DeviceTypeDefinition | null {
+        return this.taxonomy().types.find(type => type.id === this.selectedFunctionalType) ?? null;
+    }
+
+    selectedCatalogItem(): DeviceCatalogItem | null {
+        return this.catalog().find(item => item.id === this.selectedCatalogItemId) ?? null;
+    }
+
+    selectedCatalogItemEmoj(): string {
+        let catalogItem: DeviceCatalogItem | null = this.selectedCatalogItem();
+        if( !!catalogItem ) {
+            return emoj( catalogItem.emojIcon || '' );
+        }
+        return '';
+    }
+
+    compatibleTypeDefinitions(): DeviceTypeDefinition[] {
+        const compatibleTypes = this.selectedCatalogItem()?.compatibleTypes ?? [];
+        return compatibleTypes
+            .map(id => this.taxonomy().types.find(type => type.id === id))
+            .filter((type): type is DeviceTypeDefinition => type !== undefined);
     }
 
 
@@ -1045,10 +1343,22 @@ export class NewDevicePage implements OnInit {
                 .then((ipDevices: NetworkIdentity[]) => {
                     console.log(ipDevices);
                     this.devices.set(
-                        ipDevices.filter((ipDevice: NetworkIdentity) => (
-                            (!!ipDevice.deviceManufacturer)
-                            && (ipDevice.deviceManufacturer!.toLowerCase().trim() === this.integration.toLowerCase().trim())
-                        ))
+                        ipDevices
+                            // ordinamento: prima i dispositivi della famiglia scelta
+                            .sort((a: NetworkIdentity, b: NetworkIdentity) => {
+                                if(
+                                    (!!a.deviceManufacturer && !!b.deviceManufacturer)
+                                    && (a.deviceManufacturer!.toLowerCase().trim() === this.integration.toLowerCase().trim())
+                                ) {
+                                    return 1;
+                                }
+                                return 0;
+                            })
+                            // filtro: soltanto i dispositivi della famiglia scelta
+                            .filter((ipDevice: NetworkIdentity) => (
+                                (!!ipDevice.deviceManufacturer)
+                                && (ipDevice.deviceManufacturer!.toLowerCase().trim() === this.integration.toLowerCase().trim())
+                            ))
                     );
                     this.devicesLoading.set(false);
                     console.log('caricamento dispositivi IP: ' + this.devicesLoading());
@@ -1069,4 +1379,56 @@ export class NewDevicePage implements OnInit {
         }
     }
 
+
+    copyNewDeviceData(event: PointerEvent) {
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        event.preventDefault();
+
+        try {
+            navigator.clipboard.writeText( JSON.stringify(this.newDevice()) )
+                .then(() => {
+                    this.isCopied.set(true);
+                })
+                .catch((e: any) => {
+                    console.log('errore nella copia');
+                    console.error(e);
+                })
+            ;
+
+        } catch (error) {
+            console.error('Errore durante la copia:', error);
+        }
+
+
+    }
+
+    openNewDeviceDateTree() {
+        this.newDeviceDataTreePanelOpen.set(true);
+    }
+
+    newDeviceDataTreePanelClose() {
+        this.newDeviceDataTreePanelOpen.set(false);
+    }
+
+    addNewDevice() {
+        this.inWaiting.set(true);
+
+        firstValueFrom(this.api.addNewDevice(this.newDevice()))
+            .then((data: any) => {
+                console.log('fine chiamata per aggiunta nuovo dispositivo');
+                console.log( data );
+
+                this.inWaiting.set(false);
+
+            })
+            .catch((e: any) => {
+                console.log('errore nel catch di addNewDevice');
+                throw e;
+            })
+
+        // setTimeout(() => {
+        //     this.inWaiting.set(false);
+        // }, 20000)
+    }
 }

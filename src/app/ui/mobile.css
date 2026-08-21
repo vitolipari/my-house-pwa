@@ -23,6 +23,9 @@ and (max-width: 639.98px)
         background: var(--color-background-3) !important;
         border-color: var(--color-background-2) !important;
         width: 100%;
+
+        font-size: var(--main-font-size) !important;
+
     }
 
     .bottom-field {

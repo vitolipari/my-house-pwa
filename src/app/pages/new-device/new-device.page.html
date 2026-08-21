@@ -31,7 +31,7 @@
         </p-accordion-header>
         <p-accordion-content>
 
-            <div id="commisioning-type-step">
+            <div id="commisioning-type-step" style="padding-top: 2rem;">
 
 
                 <div
@@ -50,7 +50,7 @@
                     <div>Dispositivo configurato</div>
                 </div>
                 <div
-                    #newDevice
+                    #newDeviceCard
                     id="newDevice"
                     class="card"
                     (click)="commisioningTypeSelected('newDevice')"
@@ -92,7 +92,7 @@
             Kind
         </p-accordion-header>
         <p-accordion-content>
-            <div id="phisical-device-step">
+            <div id="phisical-device-step" style="padding-top: 2rem;">
                 <div
                     id="newShelly"
                     class="card"
@@ -208,7 +208,7 @@
             Tipologia
         </p-accordion-header>
         <p-accordion-content>
-            <div class="taxonomy-step">
+            <div class="taxonomy-step" style="padding-top: 2rem;">
                 <p class="taxonomy-intro">
                     Integrazione selezionata: <strong>{{ integration }}</strong>. Il tipo descrive il comportamento
                     del dispositivo; protocollo e adapter restano indipendenti dalla categoria.
@@ -281,12 +281,12 @@
             Features
         </p-accordion-header>
         <p-accordion-content>
-            <div>
+            <div style="padding-top: 2rem;">
 
                 @if (selectedCatalogItem()) {
 
                     <div class="classification-summary">
-                        <div id="classification-emoj">{{ selectedCatalogItemEmoj() }}</div>
+                        <div class="classification-emoj">{{ selectedCatalogItemEmoj() }}</div>
                         <div>
                             <strong>{{ selectedCatalogItem()!.name }}</strong>
                             <div>{{ selectedCatalogItem()!.description }}</div>
@@ -347,94 +347,90 @@
         </p-accordion-header>
         <p-accordion-content>
 
-            <div>
-                <div>
-                    <div>Status:</div>
-                    <div>
-                        <label>In uso / Nuovo</label>
-                        <span>&nbsp;{{ deviceKnowledgeType }}</span>
-                    </div>
-                    <div>
-                        <label>Famiglia</label>
-                        <span>&nbsp;{{ integration }}</span>
-                    </div>
-                    <div>
-                        <label>Tipologia</label>
-                        <!--                <span>&nbsp;{{ selectedFunctionalType | json }}</span>-->
-                        <span>&nbsp;{{ !!selectedFunctionalTypeObj ? selectedFunctionalTypeObj.name : '' }}</span>
-                        <!--                <span>&nbsp;{{ selectedUsage.name }}</span>-->
-                        <!--                <span>&nbsp;{{ selectedUsage | json }}</span>-->
-                    </div>
-                    <div>
-                        <label>Funzione</label>
-                        <span>&nbsp;{{ selectedUsage }}</span>
-                    </div>
-                    <!--            <div>-->
-                    <!--                <label>Catalogo</label>-->
-                    <!--                <span>&nbsp;{{ selectedCatalogItemId }}</span>-->
-                    <!--            </div>-->
-                </div>
-                <div>
-                    @if( deviceKnowledgeType === 'knownDevice' )  {
 
-                        <div>questi diventeranno degli input</div>
-                        <div>nome</div>
-                        <div>ip scritto a mano o dalla sezione di un dispositivo nella lista di sotto</div>
 
-                        @if(!selectedIpDevice) {
-                            <div>
-                                @if( devicesLoading() ) {
-                                    <div class="heartbeat-flash">scanning...</div>
+                <div style="padding-top: 2rem;">
+                    @if( integration === 'shelly' ) {
+
+
+                        <div
+                            [formGroup]="shellyDeviceForm"
+                            class="columns"
+                        >
+
+                            <div class="base-text-style row-field">
+                                <label for="deviceName">Nome Dispositivo</label>
+                                <input
+                                    pInputText
+                                    id="deviceName"
+                                    aria-describedby="username-help"
+                                    formControlName="deviceName"
+                                    placeholder="luci"
+                                    class="fixed-value-input"
+                                />
+                            </div>
+
+
+
+                            @if( deviceKnowledgeType === 'knownDevice' )  {
+                                @if(!selectedIpDevice) {
+                                    <div>
+                                        @if( devicesLoading() ) {
+                                            <div class="base-text-style row-field">
+                                                <label for="deviceIp">Indirizzo IP</label>
+                                                <input
+                                                    pInputText
+                                                    aria-describedby="username-help"
+                                                    formControlName="deviceIp"
+                                                    placeholder="IP"
+                                                    class="fixed-value-input"
+                                                    [disabled]="true"
+                                                    aria-disabled="true"
+                                                />
+                                            </div>
+                                            <div class="heartbeat-flash">scanning...</div>
+                                        }
+                                        @else {
+                                            <p-listbox
+                                                [options]="devices()"
+                                                [ngModelOptions]="{standalone: true}"
+                                                [(ngModel)]="selectedIpDevice"
+                                                (ngModelChange)="onIpDeviceChange($event)"
+                                                optionLabel="ip"
+                                                [filter]="true"
+                                                [filterFields]="['ip', 'mac', 'producName']"
+                                                class="w-full md:w-56"
+                                            >
+                                                <ng-template #item let-device>
+                                                    <device-ip-block
+                                                        [ipDevice]="device"
+                                                    />
+                                                </ng-template>
+                                            </p-listbox>
+
+                                        }
+                                    </div>
                                 }
                                 @else {
-                                    <!--                         credo che non vada bene -->
-                                    <p-listbox
-                                        [options]="devices()"
-                                        [(ngModel)]="selectedIpDevice"
-                                        optionLabel="ip"
-                                        [filter]="true"
-                                        [filterFields]="['ip', 'mac', 'producName']"
-                                        class="w-full md:w-56"
-                                    >
-                                        <ng-template #item let-device>
-                                            <device-ip-block
-                                                [ipDevice]="device"
-                                            />
-                                        </ng-template>
-                                    </p-listbox>
-
+                                    <div class="base-text-style row-field">
+                                        <label for="deviceIp">Indirizzo IP</label>
+                                        <input
+                                            pInputText
+                                            id="deviceIp"
+                                            aria-describedby="username-help"
+                                            formControlName="deviceIp"
+                                            placeholder="IP"
+                                            class="fixed-value-input"
+                                        />
+                                    </div>
                                 }
-                            </div>
-                        }
-                        @else {
-                            dispositivo scelto
-                        }
-
-
-
-                        <!-- dispositivo già in rete -->
-                        @switch ( integration ) {
-                            @case ('shelly') {
-                                <div>
-                                    <label>ip da cercare</label>
-                                    <span></span>
-                                </div>
-                                <div>
-                                    <label>lista filtrata</label>
-                                    <span></span>
-                                </div>
-                                <div>
-                                    <label>alla selzione step successivo</label>
-                                    <span></span>
-                                </div>
-
                             }
-                        }
-                    }
-                    @else {
+
+
+                        </div>
 
                     }
-                </div>
+
             </div>
 
 
@@ -442,4 +438,97 @@
 
         </p-accordion-content>
     </p-accordion-panel>
+    <p-accordion-panel value="5" [disabled]="step > 6">
+        <p-accordion-header>
+            @if( step > 5 ) {
+                <svg class="greenOkIcon">
+                    <use
+                        [attr.href]="'#green-ok'"
+                        [attr.xlink:href]="'#green-ok'">
+                        >
+                    </use>
+                </svg>
+            }
+            @else {
+                <svg class="greenOkIcon">
+                    <use
+                        [attr.href]="'#icon-578'"
+                        [attr.xlink:href]="'#icon-578'">
+                        >
+                    </use>
+                </svg>
+            }
+            Conferma
+        </p-accordion-header>
+        <p-accordion-content>
+            <div class="classification-summary">
+                <div class="classification-emoj">{{ selectedCatalogItemEmoj() }}</div>
+                <div>
+                    <strong>{{ selectedUsage }}</strong>
+                    <div>{{ selectedFunctionalTypeObj.description }}</div>
+                </div>
+                <svg
+                    id="open-newDevice-data-tree-panel-button-icon"
+                    (click)="openNewDeviceDateTree()"
+                >
+                    <use href="#icon-215"></use>
+                </svg>
+            </div>
+            <div class="base-text-style row-field">
+                <label>Nome</label>
+                <span>{{ newDevice().name }}</span>
+            </div>
+            <div class="base-text-style row-field">
+                <label>IP</label>
+                <span>{{ newDevice().ip }}</span>
+            </div>
+
+            <div id="signup-button">
+                @if (!!inWaiting()) {
+                    <svg class="svg-icon inside-button" style="top: 18px; height: 20px; left: 63px;">
+                        <use href="#orologio-1-1"></use>
+                    </svg>
+                }
+                <p-button
+                    label="{{ !!inWaiting() ? 'in attesa' : 'conferma' }}"
+                    type="submit"
+                    [disabled]="!!inWaiting()"
+                    [rounded]="true"
+                    [size]="'small'"
+                    [style]="{padding: '0px 20px 0px '+ ( !inWaiting() ? '20px' : '32px' ), marginTop: '2rem'}"
+                    (click)="addNewDevice()"
+                ></p-button>
+            </div>
+
+        </p-accordion-content>
+    </p-accordion-panel>
 </p-accordion>
+
+
+@if( newDeviceDataTreePanelOpen() ) {
+    <div
+        class="floating-panel-backpan"
+        (click)="newDeviceDataTreePanelClose()"
+    >
+        <div
+            class="floating-panel"
+        >
+            <div>
+                <svg><use href="#icon-215"></use></svg>
+                <strong>Dati Nuovo Dispositivo</strong>
+                <svg
+                    id="copy-newDevice-data-tree-icon-button"
+                    (click)="copyNewDeviceData($event)"
+                >
+                    @if(!isCopied()) {
+                        <use href="#icon-106"></use>
+                    }
+                    @else {
+                        <use href="#icon-46"></use>
+                    }
+                </svg>
+            </div>
+            <pre>{{ newDevice() | json }}</pre>
+        </div>
+    </div>
+}

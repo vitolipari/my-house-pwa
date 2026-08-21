@@ -184,7 +184,7 @@ export type BinaryStateSensorDevice = SensorDevice & {functionalType: 'BINARY_ST
 
 
 
-// dallo schema
+// dallo schema -------------------------------------------------------------------------------------
 
 export type DeviceFamilyType = {
 
@@ -195,23 +195,127 @@ export type TuyaFamilyType = DeviceFamilyType & {
     localKey: number | string;
 }
 
-export type ShellySystemConfig = {}
-export type ShellySystemStatus = {}
-export type ShellyWifiConfig = {}
-export type ShellyWifiStatus = {}
-export type ShellyCloudConfig = {}
-export type ShellyCloudStatus = {}
+export type ShellySystemConfig = {
+    device: {
+        name: string | null;
+        mac: string;
+        fw_id: string;
+        discoverable: boolean;
+        eco_mode: boolean;
+    };
+    location: { tz: string; lat: number; lon: number; };
+    debug: {
+        level: number;
+        file_level: any;
+        mqtt: any;
+        websocket: any;
+        udp: any;
+    };
+    ui_data: {};
+    rpc_udp: { dst_addr: string | null; listen_port: string | null };
+    sntp: { server: string; };
+    cfg_rev: number;
+}
+
+export type ShellySystemStatus = {
+    mac: string;
+    restart_required: boolean;
+    time: string | number | Date;
+    unixtime: number;
+    uptime: number;
+    ram_size: number;
+    ram_free: number;
+    fs_size: number;
+    fs_free: number;
+    cfg_rev: number;
+    kvs_rev: number;
+    schedule_rev: number;
+    webhook_rev: number;
+    available_updates: { stable: any };
+    reset_reason: number
+}
+
+export type ShellyWifiConfig = {
+    ap: {
+        ssid: string;
+        is_open: boolean;
+        enable: boolean;
+        range_extender: any;
+    };
+    sta: {
+        ssid: string;
+        is_open: boolean;
+        enable: boolean;
+        ipv4mode: string;
+        ip: any;
+        netmask: any;
+        gw: any;
+        nameserver: any;
+    };
+    sta1: {
+        ssid: string | null;
+        is_open: boolean;
+        enable: boolean;
+        ipv4mode: string | null;
+        ip: any;
+        netmask: any;
+        gw: any;
+        nameserver: any;
+    };
+    roam: { rssi_thr: number; interval: number }
+}
+
+export type ShellyWifiStatus = {
+    sta_ip: string;
+    status: string;
+    ssid: string;
+    rssi: number;
+}
+
+export type ShellyCloudConfig = { enable: boolean; server: string; }
+
+export type ShellyCloudStatus = { connected: boolean; }
 
 export type ShellyFamilyType = DeviceFamilyType & {
     id: number | string;
     name: string;
     gen: string;
-    systemConfig: ShellySystemConfig;
-    systemStatus: ShellySystemStatus;
-    wifiConfig: ShellyWifiConfig;
-    wifiStatus: ShellyWifiStatus;
-    cloudConfig: ShellyCloudConfig;
-    cloudStatus: ShellyCloudStatus;
+    config: {
+        Humidity: any;
+        MQTT: any;
+        Input: any;
+        Shelly: any;
+        Switch: any;
+        Sys: any;
+        Cloud: any;
+        WiFi: any;
+        BLE: any;
+        Matter: any;
+        Temperature: any;
+        Light: any;
+        RGB: any;
+        Cover: any;
+        Presence: any;
+        Illuminance: any;
+    },
+    status: {
+        Humidity: any;
+        MQTT: any;
+        Input: any;
+        Shelly: any;
+        Switch: any;
+        Sys: any;
+        Cloud: any;
+        WiFi: any;
+        BLE: any;
+        Matter: any;
+        Temperature: any;
+        Light: any;
+        RGB: any;
+        Cover: any;
+        Presence: any;
+        Illuminance: any;
+    }
 }
 
 export type MatterType = {
@@ -257,6 +361,9 @@ export type DeviceType = {
     signalStatus: number;
     cloud: string;
     firmware: string;
+    updateAvailability: any,
+    productName: string;
+    hostName: string;
     availability: string;
     catalogItemId: string;
     type: DeviceTipology;
@@ -326,3 +433,266 @@ export type WaterLevelSensor = SensorType & {}
 
 export type BinaryStateSensor = SensorType & {}
 
+// ------------------------------------------------------------------------------------------------
+
+export let VOID_DEVICE_FAMILY: DeviceFamilyType = {}
+
+export let VOID_TUYA_FAMILY: TuyaFamilyType = {
+    id: 0,
+    localKey: 0
+}
+
+export let VOID_SHELLY_SYSTEM_CONFIG: ShellySystemConfig = {
+    device: {
+        name: '',
+        mac: '',
+        fw_id: '',
+        discoverable: true,
+        eco_mode: false
+    },
+    location: { tz: '', lat: 0.0, lon: 0.0 },
+    debug: {
+        level: 0,
+        file_level: {},
+        mqtt: {},
+        websocket: {},
+        udp: {}
+    },
+    ui_data: {},
+    rpc_udp: { dst_addr: '', listen_port: '' },
+    sntp: { server: '' },
+    cfg_rev: 0
+}
+
+export let VOID_SHELLY_SYSTEM_STATUS: ShellySystemStatus = {
+    mac: '',
+    restart_required: false,
+    time: '',
+    unixtime: 0,
+    uptime: 0,
+    ram_size: 0,
+    ram_free: 0,
+    fs_size: 0,
+    fs_free: 0,
+    cfg_rev: 0,
+    kvs_rev: 0,
+    schedule_rev: 0,
+    webhook_rev: 0,
+    available_updates: { stable: {} },
+    reset_reason: 0
+}
+
+export let VOID_SHELLY_WIFI_CONFIG: ShellyWifiConfig = {
+    ap: {
+        ssid: '',
+        is_open: true,
+        enable: true,
+        range_extender: {},
+    },
+    sta: {
+        ssid: '',
+        is_open: true,
+        enable: true,
+        ipv4mode: '',
+        ip: {},
+        netmask: {},
+        gw: {},
+        nameserver: {},
+    },
+    sta1: {
+        ssid: '',
+        is_open: true,
+        enable: true,
+        ipv4mode: '',
+        ip: {},
+        netmask: {},
+        gw: {},
+        nameserver: {},
+    },
+    roam: { rssi_thr: 0, interval: 0 }
+}
+
+export let VOID_SHELLY_WIFI_STATUS: ShellyWifiStatus = {
+    sta_ip: '',
+    status: '',
+    ssid: '',
+    rssi: 0
+}
+
+export let VOID_SHELLY_CLOUD_CONFIG: ShellyCloudConfig = { enable: true, server: '' }
+
+export let VOID_SHELLY_CLOUD_STATUS: ShellyCloudStatus = { connected: false }
+
+export let VOID_SHELLY_FAMILY: ShellyFamilyType = {
+    id: 0,
+    name: '',
+    gen: '',
+    config: {
+        Humidity: {},
+        MQTT: {},
+        Input: {},
+        Shelly: {},
+        Switch: {},
+        Sys: {},
+        Cloud: {},
+        WiFi: {},
+        BLE: {},
+        Matter: {},
+        Temperature: {},
+        Light: {},
+        RGB: {},
+        Cover: {},
+        Presence: {},
+        Illuminance: {}
+    },
+    status: {
+        Humidity: {},
+        MQTT: {},
+        Input: {},
+        Shelly: {},
+        Switch: {},
+        Sys: {},
+        Cloud: {},
+        WiFi: {},
+        BLE: {},
+        Matter: {},
+        Temperature: {},
+        Light: {},
+        RGB: {},
+        Cover: {},
+        Presence: {},
+        Illuminance: {}
+    }
+}
+
+export let VOID_MATTER: MatterType = {
+    id: 0,
+    mode: '',
+    nodeID: 0,
+    fabricID: 0,
+    endpiontIDs: [0],
+    bridgeEndpiontIDs: [0]
+}
+
+
+export let VOID_DEVICE_TIPOLOGY: DeviceTipology = {
+    id: 0,
+    name: '',
+    description: ''
+}
+
+export let VOID_DEVICE_CATEGORY: DeviceCategory = {
+    id: 0,
+    name: '',
+    description: ''
+}
+
+export let VOID_ZONE: ZoneType = {
+    id: 0,
+    name: '',
+    picture: ''
+}
+
+export let VOID_DEVICE: DeviceType = {
+    id: 0,
+    family: '',
+    hardware: VOID_DEVICE_FAMILY,
+    model: '',
+    matter: VOID_MATTER,
+    name: '',
+    ip: '',
+    mac: '',
+    where: VOID_ZONE,
+    onMap: '',
+    description: '',
+    signalStatus: 0,
+    cloud: '',
+    firmware: '',
+    hostName: '',
+    productName: '',
+    updateAvailability: {},
+    availability: '',
+    catalogItemId: '',
+    type: VOID_DEVICE_TIPOLOGY,
+    category: VOID_DEVICE_CATEGORY,
+    svgIcon: '',
+    emoj: '',
+    imgIcon: '',
+    picture: '',
+    channel: [''],
+    status: [''],
+    lastTime: ['']
+}
+
+export let VOID_ACTUATOR: ActuatorType = {...VOID_DEVICE}
+
+export let VOID_SENSOR: SensorType = {
+    ...VOID_DEVICE,
+    unit: [''],
+    value: [''],
+    minThreshold: [''],
+    maxThreshold: ['']
+}
+
+export let VOID_SENSOR_ACTUATOR: SensorActuatorType = {
+    ...VOID_ACTUATOR,
+    ...VOID_SENSOR
+}
+
+export let VOID_CLIMA: ClimaType = {
+    ...VOID_ACTUATOR,
+    mode: '',
+    temperature: 0,
+    fan: 0,
+    airFlowVertical: 0,
+    airFlowHorizontal: 0
+}
+
+export let VOID_SWITCH: SwitchType = {...VOID_ACTUATOR}
+
+export let VOID_DIMMER: DimmerType = {...VOID_ACTUATOR}
+
+export let VOID_CURTAIN: CurtainType = {
+    ...VOID_ACTUATOR,
+    movement: '',
+    targetPosition: 0
+}
+
+export let VOID_TV: TVType = {
+    ...VOID_ACTUATOR,
+    volume: 0,
+    input: 0,
+    app: 0
+}
+
+export let VOID_METRED_SWITCH: MeteredSwitchType = {
+    ...VOID_SENSOR_ACTUATOR
+}
+
+export let VOID_METRED_DIMMER: MeteredDimmerType = {
+    ...VOID_SENSOR_ACTUATOR
+}
+
+export let VOID_METRED_CURTAIN: MeteredCurtainType = {
+    ...VOID_SENSOR_ACTUATOR,
+    ...VOID_CURTAIN
+}
+
+export let VOID_TERMOSTATE: TermostateType = {
+    ...VOID_SENSOR_ACTUATOR,
+    mode: '',
+    temperature: 0
+}
+
+export let VOID_POWER_METER: PowerMeterType = {...VOID_SENSOR_ACTUATOR}
+
+
+export let VOID_TEMPERATURE_HUMIDITY_SENSOR: TemperatureHumiditySensor = {...VOID_SENSOR}
+
+export let VOID_LIGHT_SENSOR: LightSensor = {...VOID_SENSOR}
+
+export let VOID_MOVEMENT_SENSOR: MovementSensor = {...VOID_SENSOR}
+
+export let VOID_WATER_LEVEL_SENSOR: WaterLevelSensor = {...VOID_SENSOR}
+
+export let VOID_BINARY_STATE_SENSOR: BinaryStateSensor = {...VOID_SENSOR}
