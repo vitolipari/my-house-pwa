@@ -923,22 +923,18 @@ export class NewDevicePage implements OnInit {
     functionalTypeSelected(): void {
         this.selectedUsage = this.selectedCatalogItem()?.usage ?? '';
 
-
-
-        let catalogCorrispondent = this.catalog().find((cat: any) => cat.id === this.selectedUsage);
-        let catalogType = this.taxonomy().types.find((cat: any) => cat.id === this.selectedFunctionalTypeObj.id);
-        let catalogCategory = this.taxonomy().categories.find((cat: any) => cat.id === catalogType!.category);
-        let catalogUsage = this.taxonomy().usages.find((us: any) => us.id === this.selectedUsage);
-
         const catalogItem = this.selectedCatalogItem();
+        const selectedTypeId = this.selectedFunctionalTypeObj?.id;
         const typeDefinition = this.taxonomy().types.find(
-            type => type.id === this.selectedFunctionalType
+            type => type.id === selectedTypeId
         );
 
         if (!catalogItem || !typeDefinition) {
             // Mostrare un errore e non avanzare
             return;
         }
+
+        this.selectedFunctionalType = typeDefinition.id;
 
         const categoryDefinition = this.taxonomy().categories.find(
             category => category.id === typeDefinition.category
@@ -997,7 +993,7 @@ export class NewDevicePage implements OnInit {
         }
          */
 
-        switch (catalogType!.id) {
+        switch (typeDefinition.id) {
             case 'SWITCH':
                 this.newDevice.set( VOID_SWITCH );
                 break;
@@ -1006,14 +1002,7 @@ export class NewDevicePage implements OnInit {
                 break;
 
         }
-
-        this.newDevice.set({
-            ...this.newDevice(),
-            // name: catalogUsage!.name
-            name: this.catalog().find((item: DeviceCatalogItem) => item.id === this.selectedCatalogItemId)!.name ?? catalogUsage!.name
-        });
-
-        this.shellyDeviceForm.controls.deviceName.setValue(catalogUsage!.name || '');
+        this.shellyDeviceForm.controls.deviceName.setValue(catalogItem.name);
 
         switch(this.integration) {
             case 'shelly':
