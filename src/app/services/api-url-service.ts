@@ -5,6 +5,7 @@ import {from, Observable, switchMap} from 'rxjs';
 import {catchError, firstValueFrom, of, timeout} from 'rxjs';
 import {environment} from '../../environments';
 import {DeviceType} from '../pages/devices/devices.models';
+import {NetworkIdentity} from '../components/device-ip-block.component/device-ip-block.component';
 
 @Injectable({ providedIn: 'root' })
 export class ApiUrlService {
@@ -26,4 +27,8 @@ export class ApiUrlService {
     addNewDevice(newDevice: DeviceType) {
         return this.http.post<any>(`/api/core/device/${ newDevice.family }`, newDevice);
     }
+
+
+
+
 }

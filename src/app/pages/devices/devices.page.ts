@@ -63,13 +63,19 @@ export class DevicesPage implements OnInit {
         this.devicesLoading.set(true);
         this.devicesError.set(null);
         try {
-            this.devices.set(await firstValueFrom(this.deviceApi.list()));
+            firstValueFrom(this.deviceApi.list())
+                .then((devices: DeviceRecord[]) => {
+                    this.devices.set(devices);
+                    this.devicesLoading.set(false);
+                })
+                .catch((e: any) => {
+                    throw e;
+                })
         } catch (error) {
             const candidate = error as {error?: {error?: string}; message?: string};
             this.devicesError.set(
                 candidate.error?.error ?? candidate.message ?? 'Impossibile caricare i dispositivi'
             );
-        } finally {
             this.devicesLoading.set(false);
         }
     }

@@ -14,7 +14,7 @@ import {
     DeviceTaxonomy, DeviceTipology,
     DeviceType,
     DeviceTypeDefinition, MeteredSwitchType, ShellyFamilyType,
-    SwitchType, VOID_DEVICE, VOID_METRED_SWITCH, VOID_SHELLY_FAMILY
+    SwitchType, VOID_DEVICE, VOID_METRED_SWITCH, VOID_SHELLY_FAMILY, VOID_SWITCH
 } from '../devices/devices.models';
 import {Listbox, ListboxModule} from 'primeng/listbox';
 import {
@@ -930,6 +930,25 @@ export class NewDevicePage implements OnInit {
         let catalogCategory = this.taxonomy().categories.find((cat: any) => cat.id === catalogType!.category);
         let catalogUsage = this.taxonomy().usages.find((us: any) => us.id === this.selectedUsage);
 
+        const catalogItem = this.selectedCatalogItem();
+        const typeDefinition = this.taxonomy().types.find(
+            type => type.id === this.selectedFunctionalType
+        );
+
+        if (!catalogItem || !typeDefinition) {
+            // Mostrare un errore e non avanzare
+            return;
+        }
+
+        const categoryDefinition = this.taxonomy().categories.find(
+            category => category.id === typeDefinition.category
+        );
+
+        if (!categoryDefinition) {
+            return;
+        }
+
+
         console.log('controllo tassonmia scelta');
         // console.log(catalogCorrispondent);
         /*
@@ -980,16 +999,18 @@ export class NewDevicePage implements OnInit {
 
         switch (catalogType!.id) {
             case 'SWITCH':
+                this.newDevice.set( VOID_SWITCH );
+                break;
             case 'METERED_SWITCH':
                 this.newDevice.set( VOID_METRED_SWITCH );
-
                 break;
 
         }
 
         this.newDevice.set({
             ...this.newDevice(),
-            name: catalogUsage!.name
+            // name: catalogUsage!.name
+            name: this.catalog().find((item: DeviceCatalogItem) => item.id === this.selectedCatalogItemId)!.name ?? catalogUsage!.name
         });
 
         this.shellyDeviceForm.controls.deviceName.setValue(catalogUsage!.name || '');
@@ -1000,19 +1021,21 @@ export class NewDevicePage implements OnInit {
                     ...this.newDevice(),
                     family: this.integration,
                     hardware: VOID_SHELLY_FAMILY,
+                    catalogItemId: catalogItem.id,
+                    name: catalogItem.name,
                     category: {
-                        id: catalogCategory!.id,
-                        name: catalogCategory!.name,
-                        description: catalogCategory!.description || '',
+                        id: categoryDefinition.id,
+                        name: categoryDefinition.name,
+                        description: categoryDefinition!.description || '',
                     },
                     type: {
-                        id: catalogType!.id,
-                        name: catalogType!.name,
-                        description: catalogType!.description || '',
+                        id: typeDefinition.id,
+                        name: typeDefinition.name,
+                        description: typeDefinition!.description || '',
                     },
-                    svgIcon: catalogCorrispondent!.svgIcon || '',
-                    emoj: catalogCorrispondent!.emojIcon || '',
-                    imgIcon: catalogCorrispondent!.imgIcon || ''
+                    svgIcon: catalogItem.svgIcon || '',
+                    emoj: catalogItem.emojIcon || '',
+                    imgIcon: catalogItem.imgIcon || ''
                 });
 
                 break;
@@ -1023,7 +1046,7 @@ export class NewDevicePage implements OnInit {
         console.log('newDevice');
         console.log(this.newDevice);
 
-        this.loadDevices();
+        this.loadIpDevices();
         this.step = 4;
         this.activeAccordionValue = ''+ this.step;
 
@@ -1333,7 +1356,8 @@ export class NewDevicePage implements OnInit {
     }
 
 
-    loadDevices() {
+
+    loadIpDevices() {
         this.devicesLoading.set(true);
         this.devicesError.set(null);
         try {
@@ -1344,6 +1368,7 @@ export class NewDevicePage implements OnInit {
                     console.log(ipDevices);
                     this.devices.set(
                         ipDevices
+
                             // ordinamento: prima i dispositivi della famiglia scelta
                             .sort((a: NetworkIdentity, b: NetworkIdentity) => {
                                 if(
@@ -1354,11 +1379,15 @@ export class NewDevicePage implements OnInit {
                                 }
                                 return 0;
                             })
+
+                            // soltanto i dispositivi della famiglia scelta
+                            // .filter((ipDevice: NetworkIdentity) => (ipDevice.deviceManufacturer?.trim().toLowerCase() === this.integration.trim().toLowerCase()))
+
                             // filtro: soltanto i dispositivi della famiglia scelta
-                            .filter((ipDevice: NetworkIdentity) => (
-                                (!!ipDevice.deviceManufacturer)
-                                && (ipDevice.deviceManufacturer!.toLowerCase().trim() === this.integration.toLowerCase().trim())
-                            ))
+                            // .filter((ipDevice: NetworkIdentity) => (
+                            //     (!!ipDevice.deviceManufacturer)
+                            //     && (ipDevice.deviceManufacturer!.toLowerCase().trim() === this.integration.toLowerCase().trim())
+                            // ))
                     );
                     this.devicesLoading.set(false);
                     console.log('caricamento dispositivi IP: ' + this.devicesLoading());
@@ -1424,7 +1453,7 @@ export class NewDevicePage implements OnInit {
             })
             .catch((e: any) => {
                 console.log('errore nel catch di addNewDevice');
-                throw e;
+                this.inWaiting.set(false);
             })
 
         // setTimeout(() => {
