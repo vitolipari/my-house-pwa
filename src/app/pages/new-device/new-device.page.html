@@ -350,11 +350,11 @@
 
 
                 <div style="padding-top: 2rem;">
-                    @if( integration === 'shelly' ) {
+                    @if( deviceKnowledgeType !== 'newDevice' ) {
 
 
                         <div
-                            [formGroup]="shellyDeviceForm"
+                            [formGroup]="deviceForm"
                             class="columns"
                         >
 
@@ -430,6 +430,9 @@
                         </div>
 
                     }
+                    @else {
+
+                    }
 
             </div>
 
@@ -485,7 +488,7 @@
 
             <div id="signup-button">
                 @if (!!inWaiting()) {
-                    <svg class="svg-icon inside-button" style="top: 18px; height: 20px; left: 63px;">
+                    <svg class="svg-icon inside-button" style="position: static">
                         <use href="#orologio-1-1"></use>
                     </svg>
                 }

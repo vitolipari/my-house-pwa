@@ -1,9 +1,10 @@
-import {Component, EventEmitter, inject, Input, Output} from '@angular/core';
+import {Component, computed, EventEmitter, inject, Input, Output} from '@angular/core';
 import {JsonPipe} from '@angular/common';
 import {LoggedUser} from '../../models/auth.models';
 import {Router} from '@angular/router';
 import {emoj} from '../../utils/string-utils';
 import {PermissionService} from '../../services/permission.service';
+import {DarkModeService} from '../../services/dark-mode-service';
 
 
 @Component({
@@ -26,6 +27,13 @@ export class MobileMenuComponent {
     @Output() menuClose = new EventEmitter<void>();
     coffe: string = emoj('hot_beverage');
     private readonly permissionService = inject(PermissionService);
+    private readonly darkModeService = inject(DarkModeService);
+
+    readonly lipariStudiosImage = computed(() =>
+        this.darkModeService.isDarkMode()
+            ? 'assets/images/LipariStudios_06_white.png'
+            : 'assets/images/LipariStudios_06_black.png'
+    );
 
 
     hasPermission(permission: string) {

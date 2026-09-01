@@ -1,0 +1,25 @@
+<div
+    class="switch-component-container {{ !!isReadOnly ? 'locked': 'alive' }}"
+    (click)="onCheck($event)"
+>
+    @if(!!inWait) {
+        <svg class="svg-icon inside-button" style="top: 18px; height: 20px; left: 63px;">
+            <use href="#orologio-1-1"></use>
+        </svg>
+    }
+    @if(!!inError) {
+        <img
+            src="/imgs/red_mark.png"
+        />
+    }
+    @if( !inWait ) {
+        <div
+            class="switch-component {{ !!check ? 'tsc-active' : 'tsc' }} {{ !!isReadOnly ? 'tsc-disabled' : '' }}"
+        >
+            <div
+                class="switch-component-inside {{ !!check ? 'tsci-active' : 'tsci' }} {{ !!isReadOnly ? 'tsci-disabled' : '' }}"
+            ></div>
+        </div>
+    }
+
+</div>

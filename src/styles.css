@@ -39,6 +39,8 @@
     --orbitron-font: Orbitron, sans-serif;
 
     /* Dimensioni */
+    --micro-font-size: 8px;
+    --tiny-font-size: 10px;
     --small-font-size: 12px;
     --main-font-size: 14px;
     --primeng-icon-font-size: 30px;
@@ -145,13 +147,13 @@ PRE {
     color: var(--color-text-2);
 }
 
-.page {
+/*.page {
     margin: 0px;
     padding: 2rem;
     background: var(--color-background-1);
     min-width: 100vw !important;
     min-height: 100vh !important;
-}
+}*/
 
 .base-text-style {
     color: var(--color-text-1);

@@ -61,3 +61,14 @@ LABEL {
     /*padding-right: 50px;*/
     box-sizing: border-box;
 }
+
+
+.lipariStudiosLogo {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: contain;
+}
+

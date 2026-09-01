@@ -2,36 +2,6 @@ export type DeviceProtocol = 'matter' | 'shelly' | 'tuya' | 'bluetooth' | 'remot
 
 export type DeviceCategoryId = 'ACTUATOR' | 'SENSOR' | 'SENSOR_ACTUATOR';
 
-export interface DeviceRecord {
-    id: number;
-    name: string;
-    address: string | null;
-    place: string | null;
-    description: string | null;
-    mac: string | null;
-    protocol: DeviceProtocol;
-    integration: string;
-    externalId: string;
-    matterNodeId: string | null;
-    matterFabricId: string | null;
-    status: 'DISCOVERED' | 'COMMISSIONING' | 'ONLINE' | 'OFFLINE' | 'UNAVAILABLE' | 'ERROR';
-    reachable: boolean | null;
-    category: DeviceCategoryId | null;
-    categoryName: string | null;
-    functionalType: string | null;
-    functionalTypeName: string | null;
-    usage: string | null;
-    usageName: string | null;
-    detectedDeviceType: string | null;
-    vendorId: number | null;
-    productId: number | null;
-    capabilities: string[];
-    metadata: Record<string, unknown>;
-    lastSeenAt: string | null;
-    createdAt: string;
-    updatedAt: string;
-}
-
 export interface DeviceIntegrationStatus {
     id: string;
     enabled: boolean;
@@ -103,21 +73,6 @@ export interface DiscoveryResult {
     devices: DiscoveredDevice[];
 }
 
-export interface AddDeviceRequest {
-    name: string;
-    protocol: DeviceProtocol;
-    integration?: string;
-    externalId: string;
-    address?: string | null;
-    place?: string | null;
-    description?: string | null;
-    mac?: string | null;
-    functionalType?: string | null;
-    usage?: string | null;
-    detectedDeviceType?: string | null;
-    catalogItemId?: string | null;
-}
-
 export interface CommissionMatterRequest {
     pairingCode: string;
     name?: string;
@@ -130,7 +85,7 @@ export interface CommissioningJob {
     status: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED';
     createdAt: string;
     updatedAt: string;
-    device?: DeviceRecord;
+    device?: DiscoveredDevice;
     error?: string;
 }
 
@@ -138,56 +93,14 @@ export interface CommissioningJob {
 export type DevicePropertyKind = 'STATE' | 'SETTING' | 'MEASUREMENT';
 export type DevicePropertyAccess = 'READ' | 'WRITE' | 'READ_WRITE';
 
-export interface SensorData {
-    unit: string[];
-    value: Array<number | string>;
-    minThreshold: Array<number | string | null>;
-    maxThreshold: Array<number | string | null>;
-}
-
-export type ActuatorDevice = DeviceRecord & {category: 'ACTUATOR'};
-export type SensorDevice = DeviceRecord & SensorData & {category: 'SENSOR'};
-export type SensorActuatorDevice = DeviceRecord & SensorData & {category: 'SENSOR_ACTUATOR'};
-
-export type ClassifiedDevice = ActuatorDevice | SensorDevice | SensorActuatorDevice;
-
-export type TvDevice = ActuatorDevice & {functionalType: 'TV'};
-export type AirConditionerDevice = ActuatorDevice & {functionalType: 'AIR_CONDITIONER'};
-export type SensingAirConditionerDevice = SensorActuatorDevice & {
-    functionalType: 'SENSING_AIR_CONDITIONER';
-};
-export type ThermostatDevice = SensorActuatorDevice & {functionalType: 'THERMOSTAT'};
-export type GameConsoleDevice = ActuatorDevice & {functionalType: 'GAME_CONSOLE'};
-export type PrinterDevice = ActuatorDevice & {functionalType: 'PRINTER'};
-export type ThreeDPrinterDevice = SensorActuatorDevice & {functionalType: 'THREE_D_PRINTER'};
-export type PowerMeterDevice = SensorActuatorDevice & {functionalType: 'POWER_METER'};
-export type EnergyMeterDevice = SensorDevice & {functionalType: 'ENERGY_METER'};
-export type SolarSystemMonitorDevice = SensorDevice & {functionalType: 'SOLAR_SYSTEM_MONITOR'};
-export type LightSensorDevice = SensorDevice & {functionalType: 'LIGHT_SENSOR'};
-export type WaterLevelSensorDevice = SensorDevice & {functionalType: 'WATER_LEVEL_SENSOR'};
-export type FireSensorDevice = SensorDevice & {functionalType: 'FIRE_SENSOR'};
-export type SmartWatchDevice = SensorActuatorDevice & {functionalType: 'SMART_WATCH'};
-export type HeadphonesDevice = ActuatorDevice & {functionalType: 'HEADPHONES'};
-export type SpeakerDevice = ActuatorDevice & {functionalType: 'SPEAKER'};
-export type ColorDimmerDevice = ActuatorDevice & {functionalType: 'COLOR_DIMMER'};
-export type MotorizedCanopyDevice = ActuatorDevice & {functionalType: 'MOTORIZED_CANOPY'};
-export type MotorizedDynamicCanopyDevice = ActuatorDevice & {functionalType: 'MOTORIZED_DYNAMIC_CANOPY'};
-export type GateDevice = ActuatorDevice & {functionalType: 'GATE'};
-export type DoorDevice = ActuatorDevice & {functionalType: 'DOOR'};
-export type CarDevice = SensorActuatorDevice & {functionalType: 'CAR'};
-export type ElectricCarDevice = SensorActuatorDevice & {functionalType: 'ELECTRIC_CAR'};
-export type MotorcycleDevice = SensorActuatorDevice & {functionalType: 'MOTORCYCLE'};
-export type ElectricScooterDevice = SensorActuatorDevice & {functionalType: 'ELECTRIC_SCOOTER'};
-export type ElectricBicycleDevice = SensorActuatorDevice & {functionalType: 'ELECTRIC_BICYCLE'};
-export type GpsTagDevice = SensorDevice & {functionalType: 'GPS_TAG'};
-export type BinaryStateSensorDevice = SensorDevice & {functionalType: 'BINARY_STATE_SENSOR'};
-
-
-
 // dallo schema -------------------------------------------------------------------------------------
 
 export type DeviceFamilyType = {
-
+    id: number | string;
+    name: string;
+    gen: string | number;
+    config: any;
+    status: any;
 }
 
 export type TuyaFamilyType = DeviceFamilyType & {
@@ -279,7 +192,7 @@ export type ShellyCloudStatus = { connected: boolean; }
 export type ShellyFamilyType = DeviceFamilyType & {
     id: number | string;
     name: string;
-    gen: string;
+    gen: string | number;
     config: {
         Humidity: any;
         MQTT: any;
@@ -435,11 +348,21 @@ export type BinaryStateSensor = SensorType & {}
 
 // ------------------------------------------------------------------------------------------------
 
-export let VOID_DEVICE_FAMILY: DeviceFamilyType = {}
+export let VOID_DEVICE_FAMILY: DeviceFamilyType = {
+    id: 0,
+    name: 'no-name',
+    gen: 0,
+    config: {},
+    status: {}
+}
 
 export let VOID_TUYA_FAMILY: TuyaFamilyType = {
     id: 0,
-    localKey: 0
+    name: 'no-name',
+    gen: 0,
+    localKey: 0,
+    config: {},
+    status: {}
 }
 
 export let VOID_SHELLY_SYSTEM_CONFIG: ShellySystemConfig = {
@@ -696,3 +619,1621 @@ export let VOID_MOVEMENT_SENSOR: MovementSensor = {...VOID_SENSOR}
 export let VOID_WATER_LEVEL_SENSOR: WaterLevelSensor = {...VOID_SENSOR}
 
 export let VOID_BINARY_STATE_SENSOR: BinaryStateSensor = {...VOID_SENSOR}
+
+
+/*
+
+Ventola Studio Shelly 1 mini gen3
+[
+  {
+    "id": 1,
+    "family": "shelly",
+    "hardware": {
+      "id": "shelly1minig3-e4b063f06e4c",
+      "name": "Shelly Mini 1 Gen3",
+      "gen": "3",
+      "config": {
+        "Humidity": null,
+        "MQTT": {
+          "enable": true,
+          "server": "192.168.1.34:1883",
+          "client_id": "shelly1minig3-e4b063f06e4c",
+          "user": "liparios-shelly",
+          "ssl_ca": null,
+          "topic_prefix": "liparios/devices/actuator/fan/shelly1minig3-e4b063f06e4c",
+          "rpc_ntf": true,
+          "status_ntf": true,
+          "use_client_cert": false,
+          "enable_rpc": false,
+          "enable_control": false
+        },
+        "Input": {
+          "id": 0,
+          "name": "Areazione studio",
+          "type": "switch",
+          "enable": true,
+          "invert": false,
+          "factory_reset": true
+        },
+        "Shelly": {
+          "ble": {
+            "rpc": {
+              "enable": false
+            }
+          },
+          "bthome": {},
+          "cloud": {
+            "enable": true,
+            "server": "shelly-172-eu.shelly.cloud:6022/jrpc"
+          },
+          "input:0": {
+            "id": 0,
+            "name": "Areazione studio",
+            "type": "switch",
+            "enable": true,
+            "invert": false,
+            "factory_reset": true
+          },
+          "knx": {
+            "enable": false,
+            "ia": "15.15.255",
+            "routing": {
+              "addr": "224.0.23.12:3671"
+            }
+          },
+          "matter": {
+            "enable": false
+          },
+          "mqtt": {
+            "enable": true,
+            "server": "192.168.1.34:1883",
+            "client_id": "shelly1minig3-e4b063f06e4c",
+            "user": "liparios-shelly",
+            "ssl_ca": null,
+            "topic_prefix": "liparios/devices/actuator/fan/shelly1minig3-e4b063f06e4c",
+            "rpc_ntf": true,
+            "status_ntf": true,
+            "use_client_cert": false,
+            "enable_rpc": false,
+            "enable_control": false
+          },
+          "switch:0": {
+            "id": 0,
+            "name": "Areazione studio",
+            "in_mode": "follow",
+            "in_locked": false,
+            "initial_state": "match_input",
+            "auto_on": false,
+            "auto_on_delay": 60,
+            "auto_off": false,
+            "auto_off_delay": 60,
+            "counts": {
+              "enable": true
+            }
+          },
+          "sys": {
+            "device": {
+              "name": null,
+              "mac": "E4B063F06E4C",
+              "fw_id": "20260710-101122/2.0.0-g87fbfa4",
+              "discoverable": true,
+              "eco_mode": false,
+              "tls_check_cert_validity_time": true,
+              "enhanced_security": false
+            },
+            "location": {
+              "tz": "Europe/Rome",
+              "lat": 37.645021,
+              "lon": 12.611367
+            },
+            "debug": {
+              "level": 2,
+              "file_level": null,
+              "mqtt": {
+                "enable": false
+              },
+              "websocket": {
+                "enable": false
+              },
+              "file_log": {
+                "enable": false
+              },
+              "udp": {
+                "addr": null
+              }
+            },
+            "ui_data": {},
+            "rpc_udp": {
+              "dst_addr": null,
+              "listen_port": null
+            },
+            "sntp": {
+              "server": "time.cloudflare.com"
+            },
+            "cfg_rev": 20
+          },
+          "wifi": {
+            "ap": {
+              "ssid": "Shelly1MiniG3-E4B063F06E4C",
+              "is_open": true,
+              "enable": false,
+              "range_extender": {
+                "enable": false
+              }
+            },
+            "sta": {
+              "ssid": "TIM-37999422",
+              "is_open": false,
+              "enable": true,
+              "ipv4mode": "dhcp",
+              "ip": null,
+              "netmask": null,
+              "gw": null,
+              "nameserver": null
+            },
+            "sta1": {
+              "ssid": null,
+              "is_open": true,
+              "enable": false,
+              "ipv4mode": "dhcp",
+              "ip": null,
+              "netmask": null,
+              "gw": null,
+              "nameserver": null
+            },
+            "roam": {
+              "rssi_thr": -80,
+              "interval": 60
+            }
+          },
+          "ws": {
+            "enable": false,
+            "server": null,
+            "ssl_ca": "ca.pem"
+          }
+        },
+        "Switch": {
+          "id": 0,
+          "name": "Areazione studio",
+          "in_mode": "follow",
+          "in_locked": false,
+          "initial_state": "match_input",
+          "auto_on": false,
+          "auto_on_delay": 60,
+          "auto_off": false,
+          "auto_off_delay": 60,
+          "counts": {
+            "enable": true
+          }
+        },
+        "Sys": {
+          "device": {
+            "name": null,
+            "mac": "E4B063F06E4C",
+            "fw_id": "20260710-101122/2.0.0-g87fbfa4",
+            "discoverable": true,
+            "eco_mode": false,
+            "tls_check_cert_validity_time": true,
+            "enhanced_security": false
+          },
+          "location": {
+            "tz": "Europe/Rome",
+            "lat": 37.645021,
+            "lon": 12.611367
+          },
+          "debug": {
+            "level": 2,
+            "file_level": null,
+            "mqtt": {
+              "enable": false
+            },
+            "websocket": {
+              "enable": false
+            },
+            "file_log": {
+              "enable": false
+            },
+            "udp": {
+              "addr": null
+            }
+          },
+          "ui_data": {},
+          "rpc_udp": {
+            "dst_addr": null,
+            "listen_port": null
+          },
+          "sntp": {
+            "server": "time.cloudflare.com"
+          },
+          "cfg_rev": 20
+        },
+        "Cloud": {
+          "enable": true,
+          "server": "shelly-172-eu.shelly.cloud:6022/jrpc"
+        },
+        "WiFi": {
+          "ap": {
+            "ssid": "Shelly1MiniG3-E4B063F06E4C",
+            "is_open": true,
+            "enable": false,
+            "range_extender": {
+              "enable": false
+            }
+          },
+          "sta": {
+            "ssid": "TIM-37999422",
+            "is_open": false,
+            "enable": true,
+            "ipv4mode": "dhcp",
+            "ip": null,
+            "netmask": null,
+            "gw": null,
+            "nameserver": null
+          },
+          "sta1": {
+            "ssid": null,
+            "is_open": true,
+            "enable": false,
+            "ipv4mode": "dhcp",
+            "ip": null,
+            "netmask": null,
+            "gw": null,
+            "nameserver": null
+          },
+          "roam": {
+            "rssi_thr": -80,
+            "interval": 60
+          }
+        },
+        "BLE": {
+          "rpc": {
+            "enable": false
+          }
+        },
+        "Matter": {
+          "enable": false
+        },
+        "Temperature": null,
+        "Light": null,
+        "RGB": null,
+        "Cover": null,
+        "Presence": null,
+        "Illuminance": null
+      },
+      "status": {
+        "Humidity": null,
+        "MQTT": {
+          "connected": true
+        },
+        "Input": {
+          "id": 0,
+          "state": false
+        },
+        "Shelly": {
+          "ble": {},
+          "bthome": {},
+          "cloud": {
+            "connected": true
+          },
+          "input:0": {
+            "id": 0,
+            "state": false
+          },
+          "knx": {},
+          "matter": {
+            "num_fabrics": 0,
+            "commissionable": false
+          },
+          "mqtt": {
+            "connected": true
+          },
+          "switch:0": {
+            "id": 0,
+            "source": "switch",
+            "tag": null,
+            "output": false,
+            "counts": {
+              "on_time": 15390,
+              "on_time_rst_ts": 0,
+              "switch_on": 11,
+              "switch_on_rst_ts": 0
+            },
+            "temperature": {
+              "tC": 59.4,
+              "tF": 138.9
+            }
+          },
+          "sys": {
+            "mac": "E4B063F06E4C",
+            "restart_required": false,
+            "time": "15:01",
+            "unixtime": 1787922066,
+            "last_sync_ts": 1787920861,
+            "uptime": 186097,
+            "ram_size": 275920,
+            "ram_free": 135360,
+            "ram_min_free": 119856,
+            "fs_size": 917504,
+            "fs_free": 450560,
+            "cfg_rev": 20,
+            "kvs_rev": 0,
+            "schedule_rev": 1,
+            "webhook_rev": 0,
+            "btrelay_rev": 0,
+            "bthc_rev": 0,
+            "available_updates": {
+              "beta": {
+                "version": "2.0.1-beta1"
+              }
+            },
+            "reset_reason": 3,
+            "utc_offset": 7200
+          },
+          "wifi": {
+            "sta_ip": "192.168.1.46",
+            "status": "got ip",
+            "ssid": "TIM-37999422",
+            "channel": 9,
+            "rssi": -64,
+            "bssid": "f4:fc:49:08:ef:cc",
+            "sta_ip6": [
+              "fe80::e6b0:63ff:fef0:6e4c"
+            ]
+          },
+          "ws": {
+            "connected": false
+          }
+        },
+        "Switch": {
+          "id": 0,
+          "source": "switch",
+          "tag": null,
+          "output": false,
+          "counts": {
+            "on_time": 15390,
+            "on_time_rst_ts": 0,
+            "switch_on": 11,
+            "switch_on_rst_ts": 0
+          },
+          "temperature": {
+            "tC": 59.4,
+            "tF": 138.9
+          }
+        },
+        "Sys": {
+          "mac": "E4B063F06E4C",
+          "restart_required": false,
+          "time": "15:01",
+          "unixtime": 1787922066,
+          "last_sync_ts": 1787920861,
+          "uptime": 186097,
+          "ram_size": 275920,
+          "ram_free": 135360,
+          "ram_min_free": 119856,
+          "fs_size": 917504,
+          "fs_free": 450560,
+          "cfg_rev": 20,
+          "kvs_rev": 0,
+          "schedule_rev": 1,
+          "webhook_rev": 0,
+          "btrelay_rev": 0,
+          "bthc_rev": 0,
+          "available_updates": {
+            "beta": {
+              "version": "2.0.1-beta1"
+            }
+          },
+          "reset_reason": 3,
+          "utc_offset": 7200
+        },
+        "Cloud": {
+          "connected": true
+        },
+        "WiFi": {
+          "sta_ip": "192.168.1.46",
+          "status": "got ip",
+          "ssid": "TIM-37999422",
+          "channel": 9,
+          "rssi": -64,
+          "bssid": "f4:fc:49:08:ef:cc",
+          "sta_ip6": [
+            "fe80::e6b0:63ff:fef0:6e4c"
+          ]
+        },
+        "BLE": {},
+        "Matter": {
+          "num_fabrics": 0,
+          "commissionable": false
+        },
+        "Temperature": null,
+        "Light": null,
+        "RGB": null,
+        "Cover": null,
+        "Presence": null,
+        "Illuminance": null
+      },
+      "lastReadAt": "2026-08-28T13:01:06.471Z"
+    },
+    "model": "S3SW-001X8EU",
+    "matter": {
+      "id": 0,
+      "mode": "",
+      "nodeID": 0,
+      "fabricID": 0,
+      "endpiontIDs": [],
+      "bridgeEndpiontIDs": []
+    },
+    "name": "Ventola Studio",
+    "ip": "192.168.1.46",
+    "mac": "E4:B0:63:F0:6E:4C",
+    "where": {
+      "id": 0,
+      "name": "",
+      "picture": ""
+    },
+    "onMap": "",
+    "description": "",
+    "signalStatus": 0,
+    "cloud": "",
+    "firmware": "2.0.0",
+    "updateAvailability": {},
+    "productName": "Shelly Mini 1 Gen3",
+    "hostName": "shelly1minig3-e4b063f06e4c",
+    "availability": "ONLINE",
+    "catalogItemId": "FAN",
+    "type": {
+      "id": "SWITCH",
+      "name": "Interruttore ON/OFF",
+      "description": "Comando ON/OFF senza misure sensoriali"
+    },
+    "category": {
+      "id": "ACTUATOR",
+      "name": "Attuatore",
+      "description": "Riceve comandi e modifica lo stato del dispositivo o dell ambiente"
+    },
+    "svgIcon": "fan_04",
+    "emoj": "tornado",
+    "imgIcon": "",
+    "picture": "",
+    "channel": [
+      "output",
+      "power",
+      "energy"
+    ],
+    "status": [
+      null,
+      null,
+      null
+    ],
+    "lastTime": [
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": 2,
+    "family": "shelly",
+    "hardware": {
+      "id": "shelly1pmminig4-e4b0636a5738",
+      "name": "Shelly Mini 1PM Gen4",
+      "gen": "4",
+      "config": {
+        "Humidity": null,
+        "MQTT": {
+          "enable": true,
+          "server": "192.168.1.34:1883",
+          "client_id": "shelly1pmminig4-e4b0636a5738",
+          "user": "liparios-shelly",
+          "ssl_ca": null,
+          "topic_prefix": "liparios/devices/actuator/light/shelly1pmminig4-e4b0636a5738",
+          "rpc_ntf": true,
+          "status_ntf": true,
+          "use_client_cert": false,
+          "enable_rpc": false,
+          "enable_control": false
+        },
+        "Input": {
+          "id": 0,
+          "name": null,
+          "type": "switch",
+          "enable": true,
+          "invert": false,
+          "factory_reset": true
+        },
+        "Shelly": {
+          "ble": {
+            "enable": false,
+            "rpc": {
+              "enable": true
+            }
+          },
+          "bthome": {},
+          "cloud": {
+            "enable": true,
+            "server": "shelly-172-eu.shelly.cloud:6022/jrpc"
+          },
+          "input:0": {
+            "id": 0,
+            "name": null,
+            "type": "switch",
+            "enable": true,
+            "invert": false,
+            "factory_reset": true
+          },
+          "knx": {
+            "enable": false,
+            "ia": "15.15.255",
+            "routing": {
+              "addr": "224.0.23.12:3671"
+            }
+          },
+          "matter": {
+            "enable": true
+          },
+          "mqtt": {
+            "enable": true,
+            "server": "192.168.1.34:1883",
+            "client_id": "shelly1pmminig4-e4b0636a5738",
+            "user": "liparios-shelly",
+            "ssl_ca": null,
+            "topic_prefix": "liparios/devices/actuator/light/shelly1pmminig4-e4b0636a5738",
+            "rpc_ntf": true,
+            "status_ntf": true,
+            "use_client_cert": false,
+            "enable_rpc": false,
+            "enable_control": false
+          },
+          "switch:0": {
+            "id": 0,
+            "name": null,
+            "in_mode": "follow",
+            "in_locked": false,
+            "initial_state": "match_input",
+            "auto_on": false,
+            "auto_on_delay": 60,
+            "auto_off": false,
+            "auto_off_delay": 60,
+            "power_limit": 2240,
+            "voltage_limit": 280,
+            "autorecover_voltage_errors": false,
+            "current_limit": 8,
+            "reverse": false
+          },
+          "sys": {
+            "device": {
+              "name": null,
+              "mac": "E4B0636A5738",
+              "fw_id": "20250214-121727/1.5.99-g4prod1-gc32c24b",
+              "discoverable": true,
+              "eco_mode": false
+            },
+            "location": {
+              "tz": "Europe/Rome",
+              "lat": 38.1302,
+              "lon": 13.329
+            },
+            "debug": {
+              "level": 2,
+              "file_level": null,
+              "mqtt": {
+                "enable": false
+              },
+              "websocket": {
+                "enable": false
+              },
+              "udp": {
+                "addr": null
+              }
+            },
+            "ui_data": {},
+            "rpc_udp": {
+              "dst_addr": null,
+              "listen_port": null
+            },
+            "sntp": {
+              "server": "time.cloudflare.com"
+            },
+            "cfg_rev": 18
+          },
+          "wifi": {
+            "ap": {
+              "ssid": "Shelly1PMMiniG4-E4B0636A5738",
+              "is_open": true,
+              "enable": false,
+              "range_extender": {
+                "enable": false
+              }
+            },
+            "sta": {
+              "ssid": "TIM-37999422",
+              "is_open": false,
+              "enable": true,
+              "ipv4mode": "dhcp",
+              "ip": null,
+              "netmask": null,
+              "gw": null,
+              "nameserver": null
+            },
+            "sta1": {
+              "ssid": null,
+              "is_open": true,
+              "enable": false,
+              "ipv4mode": "dhcp",
+              "ip": null,
+              "netmask": null,
+              "gw": null,
+              "nameserver": null
+            },
+            "roam": {
+              "rssi_thr": -80,
+              "interval": 60
+            }
+          },
+          "ws": {
+            "enable": false,
+            "server": null,
+            "ssl_ca": "ca.pem"
+          }
+        },
+        "Switch": {
+          "id": 0,
+          "name": null,
+          "in_mode": "follow",
+          "in_locked": false,
+          "initial_state": "match_input",
+          "auto_on": false,
+          "auto_on_delay": 60,
+          "auto_off": false,
+          "auto_off_delay": 60,
+          "power_limit": 2240,
+          "voltage_limit": 280,
+          "autorecover_voltage_errors": false,
+          "current_limit": 8,
+          "reverse": false
+        },
+        "Sys": {
+          "device": {
+            "name": null,
+            "mac": "E4B0636A5738",
+            "fw_id": "20250214-121727/1.5.99-g4prod1-gc32c24b",
+            "discoverable": true,
+            "eco_mode": false
+          },
+          "location": {
+            "tz": "Europe/Rome",
+            "lat": 38.1302,
+            "lon": 13.329
+          },
+          "debug": {
+            "level": 2,
+            "file_level": null,
+            "mqtt": {
+              "enable": false
+            },
+            "websocket": {
+              "enable": false
+            },
+            "udp": {
+              "addr": null
+            }
+          },
+          "ui_data": {},
+          "rpc_udp": {
+            "dst_addr": null,
+            "listen_port": null
+          },
+          "sntp": {
+            "server": "time.cloudflare.com"
+          },
+          "cfg_rev": 18
+        },
+        "Cloud": {
+          "enable": true,
+          "server": "shelly-172-eu.shelly.cloud:6022/jrpc"
+        },
+        "WiFi": {
+          "ap": {
+            "ssid": "Shelly1PMMiniG4-E4B0636A5738",
+            "is_open": true,
+            "enable": false,
+            "range_extender": {
+              "enable": false
+            }
+          },
+          "sta": {
+            "ssid": "TIM-37999422",
+            "is_open": false,
+            "enable": true,
+            "ipv4mode": "dhcp",
+            "ip": null,
+            "netmask": null,
+            "gw": null,
+            "nameserver": null
+          },
+          "sta1": {
+            "ssid": null,
+            "is_open": true,
+            "enable": false,
+            "ipv4mode": "dhcp",
+            "ip": null,
+            "netmask": null,
+            "gw": null,
+            "nameserver": null
+          },
+          "roam": {
+            "rssi_thr": -80,
+            "interval": 60
+          }
+        },
+        "BLE": {
+          "enable": false,
+          "rpc": {
+            "enable": true
+          }
+        },
+        "Matter": {
+          "enable": true
+        },
+        "Temperature": null,
+        "Light": null,
+        "RGB": null,
+        "Cover": null,
+        "Presence": null,
+        "Illuminance": null
+      },
+      "status": {
+        "Humidity": null,
+        "MQTT": {
+          "connected": true
+        },
+        "Input": {
+          "id": 0,
+          "state": false
+        },
+        "Shelly": {
+          "ble": {},
+          "bthome": {
+            "errors": [
+              "bluetooth_disabled"
+            ]
+          },
+          "cloud": {
+            "connected": true
+          },
+          "input:0": {
+            "id": 0,
+            "state": false
+          },
+          "knx": {},
+          "matter": {
+            "num_fabrics": 0,
+            "commissionable": false
+          },
+          "mqtt": {
+            "connected": true
+          },
+          "switch:0": {
+            "id": 0,
+            "source": "switch",
+            "output": false,
+            "apower": 0,
+            "voltage": 233.3,
+            "freq": 50.1,
+            "current": 0,
+            "aenergy": {
+              "total": 7784,
+              "by_minute": [
+                0,
+                0,
+                0
+              ],
+              "minute_ts": 1787922060
+            },
+            "ret_aenergy": {
+              "total": 0,
+              "by_minute": [
+                0,
+                0,
+                0
+              ],
+              "minute_ts": 1787922060
+            },
+            "temperature": {
+              "tC": 61.8,
+              "tF": 143.3
+            }
+          },
+          "sys": {
+            "mac": "E4B0636A5738",
+            "restart_required": false,
+            "time": "15:01",
+            "unixtime": 1787922066,
+            "last_sync_ts": 1787922051,
+            "uptime": 79039,
+            "ram_size": 361164,
+            "ram_free": 191220,
+            "ram_min_free": 170368,
+            "fs_size": 917504,
+            "fs_free": 471040,
+            "cfg_rev": 18,
+            "kvs_rev": 0,
+            "schedule_rev": 0,
+            "webhook_rev": 0,
+            "btrelay_rev": 0,
+            "available_updates": {
+              "beta": {
+                "version": "2.0.1-beta1"
+              },
+              "stable": {
+                "version": "2.0.0"
+              }
+            },
+            "alt": {
+              "Mini1PMG4ZB": {
+                "name": "Shelly Mini 1 PM Gen4",
+                "desc": "Shelly Mini 1 PM Gen4 with Zigbee",
+                "beta": {
+                  "version": "2.0.1-beta1",
+                  "build_id": "20260819-101729/2.0.1-beta1-g8a88c73"
+                },
+                "stable": {
+                  "version": "2.0.0",
+                  "build_id": "20260710-101116/2.0.0-g87fbfa4"
+                }
+              }
+            },
+            "reset_reason": 4,
+            "utc_offset": 7200
+          },
+          "wifi": {
+            "sta_ip": "192.168.1.14",
+            "status": "got ip",
+            "ssid": "TIM-37999422",
+            "rssi": -55
+          },
+          "ws": {
+            "connected": false
+          }
+        },
+        "Switch": {
+          "id": 0,
+          "source": "switch",
+          "output": false,
+          "apower": 0,
+          "voltage": 233.3,
+          "freq": 50.1,
+          "current": 0,
+          "aenergy": {
+            "total": 7784,
+            "by_minute": [
+              0,
+              0,
+              0
+            ],
+            "minute_ts": 1787922060
+          },
+          "ret_aenergy": {
+            "total": 0,
+            "by_minute": [
+              0,
+              0,
+              0
+            ],
+            "minute_ts": 1787922060
+          },
+          "temperature": {
+            "tC": 61.8,
+            "tF": 143.3
+          }
+        },
+        "Sys": {
+          "mac": "E4B0636A5738",
+          "restart_required": false,
+          "time": "15:01",
+          "unixtime": 1787922066,
+          "last_sync_ts": 1787922051,
+          "uptime": 79039,
+          "ram_size": 361164,
+          "ram_free": 191220,
+          "ram_min_free": 170368,
+          "fs_size": 917504,
+          "fs_free": 471040,
+          "cfg_rev": 18,
+          "kvs_rev": 0,
+          "schedule_rev": 0,
+          "webhook_rev": 0,
+          "btrelay_rev": 0,
+          "available_updates": {
+            "beta": {
+              "version": "2.0.1-beta1"
+            },
+            "stable": {
+              "version": "2.0.0"
+            }
+          },
+          "alt": {
+            "Mini1PMG4ZB": {
+              "name": "Shelly Mini 1 PM Gen4",
+              "desc": "Shelly Mini 1 PM Gen4 with Zigbee",
+              "beta": {
+                "version": "2.0.1-beta1",
+                "build_id": "20260819-101729/2.0.1-beta1-g8a88c73"
+              },
+              "stable": {
+                "version": "2.0.0",
+                "build_id": "20260710-101116/2.0.0-g87fbfa4"
+              }
+            }
+          },
+          "reset_reason": 4,
+          "utc_offset": 7200
+        },
+        "Cloud": {
+          "connected": true
+        },
+        "WiFi": {
+          "sta_ip": "192.168.1.14",
+          "status": "got ip",
+          "ssid": "TIM-37999422",
+          "rssi": -55
+        },
+        "BLE": {},
+        "Matter": {
+          "num_fabrics": 0,
+          "commissionable": false
+        },
+        "Temperature": null,
+        "Light": null,
+        "RGB": null,
+        "Cover": null,
+        "Presence": null,
+        "Illuminance": null
+      },
+      "lastReadAt": "2026-08-28T13:01:06.155Z"
+    },
+    "model": "S4SW-001P8EU",
+    "matter": {
+      "id": 0,
+      "mode": "",
+      "nodeID": 0,
+      "fabricID": 0,
+      "endpiontIDs": [],
+      "bridgeEndpiontIDs": []
+    },
+    "name": "Faretti Cucina",
+    "ip": "192.168.1.14",
+    "mac": "E4:B0:63:6A:57:38",
+    "where": {
+      "id": 0,
+      "name": "",
+      "picture": ""
+    },
+    "onMap": "",
+    "description": "",
+    "signalStatus": 0,
+    "cloud": "",
+    "firmware": "1.5.99-g4prod1",
+    "updateAvailability": {},
+    "productName": "Shelly Mini 1PM Gen4",
+    "hostName": "shelly1pmminig4-e4b0636a5738",
+    "availability": "ONLINE",
+    "catalogItemId": "LAMP",
+    "type": {
+      "id": "METERED_SWITCH",
+      "name": "Interruttore ON/OFF con misura",
+      "description": "Comando ON/OFF e misura della potenza o energia"
+    },
+    "category": {
+      "id": "SENSOR_ACTUATOR",
+      "name": "Sensore e attuatore",
+      "description": "Produce misure e riceve comandi funzionali"
+    },
+    "svgIcon": "icon-325",
+    "emoj": "light_bulb",
+    "imgIcon": "",
+    "picture": "",
+    "channel": [
+      "output",
+      "power",
+      "energy"
+    ],
+    "status": [
+      null,
+      null,
+      null
+    ],
+    "lastTime": [
+      null,
+      null,
+      null
+    ],
+    "unit": [
+      "",
+      "W",
+      "Wh"
+    ],
+    "value": [
+      null,
+      null,
+      null
+    ],
+    "minThreshold": [
+      null,
+      null,
+      null
+    ],
+    "maxThreshold": [
+      null,
+      null,
+      null
+    ]
+  },
+  {
+  "id": 3,
+  "family": "shelly",
+  "hardware": {
+    "id": "shelly1pmminig4-e4b063774e2c",
+    "name": "",
+    "gen": 4,
+    "config": {
+      "Humidity": null,
+      "MQTT": {
+        "enable": true,
+        "server": "192.168.1.34:1883",
+        "client_id": "shelly1pmminig4-e4b063774e2c",
+        "user": "liparios-shelly",
+        "ssl_ca": null,
+        "topic_prefix": "liparios/devices/actuator/light/shelly1pmminig4-e4b063774e2c",
+        "rpc_ntf": true,
+        "status_ntf": true,
+        "use_client_cert": false,
+        "enable_rpc": false,
+        "enable_control": false
+      },
+      "Input": {
+        "id": 0,
+        "name": null,
+        "type": "switch",
+        "enable": true,
+        "invert": false,
+        "factory_reset": true
+      },
+      "Shelly": {
+        "ble": {
+          "enable": true,
+          "rpc": {
+            "enable": true
+          }
+        },
+        "bthome": {},
+        "cloud": {
+          "enable": true,
+          "server": "shelly-172-eu.shelly.cloud:6022/jrpc"
+        },
+        "input:0": {
+          "id": 0,
+          "name": null,
+          "type": "switch",
+          "enable": true,
+          "invert": false,
+          "factory_reset": true
+        },
+        "knx": {
+          "enable": false,
+          "ia": "15.15.255",
+          "routing": {
+            "addr": "224.0.23.12:3671"
+          }
+        },
+        "matter": {
+          "enable": true
+        },
+        "mqtt": {
+          "enable": false,
+          "server": null,
+          "client_id": "shelly1pmminig4-e4b063774e2c",
+          "user": null,
+          "ssl_ca": null,
+          "topic_prefix": "shelly1pmminig4-e4b063774e2c",
+          "rpc_ntf": true,
+          "status_ntf": false,
+          "use_client_cert": false,
+          "enable_rpc": true,
+          "enable_control": true
+        },
+        "switch:0": {
+          "id": 0,
+          "name": null,
+          "in_mode": "follow",
+          "in_locked": false,
+          "initial_state": "match_input",
+          "auto_on": false,
+          "auto_on_delay": 60,
+          "auto_off": false,
+          "auto_off_delay": 60,
+          "power_limit": 2240,
+          "voltage_limit": 280,
+          "autorecover_voltage_errors": false,
+          "current_limit": 8,
+          "reverse": false
+        },
+        "sys": {
+          "device": {
+            "name": null,
+            "mac": "E4B063774E2C",
+            "fw_id": "20250214-121727/1.5.99-g4prod1-gc32c24b",
+            "discoverable": true,
+            "eco_mode": false
+          },
+          "location": {
+            "tz": "Europe/Rome",
+            "lat": 38.1302,
+            "lon": 13.329
+          },
+          "debug": {
+            "level": 2,
+            "file_level": null,
+            "mqtt": {
+              "enable": false
+            },
+            "websocket": {
+              "enable": false
+            },
+            "udp": {
+              "addr": null
+            }
+          },
+          "ui_data": {},
+          "rpc_udp": {
+            "dst_addr": null,
+            "listen_port": null
+          },
+          "sntp": {
+            "server": "time.cloudflare.com"
+          },
+          "cfg_rev": 14
+        },
+        "wifi": {
+          "ap": {
+            "ssid": "Shelly1PMMiniG4-E4B063774E2C",
+            "is_open": true,
+            "enable": true,
+            "range_extender": {
+              "enable": false
+            }
+          },
+          "sta": {
+            "ssid": "TIM-37999422",
+            "is_open": false,
+            "enable": true,
+            "ipv4mode": "dhcp",
+            "ip": null,
+            "netmask": null,
+            "gw": null,
+            "nameserver": null
+          },
+          "sta1": {
+            "ssid": null,
+            "is_open": true,
+            "enable": false,
+            "ipv4mode": "dhcp",
+            "ip": null,
+            "netmask": null,
+            "gw": null,
+            "nameserver": null
+          },
+          "roam": {
+            "rssi_thr": -80,
+            "interval": 60
+          }
+        },
+        "ws": {
+          "enable": false,
+          "server": null,
+          "ssl_ca": "ca.pem"
+        }
+      },
+      "Switch": {
+        "id": 0,
+        "name": null,
+        "in_mode": "follow",
+        "in_locked": false,
+        "initial_state": "match_input",
+        "auto_on": false,
+        "auto_on_delay": 60,
+        "auto_off": false,
+        "auto_off_delay": 60,
+        "power_limit": 2240,
+        "voltage_limit": 280,
+        "autorecover_voltage_errors": false,
+        "current_limit": 8,
+        "reverse": false
+      },
+      "Sys": {
+        "device": {
+          "name": null,
+          "mac": "E4B063774E2C",
+          "fw_id": "20250214-121727/1.5.99-g4prod1-gc32c24b",
+          "discoverable": true,
+          "eco_mode": false
+        },
+        "location": {
+          "tz": "Europe/Rome",
+          "lat": 38.1302,
+          "lon": 13.329
+        },
+        "debug": {
+          "level": 2,
+          "file_level": null,
+          "mqtt": {
+            "enable": false
+          },
+          "websocket": {
+            "enable": false
+          },
+          "udp": {
+            "addr": null
+          }
+        },
+        "ui_data": {},
+        "rpc_udp": {
+          "dst_addr": null,
+          "listen_port": null
+        },
+        "sntp": {
+          "server": "time.cloudflare.com"
+        },
+        "cfg_rev": 14
+      },
+      "Cloud": {
+        "enable": true,
+        "server": "shelly-172-eu.shelly.cloud:6022/jrpc"
+      },
+      "WiFi": {
+        "ap": {
+          "ssid": "Shelly1PMMiniG4-E4B063774E2C",
+          "is_open": true,
+          "enable": true,
+          "range_extender": {
+            "enable": false
+          }
+        },
+        "sta": {
+          "ssid": "TIM-37999422",
+          "is_open": false,
+          "enable": true,
+          "ipv4mode": "dhcp",
+          "ip": null,
+          "netmask": null,
+          "gw": null,
+          "nameserver": null
+        },
+        "sta1": {
+          "ssid": null,
+          "is_open": true,
+          "enable": false,
+          "ipv4mode": "dhcp",
+          "ip": null,
+          "netmask": null,
+          "gw": null,
+          "nameserver": null
+        },
+        "roam": {
+          "rssi_thr": -80,
+          "interval": 60
+        }
+      },
+      "BLE": {
+        "enable": true,
+        "rpc": {
+          "enable": true
+        }
+      },
+      "Matter": {
+        "enable": true
+      },
+      "Temperature": null,
+      "Light": null,
+      "RGB": null,
+      "Cover": null,
+      "Presence": null,
+      "Illuminance": null
+    },
+    "status": {
+      "Humidity": null,
+      "MQTT": {
+        "connected": true
+      },
+      "Input": {
+        "id": 0,
+        "state": false
+      },
+      "Shelly": {
+        "ble": {},
+        "bthome": {},
+        "cloud": {
+          "connected": true
+        },
+        "input:0": {
+          "id": 0,
+          "state": false
+        },
+        "knx": {},
+        "matter": {
+          "num_fabrics": 0,
+          "commissionable": false
+        },
+        "mqtt": {
+          "connected": false
+        },
+        "switch:0": {
+          "id": 0,
+          "source": "switch",
+          "output": false,
+          "apower": 0,
+          "voltage": 233.7,
+          "freq": 50.1,
+          "current": 0,
+          "aenergy": {
+            "total": 3104.561,
+            "by_minute": [
+              0,
+              0,
+              0
+            ],
+            "minute_ts": 1787925180
+          },
+          "ret_aenergy": {
+            "total": 0,
+            "by_minute": [
+              0,
+              0,
+              0
+            ],
+            "minute_ts": 1787925180
+          },
+          "temperature": {
+            "tC": 69.6,
+            "tF": 157.3
+          }
+        },
+        "sys": {
+          "mac": "E4B063774E2C",
+          "restart_required": false,
+          "time": "15:53",
+          "unixtime": 1787925185,
+          "last_sync_ts": 1787924243,
+          "uptime": 2824775,
+          "ram_size": 358264,
+          "ram_free": 91992,
+          "ram_min_free": 85088,
+          "fs_size": 917504,
+          "fs_free": 471040,
+          "cfg_rev": 14,
+          "kvs_rev": 0,
+          "schedule_rev": 0,
+          "webhook_rev": 0,
+          "btrelay_rev": 0,
+          "available_updates": {
+            "beta": {
+              "version": "2.0.1-beta1"
+            },
+            "stable": {
+              "version": "2.0.0"
+            }
+          },
+          "alt": {
+            "Mini1PMG4ZB": {
+              "name": "Shelly Mini 1 PM Gen4",
+              "desc": "Shelly Mini 1 PM Gen4 with Zigbee",
+              "beta": {
+                "version": "2.0.1-beta1",
+                "build_id": "20260819-101729/2.0.1-beta1-g8a88c73"
+              },
+              "stable": {
+                "version": "2.0.0",
+                "build_id": "20260710-101116/2.0.0-g87fbfa4"
+              }
+            }
+          },
+          "reset_reason": 1,
+          "utc_offset": 7200
+        },
+        "wifi": {
+          "sta_ip": "192.168.1.35",
+          "status": "got ip",
+          "ssid": "TIM-37999422",
+          "rssi": -41
+        },
+        "ws": {
+          "connected": false
+        }
+      },
+      "Switch": {
+        "id": 0,
+        "source": "switch",
+        "output": false,
+        "apower": 0,
+        "voltage": 233.7,
+        "freq": 50.1,
+        "current": 0,
+        "aenergy": {
+          "total": 3104.561,
+          "by_minute": [
+            0,
+            0,
+            0
+          ],
+          "minute_ts": 1787925180
+        },
+        "ret_aenergy": {
+          "total": 0,
+          "by_minute": [
+            0,
+            0,
+            0
+          ],
+          "minute_ts": 1787925180
+        },
+        "temperature": {
+          "tC": 69.6,
+          "tF": 157.3
+        }
+      },
+      "Sys": {
+        "mac": "E4B063774E2C",
+        "restart_required": false,
+        "time": "15:53",
+        "unixtime": 1787925185,
+        "last_sync_ts": 1787924243,
+        "uptime": 2824775,
+        "ram_size": 358264,
+        "ram_free": 91992,
+        "ram_min_free": 85088,
+        "fs_size": 917504,
+        "fs_free": 471040,
+        "cfg_rev": 14,
+        "kvs_rev": 0,
+        "schedule_rev": 0,
+        "webhook_rev": 0,
+        "btrelay_rev": 0,
+        "available_updates": {
+          "beta": {
+            "version": "2.0.1-beta1"
+          },
+          "stable": {
+            "version": "2.0.0"
+          }
+        },
+        "alt": {
+          "Mini1PMG4ZB": {
+            "name": "Shelly Mini 1 PM Gen4",
+            "desc": "Shelly Mini 1 PM Gen4 with Zigbee",
+            "beta": {
+              "version": "2.0.1-beta1",
+              "build_id": "20260819-101729/2.0.1-beta1-g8a88c73"
+            },
+            "stable": {
+              "version": "2.0.0",
+              "build_id": "20260710-101116/2.0.0-g87fbfa4"
+            }
+          }
+        },
+        "reset_reason": 1,
+        "utc_offset": 7200
+      },
+      "Cloud": {
+        "connected": true
+      },
+      "WiFi": {
+        "sta_ip": "192.168.1.35",
+        "status": "got ip",
+        "ssid": "TIM-37999422",
+        "rssi": -41
+      },
+      "BLE": {},
+      "Matter": {
+        "num_fabrics": 0,
+        "commissionable": false
+      },
+      "Temperature": null,
+      "Light": null,
+      "RGB": null,
+      "Cover": null,
+      "Presence": null,
+      "Illuminance": null
+    },
+    "model": "S4SW-001P8EU",
+    "lastReadAt": "2026-08-28T13:53:05.747Z"
+  },
+  "model": "S4SW-001P8EU",
+  "matter": {
+    "id": 0,
+    "mode": "",
+    "nodeID": 0,
+    "fabricID": 0,
+    "endpiontIDs": [
+      0
+    ],
+    "bridgeEndpiontIDs": [
+      0
+    ]
+  },
+  "name": "Lampada Tavolo Cucina",
+  "ip": "192.168.1.35",
+  "mac": "E4:B0:63:77:4E:2C",
+  "where": {
+    "id": 0,
+    "name": "",
+    "picture": ""
+  },
+  "onMap": "",
+  "description": "",
+  "signalStatus": 0,
+  "cloud": "",
+  "firmware": "1.5.99-g4prod1",
+  "hostName": "shelly1pmminig4-e4b063774e2c",
+  "productName": "Shelly Mini 1PM Gen4",
+  "updateAvailability": {},
+  "availability": "",
+  "catalogItemId": "LAMP",
+  "type": {
+    "id": "METERED_SWITCH",
+    "name": "Interruttore ON/OFF con misura",
+    "description": "Comando ON/OFF e misura della potenza o energia"
+  },
+  "category": {
+    "id": "SENSOR_ACTUATOR",
+    "name": "Sensore e attuatore",
+    "description": "Produce misure e riceve comandi funzionali"
+  },
+  "svgIcon": "icon-325",
+  "emoj": "light_bulb",
+  "imgIcon": "",
+  "picture": "",
+  "channel": [
+    ""
+  ],
+  "status": [
+    ""
+  ],
+  "lastTime": [
+    ""
+  ],
+  "unit": [
+    ""
+  ],
+  "value": [
+    ""
+  ],
+  "minThreshold": [
+    ""
+  ],
+  "maxThreshold": [
+    ""
+  ]
+}
+]
+ */
+
+
+export type DeviceSmallType = {
+    id: number | string;
+    family: string;
+    name: string;
+    ip: string;
+    mac: string;
+    where: ZoneType;
+    signalStatus: number;
+    catalogItemId: string;
+    type: DeviceTipology;
+    category: DeviceCategory;
+    svgIcon: string;
+    emoj: string;
+    imgIcon: string;
+    channel: string[];
+    status: Array<number | string | boolean | null>;
+    lastTime: Array<number | string | null>;
+}
+

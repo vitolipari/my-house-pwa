@@ -1,0 +1,189 @@
+:host {
+
+    --on-bg-color: #0c0;
+    --on-inside-color: #fff;
+    --on-readonly-bg-color: #aca;
+    --on-readonly-inside-color: #aaa;
+
+    --off-bg-color: #aaa;
+    --off-inside-color: #fff;
+    --off-readonly-bg-color: #aaa5;
+    --off-readonly-inside-color: #aaa;
+
+}
+
+
+
+/*
+Componente inteso come tutto il pacco!!!
+*/
+.switch-component-container {
+    display: flex;
+    flex-direction: row;
+    margin-right: calc(0.5rem + 4px);
+}
+
+.switch-component-container.alive {
+    cursor: pointer;
+    /*margin-right: calc(0.5rem + 4px);*/
+}
+
+.switch-component-container.locked {
+    /* margin-right: calc(0.5rem - 8px); */
+}
+
+
+.switch-component-container > IMG {
+    height: 24px;
+    margin-right: 0.5rem;
+}
+
+/*
+parte dello sfondo, dove scorre il pallino
+*/
+.switch-component {
+    width: 42px;
+    min-width: 42px;
+    max-width: 42px;
+    height: 24px;
+    min-height: 24px;
+    max-height: 24px;
+    /*background: #aaa;*/   /* nel file del tema */
+    border-radius: 50px;
+    display: flex;
+    flex-direction: row;
+
+    font-size: 10px;
+    line-height: 24px;
+}
+
+.switch-component:after {
+    /*content: "NO";*/
+    /*color: #0008;*/   /* nel file del tema */
+    font-size: 10px;
+    font-weight: bold;
+    padding-top: 6px;
+}
+
+
+/*
+sfondo quando normale
+*/
+.tsc {
+    background: var(--off-bg-color);
+}
+
+.tsc:after {
+    /* background: var(--on-bg-color); */
+    background: #f00;
+}
+
+
+
+/*
+sfondo quando checked
+*/
+.tsc-active {
+    background: var(--on-bg-color);
+}
+
+.tsc-active:after {
+    content: "";
+    /*color: #0008;*/   /* nel file del tema */
+    padding-left: 21px;
+    position: relative;
+    top: 4px;
+    left: -118px;
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--medium-darker);
+}
+
+.switch-component-inside {
+    /*background: #2b303f;*/   /* nel file del tema */
+    width: 20px;
+    min-width: 20px;
+    max-width: 20px;
+    height: 20px;
+    min-height: 20px;
+    max-height: 20px;
+    margin: 2px;
+    border-radius: 20px;
+    display: inline-flex;
+    /* cursor: pointer; */
+    -webkit-transition: .4s;
+    transition: .4s;
+    justify-content: center;
+
+    font-size: 12px;
+    align-content: center;
+    align-items: center;
+    align-self: center;
+}
+
+.tsci-active {
+    /*background: #0aff97;*/   /* nel file del tema */
+    /* width: 38px;
+    min-width: 38px;
+    max-width: 38px; */
+    height: 20px;
+    min-height: 20px;
+    max-height: 20px;
+    margin: 2px;
+    border-radius: 20px;
+    display: inline-flex;
+    /*box-shadow: 0px 0px 20px #0acf97aa;*/   /* nel file del tema */
+    -webkit-transition: .4s;
+    transition: .4s;
+
+    background: var(--on-inside-color);
+    /*color: #fff; /* testo del si */
+    /*color: var(--good-color); */ /*testo del si*/
+    box-shadow: 0px 0px 0px #0000;
+    -webkit-transition: .5s;
+    transition: .5s;
+
+
+    transform: translateX( 18px );
+
+    /* position: relative; */
+    /* left: 18px; */
+}
+
+.tsci-active:after {
+    /*content: "SI";*/
+    /*color: #888;*/   /* nel file del tema */
+    font-size: 14px;
+    display: inline-flex;
+    min-width: 46px;
+    justify-content: center;
+    padding-top: 2px;
+    margin-left: -4px;
+    -webkit-transition: 1s;
+    transition: 1s;
+
+    color: var(--good-color);  /* testo del si mentre si muove */
+    -webkit-transition: 1s;
+    transition: 1s;
+}
+
+.tsci {
+    background: var(--on-inside-color);
+    color: var(--good-color);
+}
+
+
+.tsc-disabled {
+    /* opacity: 0.25; */
+    background-color: var(--off-readonly-bg-color);
+}
+
+.tsc-active.tsc-disabled {
+    /* opacity: 0.25; */
+    background-color: var(--on-readonly-bg-color);
+}
+
+.tsci-disabled {
+    opacity: 1;
+}
+

@@ -10,7 +10,7 @@ import {emoj} from '../../utils/string-utils';
 import {RadioButton, RadioButtonModule} from 'primeng/radiobutton';
 import {getLastElementOr} from '../../utils/array-util';
 import {
-    DeviceCatalogItem, DeviceCategory, DeviceRecord,
+    DeviceCatalogItem, DeviceCategory,
     DeviceTaxonomy, DeviceTipology,
     DeviceType,
     DeviceTypeDefinition, MeteredSwitchType, ShellyFamilyType,
@@ -831,12 +831,12 @@ export class NewDevicePage implements OnInit {
 
 
 
-    readonly shellyDeviceForm = this.fb.nonNullable.group({
+    readonly deviceForm = this.fb.nonNullable.group({
         deviceName: ['', [Validators.required]],
         deviceIp: ['', [Validators.required]]
     });
 
-    // shellyDeviceForm = new FormGroup({
+    // deviceForm = new FormGroup({
     //     deviceName: new FormControl(),
     //     deviceIp: new FormControl()
     // });
@@ -1002,7 +1002,7 @@ export class NewDevicePage implements OnInit {
                 break;
 
         }
-        this.shellyDeviceForm.controls.deviceName.setValue(catalogItem.name);
+        this.deviceForm.controls.deviceName.setValue(catalogItem.name);
 
         switch(this.integration) {
             case 'shelly':
@@ -1045,7 +1045,9 @@ export class NewDevicePage implements OnInit {
     onIpDeviceChange(device: NetworkIdentity): void {
         this.selectedIpDevice = device;
 
-        this.shellyDeviceForm.controls.deviceIp.setValue(device.ip);
+
+        // ATTENZIONE da controllare
+        this.deviceForm.controls.deviceIp.setValue(device.ip);
 
         console.log('Nuovo valore:', this.selectedIpDevice);
         /*
@@ -1090,24 +1092,46 @@ export class NewDevicePage implements OnInit {
         }
          */
 
+        if(
+            ((!!this.selectedIpDevice.deviceManufacturer) && ( this.selectedIpDevice.deviceManufacturer!.trim().toLowerCase() === 'shelly' ))
+            || (!!this.selectedIpDevice.shelly )
+        ) {
+            this.newDevice.set({
+                ...this.newDevice(),
+                ip: device.ip,
+                mac: device.mac,
+                hardware: {
+                    ...(this.newDevice().hardware as ShellyFamilyType),
+                    id: device.shelly!.id,
+                    name: this.newDevice().hardware.name || '',
+                    gen: device.shelly!.generation,
+                    model: device.shelly!.model
+                } as ShellyFamilyType,
+                model: device.shelly!.model || '',
+                firmware: device.shelly!.firmware || '',
+                productName: device.productName || '',
+                hostName: device.hostname || '',
+                name: this.deviceForm.controls.deviceName.value || device.productName || ''
+            });
+        }
+        else {
+            this.newDevice.set({
+                ...this.newDevice(),
+                ip: device.ip,
+                mac: device.mac,
+                hardware: {
+                    ...this.newDevice().hardware
+                },
+                model: '',
+                firmware: '',
+                productName: device.productName || '',
+                hostName: device.hostname || '',
+                name: this.deviceForm.controls.deviceName.value || device.productName || ''
+            });
+        }
 
-        this.newDevice.set({
-            ...this.newDevice(),
-            ip: device.ip,
-            mac: device.mac,
-            hardware: {
-                ...this.newDevice().hardware,
-                id: device.shelly!.id,   // ATTENZIONE
-                name: '',
-                gen: device.shelly!.generation,
-                model: device.shelly!.model
-            },
-            model: device.shelly!.model || '',
-            firmware: device.shelly!.firmware || '',
-            productName: device.productName || '',
-            hostName: device.hostname || '',
-            name: this.shellyDeviceForm.controls.deviceName.value || device.productName || ''
-        });
+
+
 
         /*
             "productName": "Shelly Mini 1PM Gen3",
@@ -1417,8 +1441,6 @@ export class NewDevicePage implements OnInit {
         } catch (error) {
             console.error('Errore durante la copia:', error);
         }
-
-
     }
 
     openNewDeviceDateTree() {
@@ -1436,13 +1458,15 @@ export class NewDevicePage implements OnInit {
             .then((data: any) => {
                 console.log('fine chiamata per aggiunta nuovo dispositivo');
                 console.log( data );
-
+                this.newDevice.set( data );
                 this.inWaiting.set(false);
 
             })
             .catch((e: any) => {
                 console.log('errore nel catch di addNewDevice');
                 this.inWaiting.set(false);
+
+                // TODO messaggio di errore
             })
 
         // setTimeout(() => {

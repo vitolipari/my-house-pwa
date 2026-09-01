@@ -48,7 +48,7 @@
 </section>
 
 
-<!-- raccolta rifiuti --------------------------------------------------------------->
+<!-- raccolta rifiuti ---------------------------------------------------------------
 <section
     (click)="gotoPage('/waste-collection')"
 >
@@ -59,7 +59,7 @@
     </svg>
     <label>Raccolta</label>
 </section>
-
+-->
 
 
 
@@ -70,7 +70,7 @@
     <svg
         class="svg-icon"
     >
-        <use href="#timer_icon_1"></use>
+        <use href="#Door02"></use>
         <!--                <use href="#timer_icon_2"></use>-->
     </svg>
     <label>Stanze</label>
@@ -161,10 +161,27 @@
         class="svg-icon"
     >
         <!--        <use href="#settings_icon_1"></use>-->
-        <use href="#settings_icon_2"></use>
+<!--        <use href="#settings_icon_2"></use>-->
+        <use href="#icon-407"></use>
         <!--                <use href="#settings_icon_3"></use>-->
     </svg>
     <label>Impostazioni</label>
+</section>
+
+
+
+<section
+    (click)="gotoPage('')"
+>
+    <svg
+        class="svg-icon"
+    >
+        <!--        <use href="#settings_icon_1"></use>-->
+<!--        <use href="#settings_icon_2"></use>-->
+        <use href="#Help"></use>
+        <!--                <use href="#settings_icon_3"></use>-->
+    </svg>
+    <label>Help</label>
 </section>
 
 
@@ -174,6 +191,9 @@
 <section
     (click)="gotoPage('')"
 >
-    <span>{{ coffe }}</span>
-    <label>LiparOS</label>
+    <img
+        [src]="lipariStudiosImage()"
+        class="lipariStudiosLogo"
+    >
+    <label>LipariOS</label>
 </section>

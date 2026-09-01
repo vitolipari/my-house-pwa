@@ -80,22 +80,103 @@
                 <p>Nessun dispositivo registrato.</p>
             } @else {
                 <div class="registered-devices">
-                    @for (device of devices(); track device.id) {
-                        <article class="registered-device">
-                            <div>
-                                <strong>{{ device.name }}</strong>
-                                <span>{{ device.place || 'Posizione non indicata' }}</span>
-                            </div>
-                            <dl>
-                                <div><dt>Categoria</dt><dd>{{ device.categoryName || device.category || 'Non classificato' }}</dd></div>
-                                <div><dt>Tipo</dt><dd>{{ device.functionalTypeName || device.functionalType || 'Non classificato' }}</dd></div>
-                                @if (device.usage) {
-                                    <div><dt>Uso</dt><dd>{{ device.usageName || device.usage }}</dd></div>
+
+
+                    @for(group of deviceGroups(); track group.room.id) {
+                        <div>{{ group.room.name }}</div>
+
+
+                        @for (device of group.devices; track device.id) {
+
+
+                            <div class="device-row" (click)="gotoDeviceDetailsPage(device.id)">
+                                @if( !!device.imgIcon ) {
+                                    <img class="device-row-img" [src]="device.imgIcon">
                                 }
-                                <div><dt>Integrazione</dt><dd>{{ device.integration }}</dd></div>
-                            </dl>
-                        </article>
+                                @else {
+                                    @if( !!device.emoj ) {
+                                        <div class="device-row-emoj">{{ itemEmojIcon( device.emoj ) }}</div>
+                                    }
+                                    @else {
+                                        <svg
+                                            class="device-row-svg"
+                                        >
+                                            <use
+                                                [attr.href]="'#' + (device.svgIcon ?? 'icon-602')"
+                                                [attr.xlink:href]="'#' + (device.svgIcon ?? 'icon-602')">
+                                                >
+                                            </use>
+                                        </svg>
+                                    }
+
+                                }
+                                <div class="device-row-info">
+                                    <div>
+                                        <strong>{{ device.name }}</strong>
+    <!--                                    <div>STANZA</div>-->
+                                    </div>
+
+                                    <div class="device-row-data">
+                                        <div class="device-row-ip">{{ device.ip }}</div>
+                                        <div class="device-row-status">
+                                            <!-- TODO opacity in base al segnale -->
+                                            <span [style]="'opacity: '+ wifiSignalInOpacityRange(device) +';'">WiFi</span>
+                                            <!--
+                                            <span>ON</span>
+                                            -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- TODO da spostare nella pagina di dettaglio
+                                <svg
+                                    id="open-newDevice-data-tree-panel-button-icon"
+                                    (click)="openNewDeviceDateTree( device )"
+                                >
+                                    <use href="#icon-215"></use>
+                                </svg>
+                                -->
+                                <!-- TODO button, input, component -->
+
+                                @if( (''+ device.type.id).trim().toLowerCase().indexOf('switch') !== -1 ) {
+                                    <switcher-component
+                                        [isReadOnly]="false"
+                                        [check]="!!deviceChannelStatus(device, 'output')"
+                                        [inWait]="isDeviceInWaiting( device )"
+                                        (toggle)="switchAction(device, $event)"
+                                    ></switcher-component>
+                                }
+                                @else {
+                                    @if( (''+ device.type.id).trim().toLowerCase().indexOf('sensor') !== -1 ) {
+
+                                    }
+                                    @else {
+
+                                    }
+                                }
+
+                            </div>
+
+
+
+    <!--                        <article class="registered-device">-->
+    <!--                            <div>-->
+    <!--                                <strong>{{ device.name }}</strong>-->
+    <!--                                <span>{{ device.where.name || 'Posizione non indicata' }}</span>-->
+    <!--                            </div>-->
+    <!--                            <dl>-->
+    <!--                                <div><dt>Categoria</dt><dd>{{ device.category.name || device.category.id || 'Non classificato' }}</dd></div>-->
+    <!--                                <div><dt>Tipo</dt><dd>{{ device.type.name || device.type.id || 'Non classificato' }}</dd></div>-->
+    <!--                                @if (device.catalogItemId) {-->
+    <!--                                    <div><dt>Catalogo</dt><dd>{{ device.catalogItemId }}</dd></div>-->
+    <!--                                }-->
+    <!--                                <div><dt>Famiglia</dt><dd>{{ device.family }}</dd></div>-->
+    <!--                            </dl>-->
+    <!--                        </article>-->
+                        }
                     }
+
+                    <div>No Room</div>
+
                 </div>
             }
         </p-tabpanel>
@@ -126,7 +207,30 @@
 
 
 
-    <!--    Dispositivi del sistema -->
-    <!--    Dispositivi tramite IP (DHCP) -->
-    <!--    Dispositivi tramite loro accessPoint -->
-
+@if( deviceDataTreePanelOpen() ) {
+    <div
+        class="floating-panel-backpan"
+        (click)="newDeviceDataTreePanelClose()"
+    >
+        <div
+            class="floating-panel"
+        >
+            <div>
+                <svg><use href="#icon-215"></use></svg>
+                <strong>Dati Nuovo Dispositivo</strong>
+                <svg
+                    id="copy-newDevice-data-tree-icon-button"
+                    (click)="copyNewDeviceData($event)"
+                >
+                    @if(!isCopied()) {
+                        <use href="#icon-106"></use>
+                    }
+                    @else {
+                        <use href="#icon-46"></use>
+                    }
+                </svg>
+            </div>
+            <pre>{{ deviceDataTreePanelOpen() | json }}</pre>
+        </div>
+    </div>
+}

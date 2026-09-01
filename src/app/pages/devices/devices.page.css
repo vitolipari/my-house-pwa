@@ -40,10 +40,12 @@ p-tab > DIV > SPAN, B {
     margin-left: 0.3rem;
 }
 
+/*
 .registered-devices {
     display: grid;
     gap: 1rem;
 }
+
 
 .registered-device {
     display: grid;
@@ -78,7 +80,72 @@ p-tab > DIV > SPAN, B {
 .registered-device dt {
     color: var(--color-text-2);
 }
+*/
 
 .devices-error {
     color: var(--color-error, #c62828);
 }
+
+.device-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+
+    align-items: center;
+    background: var(--color-background-3);
+    border-radius: 6px;
+    margin: 0.5rem auto;
+    min-width: 90vw;
+    width: 100%;
+    max-width: 95vw;
+    padding: 0.6rem;
+    height: 4rem;
+
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+}
+
+.device-row-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    flex: 1;
+}
+
+.device-row-info > DIV {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    max-width: 90%;
+}
+
+.device-row-emoj {
+    font-size: 2.2rem;
+    margin-right: 1.2rem;
+}
+
+.device-row-svg {}
+
+.device-row-img {}
+
+.device-row-data {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.device-row-data > DIV {
+    font-size: var(--tiny-font-size);
+}
+
+.device-row-ip {}
+
+.device-row-status {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+
+
+

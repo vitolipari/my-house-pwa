@@ -76,7 +76,7 @@ export const routes: Routes = [
         canActivate: [routeAccessGuard],
         data: {
             accessControl: {
-                permission: '' // 'READ_HOUSE_DEVICES'    TODO
+                permission: 'READ_HOUSE_DEVICES'
             }
         },
         loadComponent: () =>
@@ -88,11 +88,23 @@ export const routes: Routes = [
         canActivate: [routeAccessGuard],
         data: {
             accessControl: {
-                permission: '' // 'ADD_HOUSE_DEVICES'   TODO
+                permission: 'ADD_HOUSE_DEVICES'
             }
         },
         loadComponent: () =>
             import('./pages/new-device/new-device.page').then(m => m.NewDevicePage)
+    },
+
+    {
+        path: 'device-details/:id',
+        canActivate: [routeAccessGuard],
+        data: {
+            accessControl: {
+                permission: 'READ_HOUSE_DEVICES_DETAILS'
+            }
+        },
+        loadComponent: () =>
+            import('./pages/device-details/device-details.page').then(m => m.DeviceDetailsPage)
     },
 
     {
