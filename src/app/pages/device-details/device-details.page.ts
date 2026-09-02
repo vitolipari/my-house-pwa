@@ -2,10 +2,13 @@ import {Component, inject} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AccessControlData} from '../../models/access-control.models';
 import {DeviceType} from '../devices/devices.models';
+import {JsonPipe} from '@angular/common';
 
 @Component({
     selector: 'app-device-details.page',
-    imports: [],
+    imports: [
+        JsonPipe
+    ],
     templateUrl: './device-details.page.html',
     styleUrl: './device-details.page.css',
     standalone: true

@@ -228,6 +228,38 @@ export class DevicesPage implements OnInit {
                     ))
                 ));
 
+                this.deviceGroups()
+                    .forEach((group: {room: ZoneType, devices: DeviceSmallType[]}) => {
+                        group.devices =
+                            group
+                                .devices
+                                .map((d: DeviceSmallType) => {
+                                    let findedDevice = this.devices().find((D: DeviceType) => (D.id === d.id));
+                                    d = {
+                                        id: !!findedDevice ? findedDevice.id : d.id,
+                                        family: !!findedDevice ? findedDevice.family : d.family,
+                                        name: !!findedDevice ? findedDevice.name : d.name,
+                                        ip: !!findedDevice ? findedDevice.ip : d.ip,
+                                        mac: !!findedDevice ? findedDevice.mac : d.mac,
+                                        where: !!findedDevice ? findedDevice.where : d.where,
+                                        signalStatus: !!findedDevice ? findedDevice.signalStatus : d.signalStatus,
+                                        catalogItemId: !!findedDevice ? findedDevice.catalogItemId : d.catalogItemId,
+                                        type: !!findedDevice ? findedDevice.type : d.type,
+                                        category: !!findedDevice ? findedDevice.category : d.category,
+                                        svgIcon: !!findedDevice ? findedDevice.svgIcon : d.svgIcon,
+                                        emoj: !!findedDevice ? findedDevice.emoj : d.emoj,
+                                        imgIcon: !!findedDevice ? findedDevice.imgIcon : d.imgIcon,
+                                        channel: !!findedDevice ? findedDevice.channel : d.channel,
+                                        status: !!findedDevice ? findedDevice.status : d.status,
+                                        lastTime: !!findedDevice ? findedDevice.lastTime : d.lastTime
+                                    }
+                                    return d;
+                                })
+                        ;
+                    })
+
+
+
 
             })
             .finally(() => {
@@ -355,19 +387,7 @@ export class DevicesPage implements OnInit {
     }
 
     wifiSignalInOpacityRange(device: DeviceSmallType) {
-    // wifiSignalInOpacityRange(device: DeviceType) {
-        // if(!!device.hardware.status.WiFi) {
-        //     const wifiSignal: number = device.hardware.status.WiFi.rssi;
-        //     let wifiSignalPercent: number = Math.max(0, Math.min(100, 2 * (wifiSignal + 100)));
-        //     if( wifiSignalPercent < 20) {
-        //         wifiSignalPercent = 20;
-        //     }
-        //     if( wifiSignalPercent > 80) {
-        //         wifiSignalPercent = 80;
-        //     }
-        //     return wifiSignalPercent/100;
-        // }
-        // return 0.5;
+
 
         if(!!device.signalStatus) {
             const wifiSignal: number = device.signalStatus;
@@ -380,7 +400,11 @@ export class DevicesPage implements OnInit {
             }
             return wifiSignalPercent/100;
         }
-        return 0.5;
+
+        // RSSI non letto: il Core usa 0, valore impossibile per una misura in
+        // dBm. L'indicatore resta invisibile invece di mostrare un segnale
+        // intermedio mai misurato.
+        return 0;
     }
 
 

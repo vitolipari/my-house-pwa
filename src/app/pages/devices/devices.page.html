@@ -119,11 +119,10 @@
                                     <div class="device-row-data">
                                         <div class="device-row-ip">{{ device.ip }}</div>
                                         <div class="device-row-status">
-                                            <!-- TODO opacity in base al segnale -->
-                                            <span [style]="'opacity: '+ wifiSignalInOpacityRange(device) +';'">WiFi</span>
-                                            <!--
-                                            <span>ON</span>
-                                            -->
+                                            <div>
+                                                <span [style]="'opacity: '+ wifiSignalInOpacityRange(device) +';'">WiFi</span>
+                                                <div class="wifi-signal-line" [style]="'width: '+ (wifiSignalInOpacityRange(device) * 100) +'%;'"></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

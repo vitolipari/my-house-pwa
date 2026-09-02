@@ -146,6 +146,19 @@ p-tab > DIV > SPAN, B {
     justify-content: flex-start;
 }
 
+.device-row-status > DIV {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    font-size: var(--tiny-font-size);
+}
+
+.wifi-signal-line {
+    background: var(--color-text-0);
+    height: 4px;
+    border-radius: 4px;
+    opacity: 0.5;
+}
 
 
 
