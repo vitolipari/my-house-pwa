@@ -106,8 +106,8 @@ export class ProfilePage {
 
 
         this.errors = {};
+        // il form contiene le password: nel log mai i valori
         let value: any = this.form.getRawValue();
-        console.log(value);
 
         if (value.newPassword !== value.confirmPassword) {
             // console.log('Le password non coincidono.');

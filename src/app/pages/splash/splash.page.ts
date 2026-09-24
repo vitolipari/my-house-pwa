@@ -44,13 +44,15 @@ export class SplashPage implements OnInit {
                             onFinish(data);
                         })
                         .catch((e: any) => {
-                            console.log('errore a leaveSplashScreen');
+                            console.log('errore in ngOnInit: leaveSplashScreen');
                             console.log(e);
                             onError(e);
                         })
 
                 }, SPLASH_SCREEN_TIME);
             } catch (e) {
+                console.log('errore sincrono in ngOnInit');
+                console.log(e);
                 onError(e);
             }
         });
@@ -71,10 +73,8 @@ export class SplashPage implements OnInit {
 
             })
             .catch((e: any) => {
-                console.log('errore');
-                console.log(e.message);
+                console.log('errore in ngOnInit: caricamento iniziale');
                 console.log(e);
-                console.error(e);
 
                 if( e === 'no-token' ) {
                     this.authService.clearLoginData();

@@ -28,17 +28,15 @@ export class AuthService {
         return (
             firstValueFrom(this.authApi.login(payload))
                 .then((result: any) => {
-                    console.log('risposta login');
-                    console.log(result);
-                    // debugger;
+                    // la risposta contiene l'accessToken: nel log solo il profilo che ha fatto l'accesso
+                    console.log('risposta login per il profilo ' + result?.profile?.id);
                     this.saveLoggedUser( result.profile );
                     this.saveToken( result.accessToken );
                     return result;
                 })
                 .catch((e: any) => {
-                    console.log('errore al signUp di auth')
+                    console.log('errore in login');
                     console.log(e);
-                    debugger;
                     return Promise.reject(e);
                 })
         );
@@ -52,9 +50,8 @@ export class AuthService {
                     return result;
                 })
                 .catch((e: any) => {
-                    console.log('errore al signUp di auth')
+                    console.log('errore in signUp');
                     console.log(e);
-                    debugger;
                     return Promise.reject(e);
                 })
         );
@@ -86,7 +83,7 @@ export class AuthService {
     ensureUserLoaded(): Promise<LoggedUser> {
         // const current = this.currentUser;
         console.log('authService controllo il token e l\'utente');
-        console.log(this.getToken(), this.currentUser());
+        console.log('token presente: ' + this.hasToken(), this.currentUser()?.id);
 
         if (!this.hasToken()) {
             console.log('manca il token in authService.ensureUserLoaded()');

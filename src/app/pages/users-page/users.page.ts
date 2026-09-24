@@ -38,9 +38,8 @@ export class UsersPage implements OnInit {
                     this.isInWaiting.set(false);
                 })
                 .catch((e: any) => {
-                    console.log('errore al get users in users.page')
+                    console.log('errore in getUsers');
                     console.log(e);
-                    debugger;
                     this.isInWaiting.set(false);
                     // TODO mostrare messaggio di errore
                 })

@@ -147,8 +147,11 @@ export const secureConInterceptor: HttpInterceptorFn = (req, next) => {
         }),
         catchError((e) => {
 
-            console.log('interceptor catchError '+ e.status);
-            console.log(e);
+            // `e` può essere un HttpErrorResponse che trasporta il body cifrato
+            // (`iv`/`payload`) o un errore di decifratura il cui messaggio cita
+            // body in chiaro: nel log vanno solo tipo e stato, non l'oggetto
+            console.log('errore in secureConInterceptor: status ' + e?.status);
+            console.log(e?.name);
             // debugger;
             /*
             HttpErrorResponse = {
@@ -185,14 +188,17 @@ export const secureConInterceptor: HttpInterceptorFn = (req, next) => {
                         secureCon.decryptBody(e.error.iv, e.error.payload)
                     ).pipe(
                         switchMap((decryptedBody) => {
+                            // il contenuto decifrato non va nel log
                             console.log('decriptato il messaggio di errore');
-                            console.log(decryptedBody);
                             decryptedError = decryptedBody;
                             return throwError(() => decryptedBody);
                         }),
                         catchError((ee: any) => {
-                            console.log('catch error ee in interceptor');
-                            console.log(ee);
+                            // l'errore arriva dalla decifratura del body di
+                            // errore: il suo messaggio può citare testo in
+                            // chiaro, quindi nel log va solo il tipo
+                            console.log('errore in secureConInterceptor: decifratura del body di errore');
+                            console.log(ee?.name);
                             // debugger;
                             return throwError(() => decryptedError);
                         })
@@ -207,7 +213,6 @@ export const secureConInterceptor: HttpInterceptorFn = (req, next) => {
             else {
                 console.log('errore da controllare');
                 console.log(e);
-                debugger;
                 return throwError(() => e);
             }
 

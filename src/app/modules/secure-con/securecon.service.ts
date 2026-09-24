@@ -61,11 +61,19 @@ export class SecureCon {
                             privateKey: keys[0],
                             publicKey: keys[1]
                         }))
-                        .catch((e: any) => Promise.reject(e))
+                        .catch((e: any) => {
+                            console.log('errore in generateKeys: export delle chiavi');
+                            console.log(e);
+                            return Promise.reject(e);
+                        })
                 )
 
             })
-            .catch((e: any) => Promise.reject(e))
+            .catch((e: any) => {
+                console.log('errore in generateKeys');
+                console.log(e);
+                return Promise.reject(e);
+            })
 
     )
 
@@ -101,11 +109,19 @@ export class SecureCon {
                                 }
                             )
                             .then((cert: string | DER) => ({certificate: cert as string, privateKey, publicKey}))
-                            .catch(e => Promise.reject(e))
+                            .catch(e => {
+                                console.log('errore in generateX509PemCert: x509.fromJwk');
+                                console.log(e);
+                                return Promise.reject(e);
+                            })
 
                     )
                 })
-                .catch(e => Promise.reject(e))
+                .catch(e => {
+                    console.log('errore in generateX509PemCert');
+                    console.log(e);
+                    return Promise.reject(e);
+                })
         )
     }
 
@@ -143,7 +159,11 @@ export class SecureCon {
                             )
                     )
                 })
-                .catch(e => Promise.reject(e))
+                .catch(e => {
+                    console.log('errore in generateX509PemCertificate');
+                    console.log(e);
+                    return Promise.reject(e);
+                })
         )
     }
 
@@ -166,7 +186,11 @@ export class SecureCon {
                                 this.session = {};
                                 return true;
                             })
-                            .catch((e: any) => Promise.reject(e))
+                            .catch((e: any) => {
+                                console.log('errore in handshake: resolveApiBaseUrl');
+                                console.log(e);
+                                return Promise.reject(e);
+                            })
                     )
                     ;
 
@@ -207,7 +231,11 @@ export class SecureCon {
                                 publicKey
                             });
                         })
-                        .catch(e => Promise.reject(e))
+                        .catch(e => {
+                            console.log('errore in handshake: chiamata /session/handshake');
+                            console.log(e);
+                            return Promise.reject(e);
+                        })
                 ))
 
                 // prepare keys -------------------------------------------------------------------------------------------------------------------
@@ -262,19 +290,14 @@ export class SecureCon {
                             this.session.privateKey = privateKey;
                             this.session.secret = secret;
 
-                            const bytes = new Uint8Array(secret);
-                            let hexSessionKey: string =
-                                Array
-                                    .from(bytes)
-                                    .map(b => b.toString(16).padStart(2, '0'))
-                                    .join('')
-                            ;
-                            console.log(hexSessionKey);
-
                             return secret;
 
                         })
-                        .catch((e: any) => Promise.reject(e))
+                        .catch((e: any) => {
+                            console.log('errore in handshake: deriveBits della chiave di sessione');
+                            console.log(e);
+                            return Promise.reject(e);
+                        })
                 ))
 
 
@@ -326,14 +349,22 @@ export class SecureCon {
                                             this.session.key = kEnc;
                                             return this.session;
                                         })
-                                        .catch((e: any) => Promise.reject(e))
+                                        .catch((e: any) => {
+                                            console.log('errore in handshake: deriveKey di kEnc');
+                                            console.log(e);
+                                            return Promise.reject(e);
+                                        })
                                 )
                             })
                     )
                 })
 
 
-                .catch((e: any) => Promise.reject(e))
+                .catch((e: any) => {
+                    console.log('errore in handshake');
+                    console.log(e);
+                    return Promise.reject(e);
+                })
         );
     };
 
@@ -359,7 +390,11 @@ export class SecureCon {
                         payload: arrayBufferToBase64Url(encrypted)
                     };
                 })
-                .catch((e: any) => Promise.reject(e))
+                .catch((e: any) => {
+                    console.log('errore in encryptBody');
+                    console.log(e);
+                    return Promise.reject(e);
+                })
         );
 
     }
@@ -383,7 +418,14 @@ export class SecureCon {
                     const json = uint8ArrayToText(new Uint8Array(decrypted));
                     return JSON.parse(json);
                 })
-                .catch((e: any) => Promise.reject(e))
+                .catch((e: any) => {
+                    // il messaggio di un SyntaxError di JSON.parse riporta un
+                    // frammento dell'input, che qui è body decifrato: nel log
+                    // va solo il tipo di errore, l'errore completo è rilanciato
+                    console.log('errore in decryptResponse');
+                    console.log(e?.name);
+                    return Promise.reject(e);
+                })
         );
 
     }
@@ -424,7 +466,6 @@ export class SecureCon {
 
 
         // console.log('jwt token key');
-        // console.log(b64SessionKey + '@' + now);
 
         return (
 
@@ -465,7 +506,11 @@ export class SecureCon {
 
 
                 })
-                .catch((e: any) => Promise.reject(e))
+                .catch((e: any) => {
+                    console.log('errore in generateJwtToken');
+                    console.log(e);
+                    return Promise.reject(e);
+                })
         );
 
 
@@ -490,7 +535,13 @@ export class SecureCon {
                 encrypted
             )
             .then((decrypted: any) => JSON.parse(new TextDecoder().decode(new Uint8Array(decrypted))))
-            .catch((e: any) => Promise.reject(e))
+            .catch((e: any) => {
+                // come in decryptResponse: il messaggio di un SyntaxError può
+                // contenere un frammento di body decifrato, nel log solo il tipo
+                console.log('errore in decryptBody');
+                console.log(e?.name);
+                return Promise.reject(e);
+            })
         )
 
 

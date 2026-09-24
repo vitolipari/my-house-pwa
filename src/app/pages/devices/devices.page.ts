@@ -142,6 +142,9 @@ export class DevicesPage implements OnInit {
 				return this.loadDevicesStatus();
             })
             .catch((error: unknown) => {
+                console.log('errore in loadDevices');
+                console.log(error);
+
                 const candidate = error as {error?: {error?: string}; message?: string};
                 this.devicesError.set(
                     candidate.error?.error ?? candidate.message ?? 'Impossibile caricare i dispositivi'
@@ -285,9 +288,8 @@ export class DevicesPage implements OnInit {
 
                 })
                 .catch((e: any) => {
-                    console.log('errore al get users in devices.page')
+                    console.log('errore in startScan');
                     console.log(e);
-                    debugger;
                     this.isInWaiting.set(false);
                     // TODO mostrare messaggio di errore
                 })
@@ -334,13 +336,14 @@ export class DevicesPage implements OnInit {
                     this.isCopied.set(true);
                 })
                 .catch((e: any) => {
-                    console.log('errore nella copia');
-                    console.error(e);
+                    console.log('errore in copyNewDeviceData');
+                    console.log(e);
                 })
             ;
 
         } catch (error) {
-            console.error('Errore durante la copia:', error);
+            console.log('errore sincrono in copyNewDeviceData');
+            console.log(error);
         }
     }
 

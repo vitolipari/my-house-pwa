@@ -5,12 +5,9 @@ import {environment} from '../../environments';
 
 
 
+// con un URL assoluto la base viene ignorata, con uno relativo si usa l'origine della PWA
 function getPathname(url: string): string {
-    try {
-        return new URL(url).pathname;
-    } catch {
-        return new URL(url, window.location.origin).pathname;
-    }
+    return new URL(url, window.location.origin).pathname;
 }
 
 function isNoAuthPath(url: string): boolean {
