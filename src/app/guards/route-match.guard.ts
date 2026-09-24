@@ -4,7 +4,8 @@ import { AuthService } from '../services/auth';
 import { AccessControlService } from '../services/access-control.service';
 import { AccessControlData } from '../models/access-control.models';
 
-export const routeMatchGuard: CanMatchFn = async (
+// carica l'utente, valuta le regole della rotta e, se l'accesso non è consentito, reindirizza spiegando il motivo
+export const routeMatchGuard: CanMatchFn = (
   route: Route,
   segments: UrlSegment[]
 ): Promise<boolean | UrlTree> => {
@@ -15,23 +16,25 @@ export const routeMatchGuard: CanMatchFn = async (
   const config = route.data?.['accessControl'] as AccessControlData | undefined;
   const url = '/' + segments.map(segment => segment.path).join('/');
 
-  const user = await authService.ensureUserLoaded();
+  return (
+    authService.ensureUserLoaded()
+      .then(user => accessControlService.evaluateAccess(user, url, config))
+      .then(result => {
+        if (result.allowed) {
+          return true;
+        }
 
-  const result = await accessControlService.evaluateAccess(user, url, config);
+        const redirectUrl = accessControlService.resolveRedirect(
+          result.reason ?? 'FORBIDDEN',
+          config
+        );
 
-  if (result.allowed) {
-    return true;
-  }
-
-  const redirectUrl = accessControlService.resolveRedirect(
-    result.reason ?? 'FORBIDDEN',
-    config
+        return router.createUrlTree([redirectUrl], {
+          queryParams: {
+            from: url,
+            reason: result.reason
+          }
+        });
+      })
   );
-
-  return router.createUrlTree([redirectUrl], {
-    queryParams: {
-      from: url,
-      reason: result.reason
-    }
-  });
 };

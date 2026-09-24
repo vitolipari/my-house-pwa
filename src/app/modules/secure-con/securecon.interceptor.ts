@@ -27,32 +27,28 @@ export const secureConInterceptor: HttpInterceptorFn = (req, next) => {
 
 
     return from(
-        (async () => {
-            if (!secureCon.session.id) {
-                await secureCon.handshake();
-            }
-
-
-
-            const token = await secureCon.generateJwtToken({
+        // prima la sessione (handshake se manca), poi il token di sessione e, se c'è un body, la cifratura
+        (!secureCon.session.id ? secureCon.handshake() : Promise.resolve())
+            .then(() => secureCon.generateJwtToken({
                 sub: secureCon.session.id,
                 iat: 0,
                 exp: 0
-            });
+            }))
+            .then((token: string) => {
+                if(
+                    !!req.body
+                    && (req.body !== undefined)
+                    && (req.body !== null)
+                    && (Object.keys(req.body as any).length > 0)
+                ) {
+                    return (
+                        secureCon.encryptBody(req.body || '')
+                            .then((payload: any) => ({ token, payload }))
+                    );
+                }
 
-            let payload = null;
-            if(
-                !!req.body
-                && (req.body !== undefined)
-                && (req.body !== null)
-                && (Object.keys(req.body as any).length > 0)
-            ) {
-                payload = await secureCon.encryptBody(req.body || '');
-            }
-
-
-            return { token, payload };
-        })()
+                return { token, payload: null as any };
+            })
     ).pipe(
         switchMap(({ token, payload }) => {
 

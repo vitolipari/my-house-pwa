@@ -54,36 +54,50 @@ export class WasteCollectionPage implements OnInit {
         return DAY_LABELS[day];
     }
 
-    async save(day: WasteCollectionDay): Promise<void> {
-        if (!this.canEdit() || this.savingDay() !== null) return;
+    // salva un giorno alla volta; un materiale vuoto toglie la raccolta da quel giorno
+    save(day: WasteCollectionDay): Promise<void> {
+        if (!this.canEdit() || this.savingDay() !== null) return Promise.resolve();
         this.error.set(null);
         this.savedDay.set(null);
         this.savingDay.set(day);
-        try {
-            const value = this.materials[day]?.trim() || null;
-            const updated = await firstValueFrom(this.api.update(day, value));
-            this.schedule.update(entries => entries.map(entry => entry.day === day ? updated : entry));
-            this.materials[day] = updated.material ?? '';
-            this.savedDay.set(day);
-        } catch (error) {
-            this.error.set(this.errorMessage(error, 'Impossibile salvare la raccolta'));
-        } finally {
-            this.savingDay.set(null);
-        }
+
+        const value = this.materials[day]?.trim() || null;
+        return (
+            firstValueFrom(this.api.update(day, value))
+                .then(updated => {
+                    this.schedule.update(entries => entries.map(entry => entry.day === day ? updated : entry));
+                    this.materials[day] = updated.material ?? '';
+                    this.savedDay.set(day);
+                })
+                .catch(error => {
+                    console.log('errore nel salvataggio della raccolta');
+                    console.log(error);
+                    this.error.set(this.errorMessage(error, 'Impossibile salvare la raccolta'));
+                })
+                .finally(() => {
+                    this.savingDay.set(null);
+                })
+        );
     }
 
-    private async loadSchedule(): Promise<void> {
+    private loadSchedule(): Promise<void> {
         this.loading.set(true);
         this.error.set(null);
-        try {
-            const entries = await firstValueFrom(this.api.schedule());
-            this.schedule.set(entries);
-            for (const entry of entries) this.materials[entry.day] = entry.material ?? '';
-        } catch (error) {
-            this.error.set(this.errorMessage(error, 'Impossibile caricare il calendario'));
-        } finally {
-            this.loading.set(false);
-        }
+        return (
+            firstValueFrom(this.api.schedule())
+                .then(entries => {
+                    this.schedule.set(entries);
+                    for (const entry of entries) this.materials[entry.day] = entry.material ?? '';
+                })
+                .catch(error => {
+                    console.log('errore nel caricamento del calendario della raccolta');
+                    console.log(error);
+                    this.error.set(this.errorMessage(error, 'Impossibile caricare il calendario'));
+                })
+                .finally(() => {
+                    this.loading.set(false);
+                })
+        );
     }
 
     private errorMessage(error: unknown, fallback: string): string {

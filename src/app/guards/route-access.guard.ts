@@ -10,7 +10,7 @@ import {AuthService} from '../services/auth';
 import {PermissionService} from '../services/permission.service';
 import {LoggedUser, RouteAccessConfig} from '../models/auth.models';
 
-export const routeAccessGuard: CanActivateFn = async (
+export const routeAccessGuard: CanActivateFn = (
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
 ): Promise<boolean | UrlTree> => {

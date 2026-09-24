@@ -39,7 +39,7 @@ export class ConfirmSignupPage {
     code: ['', Validators.required]
   });
 
-  async submit(): Promise<void> {
+  submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -48,16 +48,15 @@ export class ConfirmSignupPage {
     this.loading.set(true);
     this.message.set('');
 
-    try {
-      // await this.authService.confirm(this.form.getRawValue());
-
-      await this.router.navigate(['/access/sign-in'], {
-        queryParams: { confirmed: 'true' }
-      });
-    } catch {
-      this.message.set('Conferma non riuscita.');
-    } finally {
-      this.loading.set(false);
-    }
+    // this.authService.confirm(this.form.getRawValue())
+    this.router.navigate(['/access/sign-in'], {
+      queryParams: { confirmed: 'true' }
+    })
+      .catch((e: any) => {
+        console.log('errore nella conferma della registrazione');
+        console.log(e);
+        this.message.set('Conferma non riuscita.');
+      })
+      .finally(() => this.loading.set(false));
   }
 }

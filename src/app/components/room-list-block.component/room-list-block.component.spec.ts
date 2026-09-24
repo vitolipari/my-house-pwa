@@ -6,16 +6,17 @@ describe('RoomListBlockComponent', () => {
   let component: RoomListBlockComponent;
   let fixture: ComponentFixture<RoomListBlockComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
+  beforeEach(() => (
+    TestBed.configureTestingModule({
       imports: [RoomListBlockComponent]
     })
-    .compileComponents();
-
-    fixture = TestBed.createComponent(RoomListBlockComponent);
-    component = fixture.componentInstance;
-    await fixture.whenStable();
-  });
+      .compileComponents()
+      .then(() => {
+        fixture = TestBed.createComponent(RoomListBlockComponent);
+        component = fixture.componentInstance;
+        return fixture.whenStable();
+      })
+  ));
 
   it('should create', () => {
     expect(component).toBeTruthy();

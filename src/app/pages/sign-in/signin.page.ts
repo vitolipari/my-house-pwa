@@ -53,7 +53,7 @@ export class SignInPage {
         });
     }
 
-    async submit(): Promise<void> {
+    submit(): void {
         if (this.form.invalid) {
             this.form.markAllAsTouched();
             return;
@@ -101,8 +101,9 @@ export class SignInPage {
                     this.inWaiting.set(false);
                 })
             ;
-            // await this.router.navigate(['/dashboard']);
-        } catch {
+        } catch (e: any) {
+            console.log('errore nel login');
+            console.log(e);
             this.errorMessage.set('Login non riuscito o server non raggiungibile.');
         } finally {
             this.loading.set(false);

@@ -43,10 +43,6 @@ export class AuthService {
                 })
         );
 
-
-        // const response = await firstValueFrom(this.authApi.login(payload));
-        // this.saveToken(response.accessToken);
-        // return await this.loadCurrentUser();
     }
 
     signUp(payload: SignUpRequest): Promise<void> {
@@ -64,22 +60,23 @@ export class AuthService {
         );
     }
 
-    async editProfile(payload: EditProfileRequestType): Promise<LoggedUser> {
-        const updatedUser = await firstValueFrom(
-            this.authApi.editProfile(payload)
+    // il profilo riletto dal Core diventa l'utente corrente, così form e anteprima restano allineati
+    editProfile(payload: EditProfileRequestType): Promise<LoggedUser> {
+        return (
+            firstValueFrom(this.authApi.editProfile(payload))
+                .then(updatedUser => {
+                    this.currentUser.set(updatedUser);
+                    return updatedUser;
+                })
         );
-
-        this.currentUser.set(updatedUser);
-
-        return updatedUser;
     }
 
-    // async confirm(payload: ConfirmRequest): Promise<void> {
-    //     await firstValueFrom(this.authApi.confirm(payload));
+    // confirm(payload: ConfirmRequest): Promise<void> {
+    //     return firstValueFrom(this.authApi.confirm(payload)).then(() => undefined);
     // }
 
-    // async forgotPassword(email: string): Promise<void> {
-    //     await firstValueFrom(this.authApi.forgotPassword(email));
+    // forgotPassword(email: string): Promise<void> {
+    //     return firstValueFrom(this.authApi.forgotPassword(email)).then(() => undefined);
     // }
 
     // loadCurrentUser(): Promise<LoggedUser> {
@@ -116,18 +113,11 @@ export class AuthService {
 
         }
 
-
-
-        // try {
-        //     return await this.loadCurrentUser();
-        // } catch {
-        //     this.clearLoginData();
-        //     return null;
-        // }
     }
 
-    async logout(): Promise<void> {
+    logout(): Promise<void> {
         this.clearLoginData();
+        return Promise.resolve();
     }
 
     saveToken(token: string): void {

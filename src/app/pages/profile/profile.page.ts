@@ -101,7 +101,8 @@ export class ProfilePage {
     }
 
 
-    async submit(): Promise<void> {
+    // salva il profilo e riallinea il form con i dati che il Core ha davvero salvato
+    submit(): void {
 
 
         this.errors = {};
@@ -170,53 +171,54 @@ export class ProfilePage {
         this.message.set('');
         this.errorMessage.set('');
 
-        try {
-            const updatedUser = await this.authService.editProfile(value);
+        this.authService.editProfile(value)
+            .then(updatedUser => {
+                this.previewUrl = updatedUser.picture;
+                this.profileImageFile = null;
+                this.isInEdit = false;
+                this.isInChangePassword = false;
 
-            this.previewUrl = updatedUser.picture;
-            this.profileImageFile = null;
-            this.isInEdit = false;
-            this.isInChangePassword = false;
+                this.form.patchValue({
+                    fullName: updatedUser.username,
+                    mobilenumber: updatedUser.mobile,
+                    email: updatedUser.email,
+                    currentPassword: '',
+                    newPassword: '',
+                    confirmPassword: ''
+                });
 
-            this.form.patchValue({
-                fullName: updatedUser.username,
-                mobilenumber: updatedUser.mobile,
-                email: updatedUser.email,
-                currentPassword: '',
-                newPassword: '',
-                confirmPassword: ''
+                this.message.set('Profilo aggiornato.');
+            })
+            .catch((e: any) => {
+                console.log('errore della modifica profilo');
+                console.log(e);
+
+                const err = String(e?.code ?? e?.message ?? e ?? 'Errore durante la modifica del profilo');
+                const normalizedError = err.toLowerCase().trim();
+
+                if (normalizedError.includes('email')) {
+                    this.errors.email = err;
+                }
+                if (
+                    normalizedError.includes('phone')
+                    || normalizedError.includes('mobile')
+                    || normalizedError.includes('number')
+                ) {
+                    this.errors.mobilenumber = err;
+                }
+                if (normalizedError.includes('unique')) {
+                    this.errors.mobilenumber = 'Numero Esistente';
+                }
+                if (normalizedError.includes('password')) {
+                    this.errors.currentPassword = err;
+                }
+                if (Object.keys(this.errors).length === 0) {
+                    this.errorMessage.set(err);
+                }
+            })
+            .finally(() => {
+                this.inWaiting.set(false);
             });
-
-            this.message.set('Profilo aggiornato.');
-        } catch (e: any) {
-            console.log('errore della modifica profilo');
-            console.log(e);
-
-            const err = String(e?.code ?? e?.message ?? e ?? 'Errore durante la modifica del profilo');
-            const normalizedError = err.toLowerCase().trim();
-
-            if (normalizedError.includes('email')) {
-                this.errors.email = err;
-            }
-            if (
-                normalizedError.includes('phone')
-                || normalizedError.includes('mobile')
-                || normalizedError.includes('number')
-            ) {
-                this.errors.mobilenumber = err;
-            }
-            if (normalizedError.includes('unique')) {
-                this.errors.mobilenumber = 'Numero Esistente';
-            }
-            if (normalizedError.includes('password')) {
-                this.errors.currentPassword = err;
-            }
-            if (Object.keys(this.errors).length === 0) {
-                this.errorMessage.set(err);
-            }
-        } finally {
-            this.inWaiting.set(false);
-        }
     }
 
     toggleVisibility(field: string) {

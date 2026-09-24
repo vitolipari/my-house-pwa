@@ -48,22 +48,26 @@ export class PwaInstallService {
         });
     }
 
-    async install(): Promise<void> {
+    // mostra il prompt di installazione del browser e ne legge la scelta; il prompt si usa una sola volta
+    install(): Promise<void> {
         const prompt = this.deferredPrompt;
 
         if (!prompt) {
-            return;
+            return Promise.resolve();
         }
 
-        await prompt.prompt();
-        const choice = await prompt.userChoice;
+        return (
+            prompt.prompt()
+                .then(() => prompt.userChoice)
+                .then((choice: any) => {
+                    this.deferredPrompt = null;
+                    this.canInstall.set(false);
 
-        this.deferredPrompt = null;
-        this.canInstall.set(false);
-
-        if (choice.outcome === 'accepted') {
-            this.isInstalled.set(true);
-        }
+                    if (choice.outcome === 'accepted') {
+                        this.isInstalled.set(true);
+                    }
+                })
+        );
     }
 
     private detectStandaloneMode(): boolean {

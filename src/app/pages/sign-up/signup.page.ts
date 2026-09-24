@@ -84,7 +84,8 @@ export class SignUpPage {
     }
 
 
-    async submit(): Promise<void> {
+    // controlla il form in locale, poi registra l'utente e porta alla dashboard
+    submit(): void {
 
 
         this.errors = {};
@@ -152,11 +153,6 @@ export class SignUpPage {
         // this.inWaiting = true;
 
         try {
-            // const response = await this.authService.signUp(value);
-            // console.log('response di signup');
-            // console.log( response );
-
-
             this.authService.signUp(value)
                 .then((response: any) => {
                     console.log('signup response');
@@ -215,14 +211,9 @@ export class SignUpPage {
                     this.inWaiting.set(false);
                 })
 
-
-            // debugger;
-            // await this.router.navigate(['/access/confirm'], {
-            //     queryParams: {email: value.email}
-            // });
-
-        } catch {
+        } catch (e: any) {
             console.log('errore');
+            console.log(e);
             this.message.set('Registrazione non riuscita.');
         } finally {
             // this.inWaiting.set(false);
