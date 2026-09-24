@@ -898,15 +898,28 @@ export class NewDevicePage implements OnInit {
 
                 })
                 .catch((e: any) => {
-                    throw e;
+                    console.log('errore in ngOnInit');
+                    console.log(e);
+
+                    // l'errore arriva in modo asincrono: il try/catch esterno non
+                    // lo vede, quindi messaggio e attesa si chiudono qui
+                    const candidate = e as {error?: {error?: string}; message?: string};
+                    this.taxonomyError.set(
+                        candidate.error?.error ?? candidate.message ?? 'Impossibile caricare tipi e categorie'
+                    );
+                    this.taxonomyLoading.set(false);
                 })
             ;
 
         } catch (error) {
+            console.log('errore sincrono in ngOnInit');
+            console.log(error);
+
             const candidate = error as {error?: {error?: string}; message?: string};
             this.taxonomyError.set(
                 candidate.error?.error ?? candidate.message ?? 'Impossibile caricare tipi e categorie'
             );
+            this.taxonomyLoading.set(false);
         }
     }
 
@@ -1505,16 +1518,28 @@ export class NewDevicePage implements OnInit {
 
                 })
                 .catch((e: any) => {
-                    console.log('errore nel catch di device-list');
-                    throw e;
+                    console.log('errore in loadIpDevices');
+                    console.log(e);
+
+                    // l'errore arriva in modo asincrono: il try/catch esterno non
+                    // lo vede, quindi messaggio e attesa si chiudono qui
+                    const candidate = e as {error?: {error?: string}; message?: string};
+                    this.devicesError.set(
+                        candidate.error?.error ?? candidate.message ?? 'Impossibile caricare i dispositivi'
+                    );
+                    this.devicesLoading.set(false);
                 })
 
 
         } catch (error) {
+            console.log('errore sincrono in loadIpDevices');
+            console.log(error);
+
             const candidate = error as {error?: {error?: string}; message?: string};
             this.devicesError.set(
                 candidate.error?.error ?? candidate.message ?? 'Impossibile caricare i dispositivi'
             );
+            this.devicesLoading.set(false);
         } finally {
             // this.devicesLoading.set(false);
         }
@@ -1538,16 +1563,28 @@ export class NewDevicePage implements OnInit {
                     this.isRoomsInWaiting.set(false);
                 })
                 .catch((e: any) => {
-                    console.log('errore nel catch di device-list');
-                    throw e;
+                    console.log('errore in loadRooms');
+                    console.log(e);
+
+                    // l'errore arriva in modo asincrono: il try/catch esterno non
+                    // lo vede, quindi messaggio e attesa si chiudono qui
+                    const candidate = e as {error?: {error?: string}; message?: string};
+                    this.devicesError.set(
+                        candidate.error?.error ?? candidate.message ?? 'Impossibile caricare le stanze'
+                    );
+                    this.isRoomsInWaiting.set(false);
                 })
 
 
         } catch (error) {
+            console.log('errore sincrono in loadRooms');
+            console.log(error);
+
             const candidate = error as {error?: {error?: string}; message?: string};
             this.devicesError.set(
                 candidate.error?.error ?? candidate.message ?? 'Impossibile caricare le stanze'
             );
+            this.isRoomsInWaiting.set(false);
         }
     }
 
@@ -1563,13 +1600,14 @@ export class NewDevicePage implements OnInit {
                     this.isCopied.set(true);
                 })
                 .catch((e: any) => {
-                    console.log('errore nella copia');
-                    console.error(e);
+                    console.log('errore in copyNewDeviceData');
+                    console.log(e);
                 })
             ;
 
         } catch (error) {
-            console.error('Errore durante la copia:', error);
+            console.log('errore sincrono in copyNewDeviceData');
+            console.log(error);
         }
     }
 
@@ -1594,7 +1632,8 @@ export class NewDevicePage implements OnInit {
 
             })
             .catch((e: any) => {
-                console.log('errore nel catch di addNewDevice');
+                console.log('errore in addNewDevice');
+                console.log(e);
                 this.inWaiting.set(false);
 
                 // TODO messaggio di errore
