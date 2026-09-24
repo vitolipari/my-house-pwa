@@ -7,9 +7,10 @@
 
 
 <p-accordion [(value)]="activeAccordionValue">
-    <p-accordion-panel value="0" [disabled]="step > 2">
+    <!-- Dispositivo conosciuto già in rete o nuovo accoppiamento -->
+    <p-accordion-panel [value]="sections.init.value" [disabled]="isDisabled(sections.init)">
         <p-accordion-header>
-            @if( step > 0 ) {
+            @if( currentStep > sections.init.step ) {
                 <svg class="greenOkIcon">
                     <use
                         [attr.href]="'#green-ok'"
@@ -27,7 +28,7 @@
                     </use>
                 </svg>
             }
-            Accoppiamento
+            {{ sections.init.label }}
         </p-accordion-header>
         <p-accordion-content>
 
@@ -69,9 +70,17 @@
         </p-accordion-content>
     </p-accordion-panel>
 
-    <p-accordion-panel value="1" [disabled]="step > 3">
+
+
+
+
+
+
+
+    <!-- Famiglia Dispositivo -->
+    <p-accordion-panel [value]="sections.family.value" [disabled]="isDisabled(sections.family)">
         <p-accordion-header>
-            @if( step > 1 ) {
+            @if( currentStep > sections.family.step ) {
                 <svg class="greenOkIcon">
                     <use
                         [attr.href]="'#green-ok'"
@@ -89,7 +98,7 @@
                     </use>
                 </svg>
             }
-            Kind
+            {{ sections.family.label }}
         </p-accordion-header>
         <p-accordion-content>
             <div id="phisical-device-step" style="padding-top: 2rem;">
@@ -185,9 +194,13 @@
         </p-accordion-content>
     </p-accordion-panel>
 
-    <p-accordion-panel value="2" [disabled]="step > 4">
+
+
+
+    <!-- Tipo Dispositivo da catalogo -->
+    <p-accordion-panel [value]="sections.type.value" [disabled]="isDisabled(sections.type)">
         <p-accordion-header>
-            @if( step > 2 ) {
+            @if( currentStep > sections.type.step ) {
                 <svg class="greenOkIcon">
                     <use
                         [attr.href]="'#green-ok'"
@@ -205,7 +218,7 @@
                     </use>
                 </svg>
             }
-            Tipologia
+            {{ sections.type.label }}
         </p-accordion-header>
         <p-accordion-content>
             <div class="taxonomy-step" style="padding-top: 2rem;">
@@ -258,9 +271,19 @@
         </p-accordion-content>
     </p-accordion-panel>
 
-    <p-accordion-panel value="3" [disabled]="step > 5">
+
+
+
+
+
+
+
+
+
+    <!-- Funzionalità Dispositivo -->
+    <p-accordion-panel [value]="sections.feature.value" [disabled]="isDisabled(sections.feature)">
         <p-accordion-header>
-            @if( step > 3 ) {
+            @if( currentStep > sections.feature.step ) {
                 <svg class="greenOkIcon">
                     <use
                         [attr.href]="'#green-ok'"
@@ -278,7 +301,7 @@
                     </use>
                 </svg>
             }
-            Features
+            {{ sections.feature.label }}
         </p-accordion-header>
         <p-accordion-content>
             <div style="padding-top: 2rem;">
@@ -323,72 +346,50 @@
         </p-accordion-content>
     </p-accordion-panel>
 
-    <p-accordion-panel value="4" [disabled]="step > 6">
-        <p-accordion-header>
-            @if( step > 4 ) {
-                <svg class="greenOkIcon">
-                    <use
-                        [attr.href]="'#green-ok'"
-                        [attr.xlink:href]="'#green-ok'">
-                        >
-                    </use>
-                </svg>
-            }
-            @else {
-                <svg class="greenOkIcon">
-                    <use
-                        [attr.href]="'#icon-578'"
-                        [attr.xlink:href]="'#icon-578'">
-                        >
-                    </use>
-                </svg>
-            }
-            Discovery & Selection
-        </p-accordion-header>
-        <p-accordion-content>
 
 
+
+        <p-accordion-panel [value]="sections.discovery.value" [disabled]="isDisabled(sections.discovery)">
+            <p-accordion-header>
+                @if( currentStep > sections.discovery.step ) {
+                    <svg class="greenOkIcon">
+                        <use
+                            [attr.href]="'#green-ok'"
+                            [attr.xlink:href]="'#green-ok'">
+                            >
+                        </use>
+                    </svg>
+                }
+                @else {
+                    <svg class="greenOkIcon">
+                        <use
+                            [attr.href]="'#icon-578'"
+                            [attr.xlink:href]="'#icon-578'">
+                            >
+                        </use>
+                    </svg>
+                }
+                {{ sections.discovery.label }}
+            </p-accordion-header>
+            <p-accordion-content>
 
                 <div style="padding-top: 2rem;">
-                    @if( deviceKnowledgeType !== 'newDevice' ) {
 
 
-                        <div
-                            [formGroup]="deviceForm"
-                            class="columns"
-                        >
-
-                            <div class="base-text-style row-field">
-                                <label for="deviceName">Nome Dispositivo</label>
-                                <input
-                                    pInputText
-                                    id="deviceName"
-                                    aria-describedby="username-help"
-                                    formControlName="deviceName"
-                                    placeholder="luci"
-                                    class="fixed-value-input"
-                                />
-                            </div>
+                    @if( deviceKnowledgeType === 'knownDevice' ) {
 
 
-
-                            @if( deviceKnowledgeType === 'knownDevice' )  {
+                        @switch ( integration ) {
+                            @case ('shelly' ) {
                                 @if(!selectedIpDevice) {
                                     <div>
                                         @if( devicesLoading() ) {
-                                            <div class="base-text-style row-field">
-                                                <label for="deviceIp">Indirizzo IP</label>
-                                                <input
-                                                    pInputText
-                                                    aria-describedby="username-help"
-                                                    formControlName="deviceIp"
-                                                    placeholder="IP"
-                                                    class="fixed-value-input"
-                                                    [disabled]="true"
-                                                    aria-disabled="true"
-                                                />
+                                            <div class="waiting-full-content">
+                                                <svg class="svg-icon" style="position: static">
+                                                    <use href="#orologio-1-1"></use>
+                                                </svg>
+                                                <div class="heartbeat-flash">scanning...</div>
                                             </div>
-                                            <div class="heartbeat-flash">scanning...</div>
                                         }
                                         @else {
                                             <p-listbox
@@ -413,37 +414,171 @@
                                 }
                                 @else {
                                     <div class="base-text-style row-field">
-                                        <label for="deviceIp">Indirizzo IP</label>
-                                        <input
-                                            pInputText
-                                            id="deviceIp"
-                                            aria-describedby="username-help"
-                                            formControlName="deviceIp"
-                                            placeholder="IP"
-                                            class="fixed-value-input"
-                                        />
+                                        <label>Indirizzo</label>
+                                        <span>{{ selectedIpDevice.mac }}@{{ selectedIpDevice.ip }}</span>
                                     </div>
+
                                 }
                             }
-
-
-                        </div>
+                            @case ('tuya' ) {
+                                <div class="base-text-style row-field">
+                                    <label for="deviceTuyaMac">MAC Dispositivo</label>
+                                    <input
+                                        #deviceTuyaMac
+                                        pInputText
+                                        id="deviceTuyaMac"
+                                        aria-describedby="deviceTuyaMac-help"
+                                        placeholder="dispositivo"
+                                        class="fixed-value-input"
+                                    />
+                                </div>
+                            }
+                            @default {
+                                <div>
+                                    <span>Famiglia dispositivo non ancora gestita</span>
+                                </div>
+                            }
+                        }
 
                     }
                     @else {
-
+                        <!-- accoppiamento / commisioning -->
                     }
 
-            </div>
 
 
 
+                </div>
+            </p-accordion-content>
+        </p-accordion-panel>
+
+
+
+    <p-accordion-panel [value]="sections.room.value" [disabled]="isDisabled(sections.room)">
+        <p-accordion-header>
+            @if( currentStep > sections.room.step ) {
+                <svg class="greenOkIcon">
+                    <use
+                        [attr.href]="'#green-ok'"
+                        [attr.xlink:href]="'#green-ok'">
+                        >
+                    </use>
+                </svg>
+            }
+            @else {
+                <svg class="greenOkIcon">
+                    <use
+                        [attr.href]="'#icon-578'"
+                        [attr.xlink:href]="'#icon-578'">
+                        >
+                    </use>
+                </svg>
+            }
+            {{ sections.room.label }}
+        </p-accordion-header>
+        <p-accordion-content>
+
+                <div style="padding-top: 2rem;">
+                    @if(!selectedRoom) {
+                        <div>
+                            @if( isRoomsInWaiting() ) {
+                                <div>
+                                    <svg class="svg-icon" style="position: static">
+                                        <use href="#orologio-1-1"></use>
+                                    </svg>
+                                    <div class="heartbeat-flash">scanning...</div>
+                                </div>
+                            }
+                            @else {
+                                <p-listbox
+                                    [options]="rooms()"
+                                    [ngModelOptions]="{standalone: true}"
+                                    [(ngModel)]="selectedRoom"
+                                    (ngModelChange)="onRoomChange($event)"
+                                    optionLabel="zone"
+                                    [filter]="true"
+                                    [filterFields]="['id', 'name']"
+                                    class="w-full md:w-56"
+                                >
+                                    <ng-template #item let-room>
+                                        <room-list-block
+                                            [room]="room"
+                                        />
+                                    </ng-template>
+                                </p-listbox>
+
+                            }
+                        </div>
+                    }
+                    @else {
+                        <div class="base-text-style row-field">
+                            <label >Stanza</label>
+                            <span>{{ selectedRoom.name }}</span>
+                        </div>
+                    }
+                </div>
 
         </p-accordion-content>
     </p-accordion-panel>
-    <p-accordion-panel value="5" [disabled]="step > 6">
+
+
+
+
+    <p-accordion-panel [value]="sections.naming.value" [disabled]="isDisabled(sections.naming)">
         <p-accordion-header>
-            @if( step > 5 ) {
+            @if( currentStep > sections.naming.step ) {
+                <svg class="greenOkIcon">
+                    <use
+                        [attr.href]="'#green-ok'"
+                        [attr.xlink:href]="'#green-ok'">
+                        >
+                    </use>
+                </svg>
+            }
+            @else {
+                <svg class="greenOkIcon">
+                    <use
+                        [attr.href]="'#icon-578'"
+                        [attr.xlink:href]="'#icon-578'">
+                        >
+                    </use>
+                </svg>
+            }
+            {{ sections.naming.label }}
+        </p-accordion-header>
+        <p-accordion-content>
+
+            <div style="padding-top: 2rem;">
+                <div class="base-text-style row-field">
+                    <label for="deviceName">Nome Dispositivo</label>
+                    <input
+                        #deviceName
+                        pInputText
+                        id="deviceName"
+                        aria-describedby="username-help"
+                        placeholder="dispositivo"
+                        class="fixed-value-input"
+                    />
+                </div>
+                <p-button
+                    class="content-single-button-at-right"
+                    label="continua"
+                    type="button"
+                    [rounded]="true"
+                    [size]="'small'"
+                    [style]="{padding: '0px 20px 0px '+ ( !inWaiting() ? '20px' : '32px' ), marginTop: '2rem'}"
+                    (click)="navigateToNextStepFrom(sections.naming)"
+                    (click)="setDeviceData()"
+                ></p-button>
+            </div>
+
+        </p-accordion-content>
+    </p-accordion-panel>
+
+
+    <p-accordion-panel [value]="sections.confirm.value" [disabled]="isDisabled(sections.confirm)">
+        <p-accordion-header>
+            @if( currentStep > sections.confirm.step ) {
                 <svg class="greenOkIcon">
                     <use
                         [attr.href]="'#green-ok'"
@@ -485,10 +620,14 @@
                 <label>IP</label>
                 <span>{{ newDevice().ip }}</span>
             </div>
+            <div class="base-text-style row-field">
+                <label>Stanza</label>
+                <span>{{ !!selectedRoom ? selectedRoom.name : '' }}</span>
+            </div>
 
             <div id="signup-button">
                 @if (!!inWaiting()) {
-                    <svg class="svg-icon inside-button" style="position: static">
+                    <svg class="svg-icon inside-button" style="position: static; top: 1.1rem; left: 3.8rem;">
                         <use href="#orologio-1-1"></use>
                     </svg>
                 }

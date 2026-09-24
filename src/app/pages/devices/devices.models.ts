@@ -105,7 +105,7 @@ export type DeviceFamilyType = {
 
 export type TuyaFamilyType = DeviceFamilyType & {
     id: number | string;
-    localKey: number | string;
+    localKey: number | string | null | undefined;
 }
 
 export type ShellySystemConfig = {
@@ -257,6 +257,7 @@ export type ZoneType = {
     id: number | string;
     name: string;
     picture: string;
+    device_list: string; // as id list
 }
 
 export type DeviceType = {
@@ -288,6 +289,7 @@ export type DeviceType = {
     channel: string[];
     status: Array<number | string | boolean | null>;
     lastTime: Array<number | string | null>;
+    battery: number | string | null | undefined;
 }
 
 export type ActuatorType = DeviceType & {}
@@ -513,7 +515,8 @@ export let VOID_DEVICE_CATEGORY: DeviceCategory = {
 export let VOID_ZONE: ZoneType = {
     id: 0,
     name: '',
-    picture: ''
+    picture: '',
+    device_list: ''
 }
 
 export let VOID_DEVICE: DeviceType = {
@@ -544,7 +547,8 @@ export let VOID_DEVICE: DeviceType = {
     picture: '',
     channel: [''],
     status: [''],
-    lastTime: ['']
+    lastTime: [''],
+    battery: null
 }
 
 export let VOID_ACTUATOR: ActuatorType = {...VOID_DEVICE}

@@ -1,0 +1,20 @@
+@if(!!room.picture) {
+    <img class="device-row-img" [src]="room.picture">
+}
+@else {
+    <svg>
+        <use
+            [attr.href]="'#' + roomIcon"
+            [attr.xlink:href]="'#' + roomIcon">
+            ></use>
+    </svg>
+}
+<div class="ipdevice-info">
+    <div class="ipdevice-vendor">
+        {{ displayName }}
+    </div>
+    <div class="ipdevice-data">
+        <div class="dhcp">&nbsp;</div>
+        <div class="mac-address">{{ deviceCount }}</div>
+    </div>
+</div>

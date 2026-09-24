@@ -1,6 +1,6 @@
 
 .card {
-    background: var(--color-background-3);
+    background: var(--color-background-2);
     padding: 1rem;
     border-radius: 8px;
     margin: 1rem;
@@ -47,6 +47,7 @@
 }
 ::ng-deep .p-accordioncontent-content {
     width: 100vw;
+    background: var(--color-background-3) !important;
 }
 .p-accordioncontent-content {
     width: 100vw;
@@ -183,7 +184,7 @@ p-accordion-content > DIV,
 
 
 .small-card {
-    background: var(--color-background-3);
+    background: var(--color-background-2);
     padding: 1rem;
     border-radius: 8px;
     margin: 0.3rem;
@@ -296,4 +297,29 @@ device-ip-block {
     height: 30px;
     align-self: flex-start;
     margin: 0px;
+}
+
+
+::ng-deep .p-listbox-option {
+    padding: 0.2rem !important;
+}
+
+::ng-deep .p-listbox-list {
+    background: var(--color-background-1);
+}
+
+.waiting-full-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+
+.content-single-button-at-right {
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 0.75rem;
+    position: relative;
+    top: -1.75rem;
 }

@@ -10,11 +10,21 @@ import {emoj} from '../../utils/string-utils';
 import {RadioButton, RadioButtonModule} from 'primeng/radiobutton';
 import {getLastElementOr} from '../../utils/array-util';
 import {
-    DeviceCatalogItem, DeviceCategory,
-    DeviceTaxonomy, DeviceTipology,
+    DeviceCatalogItem,
+    DeviceCategory,
+    DeviceTaxonomy,
+    DeviceTipology,
     DeviceType,
-    DeviceTypeDefinition, MeteredSwitchType, ShellyFamilyType,
-    SwitchType, VOID_DEVICE, VOID_METRED_SWITCH, VOID_SHELLY_FAMILY, VOID_SWITCH
+    DeviceTypeDefinition,
+    MeteredSwitchType,
+    ShellyFamilyType,
+    SwitchType,
+    VOID_DEVICE,
+    VOID_METRED_SWITCH,
+    VOID_SHELLY_FAMILY,
+    VOID_SWITCH,
+    VOID_TEMPERATURE_HUMIDITY_SENSOR, VOID_TUYA_FAMILY,
+    ZoneType
 } from '../devices/devices.models';
 import {Listbox, ListboxModule} from 'primeng/listbox';
 import {
@@ -24,6 +34,8 @@ import {
 import {ApiUrlService} from '../../services/api-url-service';
 import {InputText, InputTextModule} from 'primeng/inputtext';
 import {Button, ButtonModule} from 'primeng/button';
+import {RoomListBlockComponent} from '../../components/room-list-block.component/room-list-block.component';
+import {Router} from '@angular/router';
 
 
 /*
@@ -785,7 +797,8 @@ taxonomy =
         Listbox,
         InputText,
         ReactiveFormsModule,
-        Button
+        Button,
+        RoomListBlockComponent
     ],
     templateUrl: './new-device.page.html',
     styleUrls: [
@@ -799,8 +812,8 @@ taxonomy =
 export class NewDevicePage implements OnInit {
 
 
-    activeAccordionValue: string | number | string[] | number[] | null | undefined = '0';
-    step: number = 0;
+    activeAccordionValue: string | number | string[] | number[] | null | undefined = 'init';
+    currentStep: number = 0;
     deviceKnowledgeType: string = '';
     integration: string = '';
     // selectedType: any;
@@ -808,13 +821,24 @@ export class NewDevicePage implements OnInit {
     selectedFunctionalTypeObj: any = {name: '', description: ''};
     selectedUsage: string = '';
     selectedCatalogItemId: string = '';
+    sections: any = {
+        init:           {value: 'init',             label: 'Accoppiamento',         step: 0},
+        family:         {value: 'family',           label: 'Famiglia Dispositivi',  step: 1},
+        type:           {value: 'type',             label: 'Tipologia',             step: 2},
+        feature:        {value: 'feature',          label: 'Features',              step: 3},
+        discovery:      {value: 'discovery',        label: 'Discovery & Selection', step: 4},
+        commissioning:  {value: 'commissioning',    label: 'Pair',                  step: 5},
+        room:           {value: 'room',             label: 'Posizione',             step: 6},
+        naming:         {value: 'naming',           label: 'Nomi',                  step: 7},
+        confirm:         {value: 'confirm',           label: 'Fine',                  step: 8}
+    };
 
-    isInScanning = signal(true);
+    readonly isInScanning = signal(true);
     ipDevices: NetworkIdentity[] = [];
-    selectedIpDevice!: NetworkIdentity;
 
     readonly devices = signal<NetworkIdentity[]>([]);
     readonly devicesLoading = signal(true);
+    selectedIpDevice!: NetworkIdentity;
     readonly devicesError = signal<string | null>(null);
     readonly catalog = signal<DeviceCatalogItem[]>([]);
     readonly taxonomy = signal<DeviceTaxonomy>({categories: [], types: [], usages: []});
@@ -824,11 +848,15 @@ export class NewDevicePage implements OnInit {
     readonly newDeviceDataTreePanelOpen = signal<boolean>(false);
     readonly isCopied = signal<boolean>(false);
     readonly inWaiting = signal<boolean>(false);
+    readonly rooms = signal<ZoneType[]>([]);
+    readonly isRoomsInWaiting = signal<boolean>(false);
+    selectedRoom!: ZoneType;
+
 
     private readonly fb = inject(FormBuilder);
     private readonly deviceApi = inject(DeviceApiService);
     private readonly api = inject<ApiUrlService>(ApiUrlService);
-
+    private router = inject(Router);
 
 
     readonly deviceForm = this.fb.nonNullable.group({
@@ -845,38 +873,96 @@ export class NewDevicePage implements OnInit {
     @ViewChild("newDeviceIcon", {static: true, read: ElementRef}) newDeviceIcon!: ElementRef<SVGElement>;
     @ViewChild("knownDevice", {static: true, read: ElementRef}) knownDeviceElement!: ElementRef<HTMLDivElement>;
     @ViewChild("knownDeviceIcon", {static: true, read: ElementRef}) knownDeviceIcon!: ElementRef<SVGElement>;
+    @ViewChild("deviceName", {static: true, read: ElementRef}) deviceName!: ElementRef<HTMLInputElement>;
+    @ViewChild("deviceTuyaMac", {static: true, read: ElementRef}) deviceTuyaMac!: ElementRef<HTMLInputElement>;
 
-    async ngOnInit(): Promise<void> {
+    ngOnInit() {
+
         try {
-            const [taxonomy, catalog] = await Promise.all([
-            firstValueFrom(this.deviceApi.taxonomy()),
+            Promise.all([
+                firstValueFrom(this.deviceApi.taxonomy()),
                 firstValueFrom(this.deviceApi.catalog())
-            ]);
+            ])
+                .then(([taxonomy, catalog]) => {
+                    console.log('response di taxonomy');
+                    console.log(taxonomy);
 
-            console.log('response di taxonomy');
-            console.log(taxonomy);
-
-            console.log('response di catalog');
-            console.log(catalog);
+                    console.log('response di catalog');
+                    console.log(catalog);
 
 
-            this.taxonomy.set(taxonomy);
-            this.catalog.set(catalog);
+                    this.taxonomy.set(taxonomy);
+                    this.catalog.set(catalog);
+                    this.taxonomyLoading.set(false);
+
+
+                })
+                .catch((e: any) => {
+                    throw e;
+                })
+            ;
+
         } catch (error) {
             const candidate = error as {error?: {error?: string}; message?: string};
             this.taxonomyError.set(
                 candidate.error?.error ?? candidate.message ?? 'Impossibile caricare tipi e categorie'
             );
-        } finally {
-            this.taxonomyLoading.set(false);
         }
     }
 
 
+    navigateToNextStepFrom(currentSection: any) {
+        this.currentStep =
+            Object.keys(this.sections)
+                .map((sectionField: string) => this.sections[sectionField].step)
+                .filter((step: number) => step === currentSection.step)
+                .reduce(getLastElementOr, 0)
+        +1
+        ;
+        this.activeAccordionValue =
+            Object.keys(this.sections)
+                // .find((sectionField: string) => ( this.sections[sectionField].step === this.currentStep )).value
+                .map((sectionField: string) => {
+                    // console.log(`controllo ${ sectionField }(${ this.sections[sectionField].step }) con ${ (this.currentStep +1) } = ${ ( this.sections[sectionField].step === (this.currentStep +1) ) }`);
+                    if( this.sections[sectionField].step === this.currentStep ) return this.sections[sectionField].value;
+                    return null;
+                })
+                .filter((section: any) => !!section)
+                .reduce(getLastElementOr, this.sections.init.value)
+        ;
+
+        // console.log('navigazione negli step');
+        // console.log(this.currentStep);
+        // console.log(this.activeAccordionValue);
+    }
+
+
+
+    isDisabled( section: any ) {
+
+        let currentSection =
+            Object.keys(this.sections)
+                .map((sectionField: string) => {
+                    if( this.sections[sectionField].value === this.activeAccordionValue ) return this.sections[sectionField];
+                    return null;
+                })
+                .filter((section: any) => !!section)
+                .reduce(getLastElementOr, this.sections.init)
+        ;
+
+        // console.log('controllo isDisabled');
+        // console.log(`per la section ${ section.value }: ${ this.currentStep } - ${ currentSection.step } - ${ section.step }`);
+        return (
+            (this.currentStep > section.step +1 )
+            || (this.currentStep < (section.step ))
+        );
+
+    }
+
     // # 00 > 01
     commisioningTypeSelected(deviceKnowledge: string) {
-        // this.step = (this.step === 0 ) ? 1 : this.step;
-        this.step = 1;
+        // this.currentStep = (this.currentStep === 0 ) ? 1 : this.currentStep;
+        // this.currentStep = 1;
         this.deviceKnowledgeType = deviceKnowledge;
 
         // selezione card
@@ -893,8 +979,7 @@ export class NewDevicePage implements OnInit {
             this.knownDeviceIcon.nativeElement.style.cssText = '; opacity: 1;'
         }
 
-        this.activeAccordionValue = ''+ this.step;
-
+        this.navigateToNextStepFrom(this.sections.init);
 
     }
 
@@ -904,8 +989,7 @@ export class NewDevicePage implements OnInit {
         this.selectedFunctionalType = '';
         this.selectedUsage = '';
         this.selectedCatalogItemId = '';
-        this.step = 2;
-        this.activeAccordionValue = ''+ this.step;
+        this.navigateToNextStepFrom(this.sections.family);
     }
 
 
@@ -913,8 +997,7 @@ export class NewDevicePage implements OnInit {
     // # 02 > 03
     selectCatalogItemId(id: string) {
         this.selectedCatalogItemId = id;
-        this.step = 3;
-        this.activeAccordionValue = ''+ this.step;
+        this.navigateToNextStepFrom(this.sections.type);
 
     }
 
@@ -1000,31 +1083,45 @@ export class NewDevicePage implements OnInit {
             case 'METERED_SWITCH':
                 this.newDevice.set( VOID_METRED_SWITCH );
                 break;
-
+            case 'TEMPERATURE_HUMIDITY_SENSOR':
+                this.newDevice.set( VOID_TEMPERATURE_HUMIDITY_SENSOR );
+                break;
         }
         this.deviceForm.controls.deviceName.setValue(catalogItem.name);
+
+        this.newDevice.set({
+            ...this.newDevice(),
+            family: this.integration,
+            catalogItemId: catalogItem.id,
+            name: catalogItem.name,
+            category: {
+                id: categoryDefinition.id,
+                name: categoryDefinition.name,
+                description: categoryDefinition!.description || '',
+            },
+            type: {
+                id: typeDefinition.id,
+                name: typeDefinition.name,
+                description: typeDefinition!.description || '',
+            },
+            svgIcon: catalogItem.svgIcon || '',
+            emoj: catalogItem.emojIcon || '',
+            imgIcon: catalogItem.imgIcon || ''
+        });
 
         switch(this.integration) {
             case 'shelly':
                 this.newDevice.set({
                     ...this.newDevice(),
-                    family: this.integration,
                     hardware: VOID_SHELLY_FAMILY,
-                    catalogItemId: catalogItem.id,
-                    name: catalogItem.name,
-                    category: {
-                        id: categoryDefinition.id,
-                        name: categoryDefinition.name,
-                        description: categoryDefinition!.description || '',
-                    },
-                    type: {
-                        id: typeDefinition.id,
-                        name: typeDefinition.name,
-                        description: typeDefinition!.description || '',
-                    },
-                    svgIcon: catalogItem.svgIcon || '',
-                    emoj: catalogItem.emojIcon || '',
-                    imgIcon: catalogItem.imgIcon || ''
+                });
+
+                break;
+
+            case 'tuya':
+                this.newDevice.set({
+                    ...this.newDevice(),
+                    hardware: VOID_TUYA_FAMILY,
                 });
 
                 break;
@@ -1036,8 +1133,8 @@ export class NewDevicePage implements OnInit {
         console.log(this.newDevice);
 
         this.loadIpDevices();
-        this.step = 4;
-        this.activeAccordionValue = ''+ this.step;
+        this.loadRooms();
+        this.navigateToNextStepFrom(this.sections.feature);
 
     }
 
@@ -1333,15 +1430,16 @@ export class NewDevicePage implements OnInit {
             }
          */
 
-        this.step = 5;
-        this.activeAccordionValue = ''+ this.step;
 
 
-        console.log('controllo il selectedUsage');
-        console.log(this.selectedUsage);
-        console.log(this.selectedFunctionalTypeObj.description);
-        console.log(this.selectedCatalogItemId);
 
+        // console.log('controllo il selectedUsage');
+        // console.log(this.selectedUsage);
+        // console.log(this.selectedFunctionalTypeObj.description);
+        // console.log(this.selectedCatalogItemId);
+
+
+        this.navigateToNextStepFrom(this.sections.commissioning);
 
     }
 
@@ -1376,7 +1474,7 @@ export class NewDevicePage implements OnInit {
         try {
             console.log('caricamento dispositivi IP: ' + this.devicesLoading());
 
-            firstValueFrom(this.api.netScan())
+            firstValueFrom(this.api.newDevicesNetScan())
                 .then((ipDevices: NetworkIdentity[]) => {
                     console.log(ipDevices);
                     this.devices.set(
@@ -1404,6 +1502,7 @@ export class NewDevicePage implements OnInit {
                     );
                     this.devicesLoading.set(false);
                     console.log('caricamento dispositivi IP: ' + this.devicesLoading());
+
                 })
                 .catch((e: any) => {
                     console.log('errore nel catch di device-list');
@@ -1418,6 +1517,37 @@ export class NewDevicePage implements OnInit {
             );
         } finally {
             // this.devicesLoading.set(false);
+        }
+    }
+
+
+    loadRooms() {
+        this.isRoomsInWaiting.set(true);
+
+        try {
+            console.log('caricamento stanze');
+
+            firstValueFrom(this.api.getAllRooms())
+                .then((allRooms: ZoneType[]) => {
+
+                    // aggiunta della no-zone
+                    allRooms.push({id: 99, name: 'Nessuna Stanza', device_list: '', picture: ''})
+
+                    console.log(allRooms);
+                    this.rooms.set(allRooms);
+                    this.isRoomsInWaiting.set(false);
+                })
+                .catch((e: any) => {
+                    console.log('errore nel catch di device-list');
+                    throw e;
+                })
+
+
+        } catch (error) {
+            const candidate = error as {error?: {error?: string}; message?: string};
+            this.devicesError.set(
+                candidate.error?.error ?? candidate.message ?? 'Impossibile caricare le stanze'
+            );
         }
     }
 
@@ -1460,6 +1590,7 @@ export class NewDevicePage implements OnInit {
                 console.log( data );
                 this.newDevice.set( data );
                 this.inWaiting.set(false);
+                this.router.navigate(['/devices-page']);
 
             })
             .catch((e: any) => {
@@ -1469,8 +1600,29 @@ export class NewDevicePage implements OnInit {
                 // TODO messaggio di errore
             })
 
+
+        // console.log(`nome dispositivo: ${ this.deviceName.nativeElement.value }`);
         // setTimeout(() => {
         //     this.inWaiting.set(false);
-        // }, 20000)
+        // }, 200000)
+    }
+
+    onRoomChange(event: ZoneType) {
+        this.selectedRoom = event;
+
+        console.log(`zona selezionata ${ event.name }`);
+        this.navigateToNextStepFrom(this.sections.room);
+
+    }
+
+
+    setDeviceData() {
+        this.newDevice.update(() => ({
+            ...this.newDevice(),
+            name: this.deviceName.nativeElement.value
+        }));
     }
 }
+
+
+

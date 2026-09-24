@@ -23,6 +23,7 @@ import {DarkModeService} from '../../services/dark-mode-service';
 import {emoj} from '../../utils/string-utils';
 import {SwitcherComponent} from '../../components/switcher/switcher.component';
 import {timestampInMilliseconds} from '../../utils/time-utils';
+import {getLastElementOr} from '../../utils/array-util';
 
 const DEVICE_STATUS_MAX_AGE_MS = 60_000;
 
@@ -41,7 +42,6 @@ export class DevicesPage implements OnInit {
     deviceDataTreePanelOpen = signal<DeviceType | null>(null);
     isCopied = signal<boolean>(false);
     ipDevices: NetworkIdentity[] = [];
-    readonly deviceGroups = signal<{room: ZoneType, devices: DeviceSmallType[]}[]>([]);
     readonly devices = signal<DeviceType[]>([]);
     // readonly devicesInList = signal<DeviceSmallType[]>([]);
     readonly devicesLoading = signal(true);
@@ -62,6 +62,56 @@ export class DevicesPage implements OnInit {
             : 'assets/images/locked.png'
     );
 
+    /**
+     * I gruppi per stanza sono una derivazione di `devices`: si ricalcolano da
+     * soli a ogni aggiornamento, anche quando riguarda un solo dispositivo.
+     * Non vanno quindi scritti a mano, altrimenti la lista mostrata resta
+     * indietro rispetto ai dati.
+     */
+    readonly deviceGroups = computed<{room: ZoneType, devices: DeviceSmallType[]}[]>(() => {
+        const groups: {room: ZoneType, devices: DeviceSmallType[]}[] = [{
+            room: {id: 0, name: 'No-ROOM', picture: '', device_list: ''},
+            devices: []
+        }];
+
+        this.devices().forEach((device: DeviceType) => {
+            const group = groups.find(current => current.room.id === device.where.id);
+
+            if (group) {
+                group.devices.push(this.toSmallDevice(device));
+                return;
+            }
+
+            groups.push({
+                room: device.where,
+                devices: [this.toSmallDevice(device)]
+            });
+        });
+
+        return groups;
+    });
+
+    private toSmallDevice(device: DeviceType): DeviceSmallType {
+        return {
+            id: device.id,
+            family: device.family,
+            name: device.name,
+            ip: device.ip,
+            mac: device.mac,
+            where: device.where,
+            signalStatus: device.signalStatus,
+            catalogItemId: device.catalogItemId,
+            type: device.type,
+            category: device.category,
+            svgIcon: device.svgIcon,
+            emoj: device.emoj,
+            imgIcon: device.imgIcon,
+            channel: device.channel,
+            status: device.status,
+            lastTime: device.lastTime
+        };
+    }
+
     ngOnInit(): void {
         void this.loadDevices();
     }
@@ -79,70 +129,8 @@ export class DevicesPage implements OnInit {
 
         return firstValueFrom(this.deviceApi.list())
             .then((devices: DeviceType[]) => {
+                // `deviceGroups` è derivato da `devices`: non va costruito qui.
                 this.devices.set(devices);
-
-                let groupByRoom: {room: ZoneType, devices: DeviceSmallType[]}[] = [{
-                    room: {id: 0, name: 'No-ROOM', picture: ''},
-                    devices: []
-                }];
-
-                this.devices()
-                    .map((device: DeviceType) => {
-                        let elementInGroupByRoom: {room: ZoneType, devices: DeviceSmallType[]} | undefined = groupByRoom.find((gbr) => (gbr.room.id === device.where.id));
-                        if( !!elementInGroupByRoom ) {
-                            elementInGroupByRoom
-                                .devices
-                                .push({
-                                    id: device.id,
-                                    family: device.family,
-                                    name: device.name,
-                                    ip: device.ip,
-                                    mac: device.mac,
-                                    where: device.where,
-                                    signalStatus: device.signalStatus,
-                                    catalogItemId: device.catalogItemId,
-                                    type: device.type,
-                                    category: device.category,
-                                    svgIcon: device.svgIcon,
-                                    emoj: device.emoj,
-                                    imgIcon: device.imgIcon,
-                                    channel: device.channel,
-                                    status: device.status,
-                                    lastTime: device.lastTime
-                                })
-                        }
-                        else {
-                            groupByRoom.push({
-                                room: device.where,
-                                devices: [{
-                                    id: device.id,
-                                    family: device.family,
-                                    name: device.name,
-                                    ip: device.ip,
-                                    mac: device.mac,
-                                    where: device.where,
-                                    signalStatus: device.signalStatus,
-                                    catalogItemId: device.catalogItemId,
-                                    type: device.type,
-                                    category: device.category,
-                                    svgIcon: device.svgIcon,
-                                    emoj: device.emoj,
-                                    imgIcon: device.imgIcon,
-                                    channel: device.channel,
-                                    status: device.status,
-                                    lastTime: device.lastTime
-                                }]
-                            })
-                        }
-
-                        return device;
-                    })
-                    .forEach((device: DeviceType) => {
-                        // forse non serve
-                    })
-
-                this.deviceGroups.set(groupByRoom);
-
 
                 this.isDeviceStatusInWaiting.set(
                     devices
@@ -168,6 +156,21 @@ export class DevicesPage implements OnInit {
             return false;
         }
 
+        // controllo mancanza status
+        let statuses = JSON.parse( JSON.stringify( device.status.reverse() ) );
+        if(!statuses.reduce(getLastElementOr, null)) {
+            return true;
+        }
+
+        // controllo mancanza wifi
+        if(!device.hardware.status.WiFi) {
+            return true;
+        }
+        if(!device.hardware.status.WiFi.rssi) {
+            return true;
+        }
+
+        // controllo tempo
         return device.channel.some((_channel, index) => {
             const lastReadAt = timestampInMilliseconds(device.lastTime[index]);
             return lastReadAt === null || now - lastReadAt >= DEVICE_STATUS_MAX_AGE_MS;
@@ -194,83 +197,53 @@ export class DevicesPage implements OnInit {
             }))
         ));
 
-        return Promise.allSettled(
+        // Ogni dispositivo ha la sua catena e aggiorna la propria riga appena
+        // arriva la risposta, senza attendere gli altri. Il `Promise.all`
+        // finale serve solo a sapere quando l'ultimo ha finito: le singole
+        // catene gestiscono già errore e attesa, quindi non può mai rigettare.
+        return Promise.all(
             devicesToRefresh.map(device => (
                 firstValueFrom(this.deviceApi.loadDeviceStatus(device.id))
-            ))
-        )
-            .then(results => {
-                const refreshedDevices = new Map<string, DeviceType>();
 
-                results.forEach((result, index) => {
-                    const requestedDevice = devicesToRefresh[index];
-
-                    if (result.status === 'fulfilled') {
-                        refreshedDevices.set(
-                            String(requestedDevice.id),
-                            result.value
-                        );
-                        console.log('status');
-                        console.log(result.value);
-
-                        return;
-                    }
-
-                    console.error(
-                        `Aggiornamento status del dispositivo ${requestedDevice.id} non riuscito`,
-                        result.reason
-                    );
-                });
-
-                this.devices.update(devices => (
-                    devices.map(device => (
-                        refreshedDevices.get(String(device.id)) ?? device
-                    ))
-                ));
-
-                this.deviceGroups()
-                    .forEach((group: {room: ZoneType, devices: DeviceSmallType[]}) => {
-                        group.devices =
-                            group
-                                .devices
-                                .map((d: DeviceSmallType) => {
-                                    let findedDevice = this.devices().find((D: DeviceType) => (D.id === d.id));
-                                    d = {
-                                        id: !!findedDevice ? findedDevice.id : d.id,
-                                        family: !!findedDevice ? findedDevice.family : d.family,
-                                        name: !!findedDevice ? findedDevice.name : d.name,
-                                        ip: !!findedDevice ? findedDevice.ip : d.ip,
-                                        mac: !!findedDevice ? findedDevice.mac : d.mac,
-                                        where: !!findedDevice ? findedDevice.where : d.where,
-                                        signalStatus: !!findedDevice ? findedDevice.signalStatus : d.signalStatus,
-                                        catalogItemId: !!findedDevice ? findedDevice.catalogItemId : d.catalogItemId,
-                                        type: !!findedDevice ? findedDevice.type : d.type,
-                                        category: !!findedDevice ? findedDevice.category : d.category,
-                                        svgIcon: !!findedDevice ? findedDevice.svgIcon : d.svgIcon,
-                                        emoj: !!findedDevice ? findedDevice.emoj : d.emoj,
-                                        imgIcon: !!findedDevice ? findedDevice.imgIcon : d.imgIcon,
-                                        channel: !!findedDevice ? findedDevice.channel : d.channel,
-                                        status: !!findedDevice ? findedDevice.status : d.status,
-                                        lastTime: !!findedDevice ? findedDevice.lastTime : d.lastTime
-                                    }
-                                    return d;
-                                })
-                        ;
+                    .then((refreshed: DeviceType) => {
+                        this.devices.update(devices => devices.map(current => (
+                            String(current.id) === String(device.id)
+                                ? refreshed
+                                : current
+                        )));
                     })
 
+                    .catch((error: unknown) => {
+                        console.error(
+                            `Aggiornamento status del dispositivo ${device.id} non riuscito`,
+                            error
+                        );
+                    })
 
+                    // Anche l'attesa si chiude per singolo dispositivo.
+                    .finally(() => {
+                        this.isDeviceStatusInWaiting.update(waitingStates => (
+                            waitingStates.map(waitingState => (
+                                String(waitingState.id) === String(device.id)
+                                    ? {...waitingState, inWaiting: false}
+                                    : waitingState
+                            ))
+                        ));
+                    })
+            ))
+        )
+            .then(() => undefined);
+    }
 
+    isCurrentDeviceStatusInWaiting(device: DeviceSmallType) {
 
-            })
-            .finally(() => {
-                this.isDeviceStatusInWaiting.update(waitingStates => (
-                    waitingStates.map(waitingState => (
-                        waitingDeviceIds.has(String(waitingState.id))
-                            ? {...waitingState, inWaiting: false}
-                            : waitingState
-                    ))
-                ));
-            });
+        let deviceStatusWaiting = this.isDeviceStatusInWaiting().find((d) => d.id === device.id);
+        if(!deviceStatusWaiting) {
+            return false;
+        }
+        else {
+            return deviceStatusWaiting.inWaiting;
+        }
     }
 
     deviceChannelStatus(
@@ -302,7 +275,6 @@ export class DevicesPage implements OnInit {
             firstValueFrom(this.api.netScan())
                 .then((result: NetworkIdentity[]) => {
 
-                    // TODO filtrare per i dispositivi già presenti
 
                     console.log('response di getUsers');
                     console.log(result);

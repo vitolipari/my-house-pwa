@@ -4,7 +4,7 @@ import {from, Observable, switchMap} from 'rxjs';
 
 import {catchError, firstValueFrom, of, timeout} from 'rxjs';
 import {environment} from '../../environments';
-import {DeviceType} from '../pages/devices/devices.models';
+import {DeviceType, ZoneType} from '../pages/devices/devices.models';
 import {NetworkIdentity} from '../components/device-ip-block.component/device-ip-block.component';
 
 @Injectable({ providedIn: 'root' })
@@ -24,11 +24,19 @@ export class ApiUrlService {
         return this.http.get<any[]>('/api/core/netscan');
     }
 
+    newDevicesNetScan(): Observable<any[]>  {
+        return (
+            this.http.get<any[]>('/api/core/devices/unknown')
+                // .pipe()
+        );
+    }
+
     addNewDevice(newDevice: DeviceType) {
         return this.http.post<any>(`/api/core/device/${ newDevice.family }`, newDevice);
     }
 
 
-
-
+    getAllRooms() {
+        return this.http.get<ZoneType[]>('/api/core/rooms');
+    }
 }
