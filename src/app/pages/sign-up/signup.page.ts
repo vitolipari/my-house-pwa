@@ -89,11 +89,16 @@ export class SignUpPage {
 
 
         this.errors = {};
-        // il form contiene le password: nel log mai i valori
         let value: any = this.form.getRawValue();
+        console.log(value);
 
         if (value.password !== value.confirmPassword) {
             console.log('Le password non coincidono.');
+            console.log(this.form.getRawValue());
+            console.log(this.form.controls.password.value);
+            console.log(this.form.controls.password.getRawValue());
+            console.log(this.form.controls.confirmPassword.value);
+            console.log(this.form.controls.confirmPassword.getRawValue());
 
             this.errors.confirmPassword = 'Le password non coincidono.'
 

@@ -28,8 +28,8 @@ export class AuthService {
         return (
             firstValueFrom(this.authApi.login(payload))
                 .then((result: any) => {
-                    // la risposta contiene l'accessToken: nel log solo il profilo che ha fatto l'accesso
-                    console.log('risposta login per il profilo ' + result?.profile?.id);
+                    console.log('risposta login');
+                    console.log(result);
                     this.saveLoggedUser( result.profile );
                     this.saveToken( result.accessToken );
                     return result;
@@ -83,7 +83,7 @@ export class AuthService {
     ensureUserLoaded(): Promise<LoggedUser> {
         // const current = this.currentUser;
         console.log('authService controllo il token e l\'utente');
-        console.log('token presente: ' + this.hasToken(), this.currentUser()?.id);
+        console.log(this.getToken(), this.currentUser());
 
         if (!this.hasToken()) {
             console.log('manca il token in authService.ensureUserLoaded()');
@@ -112,9 +112,24 @@ export class AuthService {
 
     }
 
+    /**
+     * Revoca il token sul server, poi cancella i dati locali anche se la revoca
+     * fallisce: l'utente deve comunque risultare disconnesso.
+     */
     logout(): Promise<void> {
-        this.clearLoginData();
-        return Promise.resolve();
+        if (!this.hasToken()) {
+            this.clearLoginData();
+            return Promise.resolve();
+        }
+        return (
+            firstValueFrom(this.authApi.signOut())
+                .then(() => undefined)
+                .catch((e: any) => {
+                    console.log('errore in logout: revoca del token sul server');
+                    console.log(e);
+                })
+                .then(() => this.clearLoginData())
+        );
     }
 
     saveToken(token: string): void {

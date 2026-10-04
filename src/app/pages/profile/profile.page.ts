@@ -106,8 +106,8 @@ export class ProfilePage {
 
 
         this.errors = {};
-        // il form contiene le password: nel log mai i valori
         let value: any = this.form.getRawValue();
+        console.log(value);
 
         if (value.newPassword !== value.confirmPassword) {
             // console.log('Le password non coincidono.');
@@ -144,7 +144,7 @@ export class ProfilePage {
         if (this.form.invalid) {
             // this.form.markAllAsTouched();
 
-            console.log( 'form is NOT valid' );
+            console.log( 'form del profilo NON valido' );
             console.log( this.form );
 
             Object.entries(this.form.controls)
@@ -226,8 +226,12 @@ export class ProfilePage {
     }
 
     logout() {
-        this.authService.logout();
-        this.router.navigate(['/dashboard']);
+        this.authService.logout()
+            .then(() => this.router.navigate(['/dashboard']))
+            .catch((e: any) => {
+                console.log('errore in ProfilePage.logout: navigazione dopo il logout');
+                console.log(e);
+            });
     }
 
     edit() {

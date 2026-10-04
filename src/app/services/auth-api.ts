@@ -30,6 +30,13 @@ export class AuthApiService {
         return this.http.post<void>(`/profile/signup`, payload);
     }
 
+    /**
+     * Logout sul server: revoca il token di accesso inviato con la richiesta.
+     */
+    signOut(): Observable<void> {
+        return this.http.post<void>('/profile/signout', {});
+    }
+
     me(): Observable<{ profile: LoggedUser; accessToken: string; }> {
         return this.http.get<{ profile: LoggedUser; accessToken: string; }>('/profile/me');
     }

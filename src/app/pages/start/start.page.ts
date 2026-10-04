@@ -15,6 +15,10 @@ export class StartupPage {
   private readonly authService = inject<AuthService>(AuthService);
 
   logout(): void {
-    this.authService.logout();
+    this.authService.logout()
+      .catch((e: any) => {
+        console.log('errore in StartupPage.logout');
+        console.log(e);
+      });
   }
 }

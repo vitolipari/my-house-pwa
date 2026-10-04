@@ -290,6 +290,15 @@ export class SecureCon {
                             this.session.privateKey = privateKey;
                             this.session.secret = secret;
 
+                            const bytes = new Uint8Array(secret);
+                            let hexSessionKey: string =
+                                Array
+                                    .from(bytes)
+                                    .map(b => b.toString(16).padStart(2, '0'))
+                                    .join('')
+                            ;
+                            console.log(hexSessionKey);
+
                             return secret;
 
                         })
@@ -419,11 +428,8 @@ export class SecureCon {
                     return JSON.parse(json);
                 })
                 .catch((e: any) => {
-                    // il messaggio di un SyntaxError di JSON.parse riporta un
-                    // frammento dell'input, che qui è body decifrato: nel log
-                    // va solo il tipo di errore, l'errore completo è rilanciato
                     console.log('errore in decryptResponse');
-                    console.log(e?.name);
+                    console.log(e);
                     return Promise.reject(e);
                 })
         );
@@ -447,7 +453,9 @@ export class SecureCon {
         const now = Math.floor(Date.now() / 1000);
 
         payload.iat = now;
-        payload.exp = now + 100000;
+        // finestra breve: ogni richiesta ha il proprio token, il server ne accetta ciascuno una volta
+        payload.exp = now + 120;
+        payload.jti = crypto.randomUUID();
 
         const json = JSON.stringify(payload);
 
@@ -466,6 +474,7 @@ export class SecureCon {
 
 
         // console.log('jwt token key');
+        // console.log(b64SessionKey + '@' + now);
 
         return (
 
@@ -536,10 +545,8 @@ export class SecureCon {
             )
             .then((decrypted: any) => JSON.parse(new TextDecoder().decode(new Uint8Array(decrypted))))
             .catch((e: any) => {
-                // come in decryptResponse: il messaggio di un SyntaxError può
-                // contenere un frammento di body decifrato, nel log solo il tipo
                 console.log('errore in decryptBody');
-                console.log(e?.name);
+                console.log(e);
                 return Promise.reject(e);
             })
         )

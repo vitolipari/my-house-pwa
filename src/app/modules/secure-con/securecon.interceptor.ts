@@ -147,11 +147,8 @@ export const secureConInterceptor: HttpInterceptorFn = (req, next) => {
         }),
         catchError((e) => {
 
-            // `e` può essere un HttpErrorResponse che trasporta il body cifrato
-            // (`iv`/`payload`) o un errore di decifratura il cui messaggio cita
-            // body in chiaro: nel log vanno solo tipo e stato, non l'oggetto
-            console.log('errore in secureConInterceptor: status ' + e?.status);
-            console.log(e?.name);
+            console.log('errore in secureConInterceptor');
+            console.log(e);
             // debugger;
             /*
             HttpErrorResponse = {
@@ -188,17 +185,14 @@ export const secureConInterceptor: HttpInterceptorFn = (req, next) => {
                         secureCon.decryptBody(e.error.iv, e.error.payload)
                     ).pipe(
                         switchMap((decryptedBody) => {
-                            // il contenuto decifrato non va nel log
                             console.log('decriptato il messaggio di errore');
+                            console.log(decryptedBody);
                             decryptedError = decryptedBody;
                             return throwError(() => decryptedBody);
                         }),
                         catchError((ee: any) => {
-                            // l'errore arriva dalla decifratura del body di
-                            // errore: il suo messaggio può citare testo in
-                            // chiaro, quindi nel log va solo il tipo
                             console.log('errore in secureConInterceptor: decifratura del body di errore');
-                            console.log(ee?.name);
+                            console.log(ee);
                             // debugger;
                             return throwError(() => decryptedError);
                         })
