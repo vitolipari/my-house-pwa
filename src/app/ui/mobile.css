@@ -36,4 +36,22 @@ and (max-width: 639.98px)
         margin-bottom: 2rem;
     }
 
+    /* stesso riquadro di .field, altrimenti testi e link prendono tutta la card */
+    .signup-field > SMALL,
+    .signup-field > A
+    {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        min-width: 320px;
+        width: 75%;
+        max-width: 640px;
+        justify-self: center;
+    }
+
+    .signup-field > A
+    {
+        justify-content: flex-end;
+    }
+
 }
