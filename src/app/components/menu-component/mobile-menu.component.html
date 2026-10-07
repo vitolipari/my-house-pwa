@@ -64,17 +64,19 @@
 
 
 <!-- stanze ------------------------------------------------------------------------->
-<section
-    (click)="gotoPage('')"
->
-    <svg
-        class="svg-icon"
+@if (hasPermission('READ_ROOMS')) {
+    <section
+        (click)="gotoPage('/rooms-page')"
     >
-        <use href="#Door02"></use>
-        <!--                <use href="#timer_icon_2"></use>-->
-    </svg>
-    <label>Stanze</label>
-</section>
+        <svg
+            class="svg-icon"
+        >
+            <use href="#Door02"></use>
+            <!--                <use href="#timer_icon_2"></use>-->
+        </svg>
+        <label>Stanze</label>
+    </section>
+}
 
 
 

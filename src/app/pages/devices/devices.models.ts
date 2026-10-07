@@ -258,6 +258,7 @@ export type ZoneType = {
     name: string;
     picture: string;
     device_list: string; // as id list
+    devices?: number[];
 }
 
 export type DeviceType = {

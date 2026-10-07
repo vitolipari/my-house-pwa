@@ -1,0 +1,18 @@
+<page-title
+    [title]="'Stanze'"
+    [hasPlusButton]="true"
+    [iconID]="'Door02'"
+    (plusButtonClick)="addRoom()"
+></page-title>
+
+<div class="rooms">
+    @for (room of rooms(); track room.id) {
+        <div class="room-block" (click)="gotoDetailsRoom(room)">
+            <img [src]="room.picture">
+            <div class="room-block-info">
+                <label>{{ room.name }}</label>
+                <label>{{ room.devices?.length }}</label>
+            </div>
+        </div>
+    }
+</div>

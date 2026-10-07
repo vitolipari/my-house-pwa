@@ -1,5 +1,6 @@
-import {Component, Input} from '@angular/core';
+import {Component, inject, Input} from '@angular/core';
 import {ZoneType} from '../../pages/devices/devices.models';
+import {Router} from '@angular/router';
 
 @Component({
     selector: 'room-list-block',
@@ -15,6 +16,7 @@ export class RoomListBlockComponent {
 
     @Input() room!: ZoneType;
     roomIcon: string = 'Door02'; // 'BxsDoorOpen'; // 'Door02';
+    private readonly router = inject(Router);
 
     get displayName(): string {
         return this.room.name;
@@ -25,7 +27,13 @@ export class RoomListBlockComponent {
         console.log( this.room );
         // console.log( this.room.device_list.split(',') );
         // console.log( this.room.device_list.split(',').length );
-        return `${ this.room.device_list.split(',').filter((part: string) => !!part).length } dispositivi`;
+        return `${
+            (this.room.device_list || '')
+                .split(',')
+                .filter((part: string) => !!part)
+                .length
+        } dispositivi`;
     }
+
 
 }

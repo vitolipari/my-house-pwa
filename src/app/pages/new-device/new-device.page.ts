@@ -1649,6 +1649,11 @@ export class NewDevicePage implements OnInit {
     onRoomChange(event: ZoneType) {
         this.selectedRoom = event;
 
+        this.newDevice.update(() => ({
+            ...this.newDevice(),
+            where: {id: event.id, name: event.name, picture: event.picture, device_list: event.device_list }
+        }));
+
         console.log(`zona selezionata ${ event.name }`);
         this.navigateToNextStepFrom(this.sections.room);
 

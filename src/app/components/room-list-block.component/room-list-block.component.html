@@ -1,3 +1,4 @@
+<!--
 @if(!!room.picture) {
     <img class="device-row-img" [src]="room.picture">
 }
@@ -16,5 +17,19 @@
     <div class="ipdevice-data">
         <div class="dhcp">&nbsp;</div>
         <div class="mac-address">{{ deviceCount }}</div>
+    </div>
+</div>
+-->
+
+<div
+    class="room-block"
+
+>
+    @if(!!room.picture) {
+        <img class="device-row-img" [src]="room.picture">
+    }
+    <div class="room-block-info">
+        <label>{{ room.name }}</label>
+        <label>{{ room.devices?.length }}</label>
     </div>
 </div>

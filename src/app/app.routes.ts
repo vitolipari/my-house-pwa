@@ -2,6 +2,7 @@ import {Routes} from '@angular/router';
 import {routeAccessGuard} from './guards/route-access.guard';
 import {guestGuard} from './guards/guest.guard';
 import {NewDevicePage} from './pages/new-device/new-device.page';
+import {NewRoomPage} from './pages/new-room/new-room.page';
 
 
 export const routes: Routes = [
@@ -105,6 +106,40 @@ export const routes: Routes = [
         },
         loadComponent: () =>
             import('./pages/device-details/device-details.page').then(m => m.DeviceDetailsPage)
+    },
+
+    {
+        path: 'rooms-page',
+        canActivate: [routeAccessGuard],
+        data: {
+            accessControl: {
+                permission: 'READ_ROOMS'
+            }
+        },
+        loadComponent: () =>
+            import('./pages/rooms/rooms.page').then(m => m.RoomsPage)
+    },
+
+    {
+        path: 'room-page/:id',
+        data: {
+            accessControl: {
+                permission: 'READ_ROOM'
+            }
+        },
+        loadComponent: () =>
+            import('./pages/room/room.page').then(m => m.RoomPage)
+    },
+
+    {
+        path: 'new-room',
+        data: {
+            accessControl: {
+                permission: ['READ_ROOMS', 'READ_ROOM', 'CREATE_ROOM']
+            }
+        },
+        loadComponent: () =>
+            import('./pages/new-room/new-room.page').then(m => m.NewRoomPage)
     },
 
     {

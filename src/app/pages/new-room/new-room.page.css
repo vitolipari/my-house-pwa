@@ -1,0 +1,17 @@
+#room-image-placeholder
+{
+    width: 10rem;
+    height: 10rem;
+    justify-self: center;
+    cursor: pointer;
+}
+
+
+#room-image
+{
+    object-fit: contain;
+    width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    justify-self: center;
+}
