@@ -20,6 +20,33 @@ export class DeviceApiService {
         return this.http.get<DeviceType[]>(`${this.baseUrl}/devices`);
     }
 
+    search(params: {
+        pageSize?: number;
+        pageNumber?: number;
+        name?: string;
+        family?: string;
+        model?: string;
+        description?: string;
+        firmware?: string;
+        productName?: string;
+        hostName?: string;
+        ids?: number[] | string[];
+        ips?: string[];
+        macs?: string[];
+        zones?: number[] | string[];
+        channels?: number[] | string[];
+        types?: number[] | string[];
+        categories?: number[] | string[];
+        usages?: number[] | string[];
+        catalogItemIds?: number[] | string[];
+        status?: number[] | string[];
+        availability?: string;
+        lastTime?: string | number;
+        signalStatus?: string;
+    }): Observable<DeviceType[]> {
+        return this.http.get<DeviceType[]>(`${this.baseUrl}/devices`, {params});
+    }
+
     integrations(): Observable<DeviceIntegrationStatus[]> {
         return this.http.get<DeviceIntegrationStatus[]>(`${this.baseUrl}/devices/integrations`);
     }

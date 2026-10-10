@@ -17,5 +17,19 @@
     </svg>
 }
 @else {
-    <div id="page-title-spacer"></div>
+
+    @if( !!hasEditButton ) {
+        <svg
+            (click)="editButtonCallback()"
+        >
+            <use
+                [attr.href]="'#icon-407'"
+                [attr.xlink:href]="'#icon-407'">
+                ></use>
+        </svg>
+    }
+    @else {
+        <div id="page-title-spacer"></div>
+    }
+
 }

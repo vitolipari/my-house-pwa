@@ -117,7 +117,14 @@
                                     </div>
 
                                     <div class="device-row-data">
-                                        <div class="device-row-ip">{{ device.ip }}</div>
+                                        <div class="device-row-ip">
+                                            <div>{{ device.ip }}</div>
+                                            <div class="device-mac">{{ device.mac }}</div>
+                                        </div>
+                                        <div class="device-row-ip">
+                                            <div class="device-mac to-right" style="color: {{ (thresholdIndicator(device) !== 0) ? '#ff0000' : '' }}">{{ getMainChannel(device) }}</div>
+                                            <div class="device-mac to-right">{{ getMainChannelLastTimeUpdated(device) }}</div>
+                                        </div>
                                         <div class="device-row-status">
                                             <div>
                                                 <span [style]="'opacity: '+ wifiSignalInOpacityRange(device) +';'">WiFi</span>
@@ -182,7 +189,6 @@
                         }
                     }
 
-                    <div>No Room</div>
 
                 </div>
             }

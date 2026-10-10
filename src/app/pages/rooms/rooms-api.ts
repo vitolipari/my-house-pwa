@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {ZoneType} from '../devices/devices.models';
 
 /*
@@ -19,49 +19,51 @@ export class RoomsApiService {
     private readonly http = inject(HttpClient);
     private readonly baseUrl = '/api/core';
 
-    searchRooms(pageSize?: number, pageNumber?: number, name?: number, id?: number | number[]): Observable<ZoneType[]> {
-        let url = `${this.baseUrl}/rooms`;
-        let queryString: string =
-            [
-                !!pageSize ? pageSize : undefined,
-                !!pageNumber ? pageNumber : undefined,
-                !!name ? name : undefined,
-                !!id ? id : ((Array.isArray(id) && id.length > 0) ? id : undefined)
-            ]
-                .filter((par: any) => !!par)
-                .map((par: any) => {
-                    if(Array.isArray(par)) {
-                        return par.join(',')
-                    }
-                    else {
-                        return par
-                    }
-                })
-                .map((par: string, index: number) => {
-                    switch (index) {
-                        case 0:
-                            return `pagesize=${par}`;
-                        case 1:
-                            return `pagenumber=${par}`;
-                        case 2:
-                            return `name=${par}`;
-                        case 3:
-                            return `id=${par}`;
-                        default:
-                            return '';
-                    }
-                })
-                .filter((par: any) => !!par)
-                .join('&')
-        ;
 
-        url += (!!queryString ? `?${queryString}` : '');
-        return this.http.get<ZoneType[]>(url);
+
+    searchRooms(searchParams?: {
+        id?: number | number[];
+        name?: string;
+        devices?: number[];
+        pageSize?: number;
+        pageNumber?: number;
+    }): Observable<ZoneType[]> {
+        let params = new HttpParams();
+        if(!!searchParams) {
+            if(!!searchParams.pageSize) {
+                params = params.set('pagesize', searchParams.pageSize);
+            }
+            if(!!searchParams.pageNumber) {
+                params = params.set('pagenumber', searchParams.pageNumber);
+            }
+            if(!!searchParams.name) {
+                params = params.set('name', searchParams.name);
+            }
+            if(Array.isArray(searchParams.id) ? searchParams.id.length > 0 : searchParams.id !== undefined) {
+                params = params.set('id', ([] as number[]).concat(searchParams.id as any).join(','));
+            }
+            if(!!searchParams.devices && searchParams.devices.length > 0) {
+                params = params.set('devices', searchParams.devices.join(','));
+            }
+        }
+        return this.http.get<ZoneType[]>(`${this.baseUrl}/rooms`, {params});
     }
 
     newRoom(data: ZoneType): Observable<number> {
         let url = `${this.baseUrl}/room`;
         return this.http.post<number>(url, data);
     }
+
+    editRoom(data: ZoneType): Observable<ZoneType> {
+        let url = `${this.baseUrl}/room/${ data.id }`;
+        return this.http.put<ZoneType>(url, data);
+    }
+
+
+    deleteRooms(rooms: ZoneType[]): Observable<ZoneType> {
+        let url = `${this.baseUrl}/rooms?ids=${ rooms.map((room: ZoneType) => room.id).join(',') }`;
+        return this.http.delete<ZoneType>(url);
+    }
+
 
 }

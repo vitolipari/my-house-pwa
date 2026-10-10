@@ -1,0 +1,186 @@
+
+.device-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+
+    align-items: center;
+    background: var(--color-background-3);
+    border-radius: 6px;
+    margin: 0.5rem auto;
+    min-width: 90vw;
+    width: 100%;
+    max-width: 95vw;
+    padding: 0.6rem;
+    height: 4rem;
+
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+}
+
+.device-row-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    flex: 1;
+}
+
+.device-row-info > DIV {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    max-width: 90%;
+}
+
+.device-row-emoj {
+    font-size: 2.2rem;
+    margin-right: 1.2rem;
+}
+
+.device-row-svg {}
+
+.device-row-img {}
+
+.device-row-data {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.device-row-data > DIV {
+    font-size: var(--tiny-font-size);
+}
+
+.device-mac {
+    font-size: var(--micro-font-size) !important;
+}
+
+.device-row-ip,
+.device-row-ip > DIV
+{
+    font-size: inherit;
+}
+
+.device-row-status {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+.device-row-status > DIV {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    font-size: var(--tiny-font-size);
+}
+
+.wifi-signal-line {
+    background: var(--color-text-0);
+    height: 4px;
+    border-radius: 4px;
+    opacity: 0.5;
+}
+
+.inside-device-list-status {
+
+}
+
+
+
+.to-right {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+}
+
+
+
+
+.row-field {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    /*max-width: 96%;*/
+    width: 100%;
+    margin: 0.3rem auto;
+    background: var(--color-background-3);
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    align-items: center;
+}
+
+.fixed-value-input {
+    max-width: 50%;
+}
+
+
+
+.room-block::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        var(--theme-color-inverse-for-gradient-0) 0%,
+        var(--theme-color-inverse-for-gradient-50) 50%,
+        var(--theme-color-inverse-for-gradient-70) 100%
+    );
+    pointer-events: none;
+}
+
+.room-block {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 10rem;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    /*margin-bottom: 1.5rem;*/
+}
+/* l'immagine riempie il blocco e viene ritagliata, senza deformarsi */
+.room-block > IMG {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+/* nome e dispositivi sovrapposti al fondo dell'immagine */
+.room-block-info {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    bottom: 0rem;
+}
+
+
+.fixed-value-input {
+    background: var(--color-background-2) !important;
+}
+
+.room-block-info > DIV,
+.room-block-info > LABEL
+{
+    color: var(--color-background-1);
+    font-family: var(--page-font);
+    font-size: var(--main-big-font-size);
+    text-shadow: var(--color-ambient-1) 0px 0px 10px;
+    z-index: 10;
+}
+
+#edit-button {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 1rem;
+    height: 4rem;
+    margin-bottom: 2rem;
+}
+
+

@@ -138,7 +138,15 @@ p-tab > DIV > SPAN, B {
     font-size: var(--tiny-font-size);
 }
 
-.device-row-ip {}
+.device-mac {
+    font-size: var(--micro-font-size) !important;
+}
+
+.device-row-ip,
+.device-row-ip > DIV
+{
+    font-size: inherit;
+}
 
 .device-row-status {
     display: flex;
@@ -165,4 +173,10 @@ p-tab > DIV > SPAN, B {
 }
 
 
+
+.to-right {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+}
 

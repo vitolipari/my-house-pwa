@@ -1556,7 +1556,7 @@ export class NewDevicePage implements OnInit {
                 .then((allRooms: ZoneType[]) => {
 
                     // aggiunta della no-zone
-                    allRooms.push({id: 99, name: 'Nessuna Stanza', device_list: '', picture: ''})
+                    allRooms.push({id: -1, name: 'Nessuna Stanza', device_list: '', picture: ''})
 
                     console.log(allRooms);
                     this.rooms.set(allRooms);
@@ -1651,7 +1651,7 @@ export class NewDevicePage implements OnInit {
 
         this.newDevice.update(() => ({
             ...this.newDevice(),
-            where: {id: event.id, name: event.name, picture: event.picture, device_list: event.device_list }
+            where: [{id: event.id, name: event.name, picture: event.picture, device_list: event.device_list}]
         }));
 
         console.log(`zona selezionata ${ event.name }`);

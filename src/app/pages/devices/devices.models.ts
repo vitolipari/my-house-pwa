@@ -258,7 +258,8 @@ export type ZoneType = {
     name: string;
     picture: string;
     device_list: string; // as id list
-    devices?: number[];
+    // devices?: number[] | DeviceType[];
+    devices?: DeviceType[];
 }
 
 export type DeviceType = {
@@ -270,7 +271,7 @@ export type DeviceType = {
     name: string;
     ip: string;
     mac: string;
-    where: ZoneType;
+    where: ZoneType[];
     onMap: string;
     description: string;
     signalStatus: number;
@@ -529,7 +530,7 @@ export let VOID_DEVICE: DeviceType = {
     name: '',
     ip: '',
     mac: '',
-    where: VOID_ZONE,
+    where: [VOID_ZONE],
     onMap: '',
     description: '',
     signalStatus: 0,
@@ -2229,7 +2230,7 @@ export type DeviceSmallType = {
     name: string;
     ip: string;
     mac: string;
-    where: ZoneType;
+    where: ZoneType[];
     signalStatus: number;
     catalogItemId: string;
     type: DeviceTipology;
@@ -2242,3 +2243,134 @@ export type DeviceSmallType = {
     lastTime: Array<number | string | null>;
 }
 
+
+
+export const extractRealDeviceType = (device: DeviceType) => {
+        switch (device.type.id) {
+
+            // --- attuatori ---------------------------------------------
+            case 'SWITCH':
+                const sw = device as SwitchType;
+                // ...
+                return sw;
+
+            case 'DIMMER':
+            case 'COLOR_DIMMER':
+                const dimmer = device as DimmerType;
+                // ...
+                return dimmer;
+
+            case 'CURTAIN':
+                const curtain = device as CurtainType;
+                // curtain.movement, curtain.targetPosition
+                return curtain;
+
+            case 'AIR_CONDITIONER':
+                const clima = device as ClimaType;
+                // clima.mode, clima.temperature, clima.fan
+                return clima;
+
+            case 'TV':
+                const tv = device as TVType;
+                // tv.volume, tv.input, tv.app
+                return tv;
+
+            case 'MOTORIZED_CANOPY':
+            case 'MOTORIZED_DYNAMIC_CANOPY':
+            case 'DOOR':
+            case 'GATE':
+            case 'GAME_CONSOLE':
+            case 'PRINTER':
+            case 'HEADPHONES':
+            case 'SPEAKER':
+                const actuator = device as ActuatorType;
+                // ...
+                return actuator;
+
+            // --- sensori/attuatori con misura --------------------------
+            case 'METERED_SWITCH':
+                const meteredSwitch = device as MeteredSwitchType;
+                // meteredSwitch.channel, .value, .unit, .minThreshold, .maxThreshold
+                return meteredSwitch;
+
+            case 'METERED_DIMMER':
+                const meteredDimmer = device as MeteredDimmerType;
+                // ...
+                return meteredDimmer;
+
+            case 'METERED_CURTAIN':
+                const meteredCurtain = device as MeteredCurtainType;
+                // ...
+                return meteredCurtain;
+
+            case 'POWER_METER':
+                const powerMeter = device as PowerMeterType;
+                // ...
+                return powerMeter;
+
+            case 'THERMOSTAT':
+                const thermostat = device as TermostateType;
+                // thermostat.mode, thermostat.temperature
+                return thermostat;
+
+            case 'SENSING_AIR_CONDITIONER':
+            case 'MOVEMENT_SENSOR_SWITCH':
+            case 'LIGHT_SENSOR_SWITCH':
+            case 'THREE_D_PRINTER':
+            case 'SMART_WATCH':
+            case 'CAR':
+            case 'ELECTRIC_CAR':
+            case 'ELECTRIC_BICYCLE':
+            case 'ELECTRIC_SCOOTER':
+            case 'MOTORCYCLE':
+                const sensorActuator = device as SensorActuatorType;
+                // ...
+                return sensorActuator;
+
+            // --- sensori -----------------------------------------------
+            case 'TEMPERATURE_HUMIDITY_SENSOR':
+                const thSensor = device as TemperatureHumiditySensor;
+                // ...
+                return thSensor;
+
+            case 'LIGHT_SENSOR':
+                const lightSensor = device as LightSensor;
+                // ...
+                return lightSensor;
+
+            case 'MOVEMENT_SENSOR':
+                const movementSensor = device as MovementSensor;
+                // ...
+                return movementSensor;
+
+            case 'WATER_LEVEL_SENSOR':
+                const waterSensor = device as WaterLevelSensor;
+                // ...
+                return waterSensor;
+
+            case 'BINARY_STATE_SENSOR':
+                const binarySensor = device as BinaryStateSensor;
+                // ...
+                return binarySensor;
+
+            case 'FIRE_SENSOR':
+            case 'ENERGY_METER':
+            case 'SOLAR_SYSTEM_MONITOR':
+            case 'GPS_TAG':
+                const sensor = device as SensorType;
+                // ...
+                return sensor;
+
+            // tipo nuovo non ancora gestito dalla PWA
+            default:
+                console.log(`tipo dispositivo non gestito nella PWA: ${device.type.id}`);
+                return device;
+        }
+    }
+;
+
+
+// vero per i dispositivi che hanno value, unit e soglie (categorie con misura)
+export const isSensorDevice = (device: DeviceType): device is SensorType =>
+    device.category?.id === 'SENSOR' || device.category?.id === 'SENSOR_ACTUATOR'
+;

@@ -1,10 +1,10 @@
-import {CommonModule} from '@angular/common';
+import {CommonModule, formatDate} from '@angular/common';
 import {Component, computed, inject, ModelSignal, OnDestroy, OnInit, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {firstValueFrom} from 'rxjs';
 import {
     DeviceCatalogItem, DeviceSmallType,
-    DeviceType,
+    DeviceType, extractRealDeviceType, isSensorDevice,
     ShellyFamilyType, ZoneType
 } from './devices.models';
 import {AuthService} from '../../services/auth';
@@ -18,14 +18,15 @@ import {
 import {Tab, TabList, TabPanel, TabPanels, Tabs, TabsModule} from 'primeng/tabs';
 import {PageTitleComponent} from '../../components/page-title.component/page-title.component';
 import {Router} from '@angular/router';
-import { PermissionService } from '../../services/permission.service';
+import {PermissionService} from '../../services/permission.service';
 import {DarkModeService} from '../../services/dark-mode-service';
 import {emoj} from '../../utils/string-utils';
 import {SwitcherComponent} from '../../components/switcher/switcher.component';
 import {timestampInMilliseconds} from '../../utils/time-utils';
 import {getLastElementOr} from '../../utils/array-util';
+import moment from 'moment';
 
-const DEVICE_STATUS_MAX_AGE_MS = 60_000;
+export const DEVICE_STATUS_MAX_AGE_MS = 60_000;
 
 
 @Component({
@@ -46,7 +47,10 @@ export class DevicesPage implements OnInit {
     // readonly devicesInList = signal<DeviceSmallType[]>([]);
     readonly devicesLoading = signal(true);
     readonly devicesError = signal<string | null>(null);
-    readonly isDeviceStatusInWaiting = signal<{id: number | string; inWaiting: boolean}[]>([{id: 0, inWaiting: false}]);
+    readonly isDeviceStatusInWaiting = signal<{ id: number | string; inWaiting: boolean }[]>([{
+        id: 0,
+        inWaiting: false
+    }]);
 
     value: string | number = "device";
 
@@ -68,24 +72,46 @@ export class DevicesPage implements OnInit {
      * Non vanno quindi scritti a mano, altrimenti la lista mostrata resta
      * indietro rispetto ai dati.
      */
-    readonly deviceGroups = computed<{room: ZoneType, devices: DeviceSmallType[]}[]>(() => {
-        const groups: {room: ZoneType, devices: DeviceSmallType[]}[] = [{
-            room: {id: 0, name: 'No-ROOM', picture: '', device_list: ''},
-            devices: []
+    readonly deviceGroups = computed<{ room: ZoneType, devices: DeviceSmallType[] }[]>(() => {
+        const groups: { room: ZoneType, devices: DeviceSmallType[] }[] = [{
+            room: {
+                id: 0,
+                name: 'Nessuna Stanza',
+                device_list: '',
+                picture: ''
+            },
+            devices: [],
         }];
 
         this.devices().forEach((device: DeviceType) => {
-            const group = groups.find(current => current.room.id === device.where.id);
 
-            if (group) {
-                group.devices.push(this.toSmallDevice(device));
-                return;
+            // senza zone il dispositivo finisce nel gruppo No-ROOM
+            // const rooms = device.where.length > 0 ? device.where : [groups[0].room];
+            const rooms = device.where;
+
+            rooms.forEach((room: ZoneType) => {
+                const group = groups.find(current => current.room.id === room.id);
+
+                if (group) {
+                    group.devices.push(this.toSmallDevice(device));
+                    return;
+                }
+
+                if( device.where.every((w: ZoneType) => w.id !== -1) ) {
+                    groups.push({room, devices: [this.toSmallDevice(device)]});
+                }
+            });
+
+            device.where
+                .filter((zone: ZoneType) => zone.id === -1)
+                .forEach(() => {
+                    groups[0].devices.push(this.toSmallDevice(device));
+                })
+            ;
+            if(device.where.length === 0) {
+                groups[0].devices.push(this.toSmallDevice(device));
             }
 
-            groups.push({
-                room: device.where,
-                devices: [this.toSmallDevice(device)]
-            });
         });
 
         return groups;
@@ -116,11 +142,11 @@ export class DevicesPage implements OnInit {
         void this.loadDevices();
     }
 
-    itemEmojIcon( emojIconName: string) {
-        if( !emojIconName ) {
+    itemEmojIcon(emojIconName: string) {
+        if (!emojIconName) {
             // TODO
         }
-        return emoj( emojIconName || '' );
+        return emoj(emojIconName || '');
     }
 
     private loadDevices(): Promise<void> {
@@ -129,6 +155,10 @@ export class DevicesPage implements OnInit {
 
         return firstValueFrom(this.deviceApi.list())
             .then((devices: DeviceType[]) => {
+
+                console.log('devices arrivati');
+                console.log(devices);
+
                 // `deviceGroups` è derivato da `devices`: non va costruito qui.
                 this.devices.set(devices);
 
@@ -139,13 +169,13 @@ export class DevicesPage implements OnInit {
                 ;
                 this.devicesLoading.set(false);
 
-				return this.loadDevicesStatus();
+                return this.loadDevicesStatus();
             })
             .catch((error: unknown) => {
-                console.log('errore in loadDevices');
+                console.log('errore in loadOwnDevices');
                 console.log(error);
 
-                const candidate = error as {error?: {error?: string}; message?: string};
+                const candidate = error as { error?: { error?: string }; message?: string };
                 this.devicesError.set(
                     candidate.error?.error ?? candidate.message ?? 'Impossibile caricare i dispositivi'
                 );
@@ -160,16 +190,16 @@ export class DevicesPage implements OnInit {
         }
 
         // controllo mancanza status
-        let statuses = JSON.parse( JSON.stringify( device.status.reverse() ) );
-        if(!statuses.reduce(getLastElementOr, null)) {
+        let statuses = JSON.parse(JSON.stringify(device.status.reverse()));
+        if (!statuses.reduce(getLastElementOr, null)) {
             return true;
         }
 
         // controllo mancanza wifi
-        if(!device.hardware.status.WiFi) {
+        if (!device.hardware.status.WiFi) {
             return true;
         }
-        if(!device.hardware.status.WiFi.rssi) {
+        if (!device.hardware.status.WiFi.rssi) {
             return true;
         }
 
@@ -205,46 +235,45 @@ export class DevicesPage implements OnInit {
         // finale serve solo a sapere quando l'ultimo ha finito: le singole
         // catene gestiscono già errore e attesa, quindi non può mai rigettare.
         return Promise.all(
-            devicesToRefresh.map(device => (
-                firstValueFrom(this.deviceApi.loadDeviceStatus(device.id))
+                devicesToRefresh.map(device => (
+                    firstValueFrom(this.deviceApi.loadDeviceStatus(device.id))
 
-                    .then((refreshed: DeviceType) => {
-                        this.devices.update(devices => devices.map(current => (
-                            String(current.id) === String(device.id)
-                                ? refreshed
-                                : current
-                        )));
-                    })
+                        .then((refreshed: DeviceType) => {
+                            this.devices.update(devices => devices.map(current => (
+                                String(current.id) === String(device.id)
+                                    ? refreshed
+                                    : current
+                            )));
+                        })
 
-                    .catch((error: unknown) => {
-                        console.error(
-                            `Aggiornamento status del dispositivo ${device.id} non riuscito`,
-                            error
-                        );
-                    })
+                        .catch((error: unknown) => {
+                            console.error(
+                                `Aggiornamento status del dispositivo ${device.id} non riuscito`,
+                                error
+                            );
+                        })
 
-                    // Anche l'attesa si chiude per singolo dispositivo.
-                    .finally(() => {
-                        this.isDeviceStatusInWaiting.update(waitingStates => (
-                            waitingStates.map(waitingState => (
-                                String(waitingState.id) === String(device.id)
-                                    ? {...waitingState, inWaiting: false}
-                                    : waitingState
-                            ))
-                        ));
-                    })
-            ))
-        )
+                        // Anche l'attesa si chiude per singolo dispositivo.
+                        .finally(() => {
+                            this.isDeviceStatusInWaiting.update(waitingStates => (
+                                waitingStates.map(waitingState => (
+                                    String(waitingState.id) === String(device.id)
+                                        ? {...waitingState, inWaiting: false}
+                                        : waitingState
+                                ))
+                            ));
+                        })
+                ))
+            )
             .then(() => undefined);
     }
 
     isCurrentDeviceStatusInWaiting(device: DeviceSmallType) {
 
         let deviceStatusWaiting = this.isDeviceStatusInWaiting().find((d) => d.id === device.id);
-        if(!deviceStatusWaiting) {
+        if (!deviceStatusWaiting) {
             return false;
-        }
-        else {
+        } else {
             return deviceStatusWaiting.inWaiting;
         }
     }
@@ -274,7 +303,7 @@ export class DevicesPage implements OnInit {
         }
 
         // controllo se gia e stato avviato
-        if( this.ipDevices.length === 0 ) {
+        if (this.ipDevices.length === 0) {
             firstValueFrom(this.api.netScan())
                 .then((result: NetworkIdentity[]) => {
 
@@ -331,7 +360,7 @@ export class DevicesPage implements OnInit {
         event.preventDefault();
 
         try {
-            navigator.clipboard.writeText( JSON.stringify(this.deviceDataTreePanelOpen()) )
+            navigator.clipboard.writeText(JSON.stringify(this.deviceDataTreePanelOpen()))
                 .then(() => {
                     this.isCopied.set(true);
                 })
@@ -350,7 +379,7 @@ export class DevicesPage implements OnInit {
     gotoDeviceDetailsPage(id: number | string) {
         // TODO controllo permesso
         this.router.navigate(
-            [`/device-details/${ id }`],
+            [`/device-details/${id}`],
             {
                 state: {
                     from: 'mobileMenu',
@@ -364,16 +393,16 @@ export class DevicesPage implements OnInit {
     wifiSignalInOpacityRange(device: DeviceSmallType) {
 
 
-        if(!!device.signalStatus) {
+        if (!!device.signalStatus) {
             const wifiSignal: number = device.signalStatus;
             let wifiSignalPercent: number = Math.max(0, Math.min(100, 2 * (wifiSignal + 100)));
-            if( wifiSignalPercent < 20) {
+            if (wifiSignalPercent < 20) {
                 wifiSignalPercent = 20;
             }
-            if( wifiSignalPercent > 80) {
+            if (wifiSignalPercent > 80) {
                 wifiSignalPercent = 80;
             }
-            return wifiSignalPercent/100;
+            return wifiSignalPercent / 100;
         }
 
         // RSSI non letto: il Core usa 0, valore impossibile per una misura in
@@ -389,13 +418,115 @@ export class DevicesPage implements OnInit {
 
 
     isDeviceInWaiting(device: DeviceSmallType) {
-        let waitingStatus: {id: number | string; inWaiting: boolean} | undefined =
+        let waitingStatus: { id: number | string; inWaiting: boolean } | undefined =
             this.isDeviceStatusInWaiting()
-                .find((waitForStatus: {id: number | string; inWaiting: boolean}) => waitForStatus.id === device.id)
+                .find((waitForStatus: { id: number | string; inWaiting: boolean }) => waitForStatus.id === device.id)
         ;
-        if( !!waitingStatus ) {
+        if (!!waitingStatus) {
             return waitingStatus.inWaiting;
         }
         return false;
     }
+
+
+    // get deviceTypeIcon(device: DeviceType): string {
+    //
+    //     // gestione del tipo
+    //     switch (device.deviceType) {
+    //         case null:
+    //         case '':
+    //             return '';
+    //         case 'IoT device':
+    //             return 'icon-209';
+    //     }
+    //
+    //     return "";
+    //
+    // }
+
+    getMainChannel(device: DeviceSmallType): string {
+        let d: DeviceType | undefined =
+            this.devices()
+                .find((dd: DeviceType) => dd.id === device.id)
+        ;
+        let mainChannelText: string = '';
+        if(!d) return mainChannelText;
+
+        // d = extractRealDeviceType( d );
+        // let powerChannelIndex: number =
+        //     d.channel
+        //         .map((ch: string, index: number) => (ch === 'power') ? index : -1)
+        //         .filter((chIndex: number) => chIndex !== -1)
+        //         .reduce(getLastElementOr, -1)
+        // ;
+        // if( powerChannelIndex !== -1 ) {
+        //     // mainChannelText += d.channel[powerChannelIndex];
+        //     mainChannelText += d.value[powerChannelIndex];
+        //     mainChannelText += d.unit[powerChannelIndex];
+        //
+        //     // minThreshold: []
+        //     // maxThreshold: []
+        //
+        // }
+        //
+        // /*
+        // MeteredSwitchType
+        //  */
+        //
+        // if( d.channel.reduce(getLastElementOr, null) === 'output' ) return ' ';
+        // return (`${d.channel.reduce(getLastElementOr, null)}: ${d.status.reduce(getLastElementOr, null)}`);
+
+        if (isSensorDevice(d)) {
+            const powerChannelIndex: number = d.channel.lastIndexOf('power');
+            const power = (powerChannelIndex !== -1) ? d.value[powerChannelIndex] : null;
+            if (power !== null && power !== undefined) {
+                return `${power} ${d.unit?.[powerChannelIndex] ?? ''}`.trim();
+            }
+        }
+
+        return mainChannelText;
+    }
+
+    getMainChannelLastTimeUpdated(device: DeviceSmallType): string {
+        let d: DeviceType | undefined =
+            this.devices()
+                .find((dd: DeviceType) => dd.id === device.id)
+        ;
+        if(!d) return '';
+       return ''+ moment(d.lastTime.reduce(getLastElementOr, null)).format('DD/MM/YYYY HH:mm');
+    }
+
+
+    /**
+     * valori possibili di ritorno:
+     * -1 sotto la soglia minima
+     * 0 entro le sooglie
+     * +1 sopra la soglia massima
+     * @param device
+     */
+    thresholdIndicator(device: DeviceSmallType){
+        let d: DeviceType | undefined =
+            this.devices()
+                .find((dd: DeviceType) => dd.id === device.id)
+        ;
+        if(!d) return 0;
+
+        if (isSensorDevice(d)) {
+            const powerChannelIndex: number = d.channel.lastIndexOf('power');
+            const power = (powerChannelIndex !== -1) ? (d.value[powerChannelIndex] || 0) : 0;
+            if( !! d.minThreshold[powerChannelIndex] ) {
+                if( power < d.minThreshold[powerChannelIndex] ) return -1;
+            }
+            if( !! d.maxThreshold[powerChannelIndex] ) {
+                if( power > d.maxThreshold[powerChannelIndex] ) return 1;
+            }
+        }
+
+        return 0;
+    }
+
+
+
+
+
 }

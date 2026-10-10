@@ -6,7 +6,7 @@
 
 <div
         class="columns"
-        style="margin: 2rem;"
+        style="margin: 2rem; padding-top: 2rem;"
 >
 
 
@@ -40,12 +40,12 @@
 
 
         @if (!errors()?.picture) {
-            <small id="profilePicture-help">Carica una immagine di profilo</small>
+            <small id="profilePicture-help">Carica una immagine</small>
         } @else {
             <small id="profilePicture-error" class="error-message">{{ errors()?.picture }}</small>
         }
 
-        <div>Sign Up</div>
+
     </div>
 
 
@@ -79,8 +79,7 @@
         <p>Nessun dispositivo registrato.</p>
     } @else {
 
-        @for (device of devices(); track device.id) {
-
+        <!--
             <p-listbox
                 [options]="devices()"
                 [ngModelOptions]="{standalone: true}"
@@ -100,8 +99,72 @@
                     />
                 </ng-template>
             </p-listbox>
+        -->
 
-        }
+
+        <div>Dispositivi</div>
+
+        <div class="device-list-container">
+            @for (device of devices(); track device.id) {
+
+
+                <div class="device-row">
+
+                    <div>
+                        <p-checkbox
+                            (onChange)="toggleSelctedDevice(device, $event)"
+                            [binary]="true"
+                            inputId="size_small"
+                            name="size"
+                            value="Small"
+                            size="small"
+                            style="margin: 1rem;"
+                        />
+                    </div>
+
+                    @if( !!device.imgIcon ) {
+                        <img class="device-row-img" [src]="device.imgIcon">
+                    }
+                    @else {
+                        @if( !!device.emoj ) {
+                            <div class="device-row-emoj">{{ itemEmojIcon( device.emoj ) }}</div>
+                        }
+                        @else {
+                            <svg
+                                class="device-row-svg"
+                            >
+                                <use
+                                    [attr.href]="'#' + (device.svgIcon ?? 'icon-602')"
+                                    [attr.xlink:href]="'#' + (device.svgIcon ?? 'icon-602')">
+                                    >
+                                </use>
+                            </svg>
+                        }
+
+                    }
+                    <div class="device-row-info">
+                        <div>
+                            <strong>{{ device.name }}</strong>
+                            <!--                                    <div>STANZA</div>-->
+                        </div>
+
+                        <div class="device-row-data">
+                            <div class="device-row-ip">{{ device.ip }}</div>
+                            <div class="device-row-status">
+    <!--                            <div>-->
+    <!--                                <span [style]="'opacity: '+ wifiSignalInOpacityRange(device) +';'">WiFi</span>-->
+    <!--                                <div class="wifi-signal-line" [style]="'width: '+ (wifiSignalInOpacityRange(device) * 100) +'%;'"></div>-->
+    <!--                            </div>-->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            }
+        </div>
+
+
     }
 
 

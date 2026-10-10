@@ -5,14 +5,70 @@
     (plusButtonClick)="addRoom()"
 ></page-title>
 
+@if( !!isInSelection() ) {
+    <div id="delete-button">
+        @if (!!inWaiting()) {
+            <svg class="svg-icon inside-button" style="position: static; top: 1rem; left: 1.5rem;">
+                <use href="#orologio-1-1"></use>
+            </svg>
+        }
+        @else {
+            <svg
+                class="svg-icon inside-button"
+                style="position: static; top: 0.4rem; left: 1.8rem;"
+            >
+                <use href="#icon-102"></use>
+            </svg>
+        }
+        <p-button
+            label="{{ !!inWaiting() ? 'in attesa' : 'elimina selezionati' }}"
+            type="submit"
+            [disabled]="!!inWaiting()"
+            [rounded]="true"
+            [size]="'small'"
+            [style]="{
+                padding: '0px 20px 0px '+ ( !inWaiting() ? '20px' : '32px' ),
+                marginTop: '2rem',
+                background: 'var(--dark-red-color)',
+                border: 'none',
+                paddingLeft: '2rem'
+            }"
+            (click)="deleteMultiRoom()"
+        ></p-button>
+    </div>
+}
+
 <div class="rooms">
     @for (room of rooms(); track room.id) {
-        <div class="room-block" (click)="gotoDetailsRoom(room)">
-            <img [src]="room.picture">
+        <div
+            class="room-block"
+            (click)="gotoDetailsRoom(room)"
+        >
+            <img
+                [src]="room.picture"
+                (longPress)="onLongPress(room)"
+                [style]="{ opacity: !!isInSelection() ? 0.25 : 1 }"
+            >
             <div class="room-block-info">
                 <label>{{ room.name }}</label>
                 <label>{{ room.devices?.length }}</label>
             </div>
+            @if(!!isInSelection()) {
+                <div
+                    style="position: relative; display: inline-block; top: -10rem; left: 0px; z-index: 2;"
+                >
+                    <p-checkbox
+                        (onChange)="toggleSelctedRooms(room, $event)"
+                        (click)="stopPropagation($event)"
+                        [binary]="true"
+                        inputId="size_small"
+                        name="size"
+                        value="Small"
+                        size="small"
+                        style="margin: 1rem;"
+                    />
+                </div>
+            }
         </div>
     }
 </div>

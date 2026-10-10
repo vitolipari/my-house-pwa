@@ -16,6 +16,7 @@ import {
 import {Listbox} from 'primeng/listbox';
 import {RoomsApiService} from '../rooms/rooms-api';
 import {Router} from '@angular/router';
+import {Checkbox, CheckboxChangeEvent, CheckboxModule} from 'primeng/checkbox';
 
 
 
@@ -29,7 +30,8 @@ import {Router} from '@angular/router';
         SwitcherComponent,
         DeviceIpBlockComponent,
         Listbox,
-        Button
+        Button,
+        Checkbox
     ],
   templateUrl: './new-room.page.html',
   styleUrl: './new-room.page.css',
@@ -39,7 +41,7 @@ export class NewRoomPage implements OnInit {
     // constant
 
     // variables
-    selectedIpDevices!: NetworkIdentity[] | DeviceType[];
+    selectedDevices: DeviceType[] = [];
 
     // signals
     readonly data = signal<ZoneType>({
@@ -69,7 +71,7 @@ export class NewRoomPage implements OnInit {
 
     ngOnInit(): void {
         console.log('new room on Init');
-        // void this.loadDevices();
+        // void this.loadOwnDevices();
     }
 
     constructor(private cdr: ChangeDetectorRef) {
@@ -89,13 +91,15 @@ export class NewRoomPage implements OnInit {
 
         return firstValueFrom(this.deviceApi.list())
             .then((devices: DeviceType[]) => {
-                this.devices.set(devices);
+                this.devices.set(
+                    devices.filter((device: DeviceType) => ((device.where.length === 0) || (!device.where)))
+                );
                 this.devicesLoading.set(false);
                 console.log('devices arrivati');
                 console.log(devices);
             })
             .catch((error: unknown) => {
-                console.log('errore in loadDevices della nuova stanza');
+                console.log('errore in loadOwnDevices della nuova stanza');
                 console.log(error);
 
                 const candidate = error as {error?: {error?: string}; message?: string};
@@ -170,8 +174,8 @@ export class NewRoomPage implements OnInit {
 
         this.data.update((data: ZoneType) => ({
             ...data,
-            device_list: devicesIds_string,
-            devices: devicesIds
+            device_list: devicesIds_string
+            // devices: devicesIds
         }));
     }
 
@@ -236,5 +240,23 @@ export class NewRoomPage implements OnInit {
                 console.log(error);
             });
 
+    }
+
+    protected toggleSelctedDevice(device: DeviceType, event: CheckboxChangeEvent) {
+
+        if( !!event.checked ) {
+            this.selectedDevices = [...this.selectedDevices, device];
+        }
+        else {
+            this.selectedDevices =
+                this.selectedDevices
+                    .filter((sd: DeviceType) => sd.id !== device.id)
+            ;
+        }
+        this.data.update(() => ({
+            ...this.data(),
+            devices: this.selectedDevices,
+            device_list: this.selectedDevices.map((device: DeviceType) => device.id).join(',')
+        }));
     }
 }

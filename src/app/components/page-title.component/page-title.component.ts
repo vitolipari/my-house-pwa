@@ -12,10 +12,17 @@ export class PageTitleComponent {
     @Input() iconID: string | null = null;
     @Input() title!: string;
     @Input() hasPlusButton: boolean = true;
+    @Input() hasEditButton: boolean = false;
     // @Input() plusButtonCallBack: any;
     @Output() plusButtonClick = new EventEmitter<void>();
+    @Output() editButtonClick = new EventEmitter<void>();
 
     plusButtonCallback() {
         this.plusButtonClick.emit();
     }
+
+    editButtonCallback() {
+        this.editButtonClick.emit();
+    }
+
 }
