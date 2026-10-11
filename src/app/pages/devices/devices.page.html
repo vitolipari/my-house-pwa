@@ -3,11 +3,11 @@
     [title]="'Dispositivi'"
     [hasPlusButton]="true"
     [iconID]="'icon-521'"
-    (plusButtonClick)="addDevice()"
+    (plusButtonClick)="addFromTitle()"
 ></page-title>
 
 
-<p-tabs value="device">
+<p-tabs [value]="value">
     <p-tablist>
         <p-tab value="device" (click)="activeTab('device')">
             <div>
@@ -186,7 +186,89 @@
             }
         </p-tabpanel>
         <p-tabpanel value="groups">
-            gruppi dell'app
+            @if( !!isGroupsInSelection() ) {
+                <div id="delete-button">
+                    <p-button
+                        label="annulla"
+                        [rounded]="true"
+                        [size]="'small'"
+                        [text]="true"
+                        [disabled]="!!isGroupsDeleteInWaiting()"
+                        (click)="cancelGroupsSelection()"
+                    ></p-button>
+                    @if (!!isGroupsDeleteInWaiting()) {
+                        <svg class="svg-icon inside-button" style="position: static; top: 1rem; left: 1.5rem;">
+                            <use href="#orologio-1-1"></use>
+                        </svg>
+                    }
+                    @else {
+                        <svg
+                            class="svg-icon inside-button"
+                            style="position: static; top: 0.4rem; left: 1.8rem;"
+                        >
+                            <use href="#icon-102"></use>
+                        </svg>
+                    }
+                    <p-button
+                        label="{{ !!isGroupsDeleteInWaiting() ? 'in attesa' : 'elimina selezionati' }}"
+                        type="submit"
+                        [disabled]="!!isGroupsDeleteInWaiting()"
+                        [rounded]="true"
+                        [size]="'small'"
+                        [style]="{
+                            padding: '0px 20px 0px '+ ( !isGroupsDeleteInWaiting() ? '20px' : '32px' ),
+                            background: 'var(--dark-red-color)',
+                            border: 'none',
+                            paddingLeft: '2rem'
+                        }"
+                        (click)="deleteMultiGroup()"
+                    ></p-button>
+                </div>
+            }
+
+            @if (groupsLoading()) {
+                <p>Caricamento gruppi…</p>
+            } @else if (groupsError()) {
+                <p class="devices-error">{{ groupsError() }}</p>
+            } @else if (groups().length === 0) {
+                <p>Nessun gruppo registrato.</p>
+            } @else {
+                <div class="registered-devices">
+                    @for (group of groups(); track group.id) {
+                        <div class="device-row group-row" (click)="gotoDetailsGroup(group)">
+                            @if(!!isGroupsInSelection()) {
+                                <div>
+                                    <p-checkbox
+                                        (onChange)="toggleSelectedGroup(group, $event)"
+                                        (click)="stopPropagation($event)"
+                                        [binary]="true"
+                                        size="small"
+                                        style="margin: 1rem;"
+                                    />
+                                </div>
+                            }
+                            <svg class="device-row-svg">
+                                <use
+                                    [attr.href]="'#icon-541'"
+                                    [attr.xlink:href]="'#icon-541'">
+                                </use>
+                            </svg>
+                            <div
+                                class="device-row-info"
+                                (longPress)="onGroupLongPress(group)"
+                            >
+                                <div>
+                                    <strong>{{ group.name }}</strong>
+                                    <span class="device-mac">{{ groupDeviceCount(group) }} dispositivi</span>
+                                </div>
+                                <div class="device-row-data">
+                                    <div class="device-mac">{{ group.description }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
         </p-tabpanel>
         <p-tabpanel
             value="network"

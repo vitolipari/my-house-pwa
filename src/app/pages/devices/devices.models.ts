@@ -262,6 +262,16 @@ export type ZoneType = {
     devices?: DeviceType[];
 }
 
+// Gruppo di dispositivi dal Core: come per le stanze, device_list è la lista
+// di id separati da virgola; devices si riempie solo lato PWA.
+export type GroupType = {
+    id: number | string;
+    name: string;
+    description: string;
+    device_list: string; // as id list
+    devices?: DeviceType[];
+}
+
 export type DeviceType = {
     id: number | string;
     family: string;

@@ -1,0 +1,167 @@
+<page-title
+    [title]="'Gruppo'"
+    [hasPlusButton]="false"
+    [hasEditButton]="!isInEdit()"
+    [iconID]="'icon-541'"
+    (editButtonClick)="editData()"
+></page-title>
+
+<div style="padding: 1rem;">
+
+    @if (groupDataLoading()) {
+        <p>Caricamento gruppo…</p>
+    }
+
+    <div style="padding-top: 1rem;">
+        <div class="base-text-style row-field">
+            <label for="groupName">Nome</label>
+            <input
+                pInputText
+                id="groupName"
+                placeholder="gruppo"
+                class="fixed-value-input"
+                [readonly]="!isInEdit()"
+                [disabled]="!isInEdit()"
+                [ngModel]="group().name"
+                (ngModelChange)="setName($event)"
+            />
+        </div>
+        <div class="base-text-style row-field">
+            <label for="groupDescription">Descrizione</label>
+            <input
+                pInputText
+                id="groupDescription"
+                placeholder="descrizione"
+                class="fixed-value-input"
+                [readonly]="!isInEdit()"
+                [disabled]="!isInEdit()"
+                [ngModel]="group().description"
+                (ngModelChange)="setDescription($event)"
+            />
+        </div>
+    </div>
+
+
+    @if( !isInEdit() ) {
+        <div style="margin-top: 2rem;">Dispositivi</div>
+
+        @if (devicesLoading()) {
+            <p>Caricamento dispositivi…</p>
+        } @else if (devicesError()) {
+            <p class="devices-error">{{ devicesError() }}</p>
+        } @else if (groupDevices().length === 0) {
+            <p>Nessun dispositivo nel gruppo.</p>
+        }
+
+        @for (device of groupDevices(); track device.id) {
+            <div class="device-row">
+                @if( !!device.imgIcon ) {
+                    <img class="device-row-img" [src]="device.imgIcon">
+                }
+                @else {
+                    @if( !!device.emoj ) {
+                        <div class="device-row-emoj">{{ itemEmojIcon( device.emoj ) }}</div>
+                    }
+                    @else {
+                        <svg class="device-row-svg">
+                            <use
+                                [attr.href]="'#' + (device.svgIcon ?? 'icon-602')"
+                                [attr.xlink:href]="'#' + (device.svgIcon ?? 'icon-602')">
+                            </use>
+                        </svg>
+                    }
+                }
+                <div class="device-row-info">
+                    <div>
+                        <strong>{{ device.name }}</strong>
+                    </div>
+                    <div class="device-row-data">
+                        <div class="device-row-ip">
+                            <div>{{ device.ip }}</div>
+                            <div class="device-mac">{{ device.mac }}</div>
+                        </div>
+                        <div class="device-row-status">
+                            <div>
+                                <span [style]="'opacity: '+ wifiSignalInOpacityRange(device) +';'">WiFi</span>
+                                <div class="wifi-signal-line" [style]="'width: '+ (wifiSignalInOpacityRange(device) * 100) +'%;'"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    @else {
+        <div style="margin-top: 2rem;">Dispositivi del gruppo</div>
+
+        @if (devicesLoading()) {
+            <p>Caricamento dispositivi…</p>
+        } @else if (devicesError()) {
+            <p class="devices-error">{{ devicesError() }}</p>
+        } @else if (devices().length === 0) {
+            <p>Nessun dispositivo registrato.</p>
+        } @else {
+            <div class="device-list-container">
+                @for (device of devices(); track device.id) {
+                    <div class="device-row">
+                        <div>
+                            <p-checkbox
+                                (onChange)="toggleSelctedDevice(device, $event)"
+                                [binary]="true"
+                                [ngModel]="isDeviceInGroup(device)"
+                                size="small"
+                                style="margin: 1rem;"
+                            />
+                        </div>
+                        @if( !!device.imgIcon ) {
+                            <img class="device-row-img" [src]="device.imgIcon">
+                        }
+                        @else {
+                            @if( !!device.emoj ) {
+                                <div class="device-row-emoj">{{ itemEmojIcon( device.emoj ) }}</div>
+                            }
+                            @else {
+                                <svg class="device-row-svg">
+                                    <use
+                                        [attr.href]="'#' + (device.svgIcon ?? 'icon-602')"
+                                        [attr.xlink:href]="'#' + (device.svgIcon ?? 'icon-602')">
+                                    </use>
+                                </svg>
+                            }
+                        }
+                        <div class="device-row-info">
+                            <div>
+                                <strong>{{ device.name }}</strong>
+                            </div>
+                            <div class="device-row-data">
+                                <div class="device-row-ip">
+                                    <div>{{ device.ip }}</div>
+                                    <div class="device-mac">{{ device.mac }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <div id="edit-button">
+            @if (!!inWaiting()) {
+                <svg class="svg-icon inside-button" style="position: static; top: 1rem; left: 1.5rem;">
+                    <use href="#orologio-1-1"></use>
+                </svg>
+            }
+            <p-button
+                label="{{ !!inWaiting() ? 'in attesa' : 'conferma' }}"
+                type="submit"
+                [disabled]="!!inWaiting() || !group().name.trim()"
+                [rounded]="true"
+                [size]="'small'"
+                [style]="{padding: '0px 20px 0px '+ ( !inWaiting() ? '20px' : '32px' ), marginTop: '2rem'}"
+                (click)="editGroup()"
+            ></p-button>
+        </div>
+    }
+
+</div>

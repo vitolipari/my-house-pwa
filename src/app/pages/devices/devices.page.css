@@ -180,3 +180,17 @@ p-tab > DIV > SPAN, B {
     flex-direction: column;
 }
 
+
+
+/* gruppi: la riga riusa .device-row, la pressione prolungata sta sulle info */
+.group-row {
+    cursor: pointer;
+}
+
+#delete-button {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0.5rem 0;
+}

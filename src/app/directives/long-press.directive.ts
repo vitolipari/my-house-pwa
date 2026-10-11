@@ -1,12 +1,12 @@
 import {Directive, ElementRef, EventEmitter, HostListener, inject, Input, OnDestroy, Output} from '@angular/core';
 
 /**
- * Pressione prolungata su un'immagine: emette `longPress` dopo `longPressDuration` ms
+ * Pressione prolungata su un elemento (immagini delle stanze, righe dei gruppi): emette `longPress` dopo `longPressDuration` ms
  * e vibra (Android con Vibration API, iOS con il feedback aptico dello switch di Safari).
  * Il click che segue il rilascio viene bloccato, così il contenitore non lo riceve.
  */
 @Directive({
-    selector: 'img[longPress]',
+    selector: '[longPress]',
     standalone: true
 })
 export class LongPressDirective implements OnDestroy {
@@ -26,10 +26,10 @@ export class LongPressDirective implements OnDestroy {
     private fired: boolean = false;
 
     // services
-    private readonly host = inject(ElementRef<HTMLImageElement>);
+    private readonly host = inject(ElementRef<HTMLElement>);
 
     constructor() {
-        const img: HTMLImageElement = this.host.nativeElement;
+        const img: HTMLElement = this.host.nativeElement;
         // niente menu "Salva immagine", selezione o trascinamento nativi durante la pressione
         img.draggable = false;
         img.style.setProperty('-webkit-touch-callout', 'none');

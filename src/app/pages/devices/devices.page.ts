@@ -4,7 +4,7 @@ import {FormsModule} from '@angular/forms';
 import {firstValueFrom} from 'rxjs';
 import {
     DeviceCatalogItem, DeviceSmallType,
-    DeviceType, extractRealDeviceType, isSensorDevice,
+    DeviceType, extractRealDeviceType, GroupType, isSensorDevice,
     ShellyFamilyType, ZoneType
 } from './devices.models';
 import {AuthService} from '../../services/auth';
@@ -25,6 +25,10 @@ import {SwitcherComponent} from '../../components/switcher/switcher.component';
 import {timestampInMilliseconds} from '../../utils/time-utils';
 import {getLastElementOr} from '../../utils/array-util';
 import moment from 'moment';
+import {GroupsApiService} from '../groups/groups-api';
+import {LongPressDirective} from '../../directives/long-press.directive';
+import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
+import {Button} from 'primeng/button';
 
 export const DEVICE_STATUS_MAX_AGE_MS = 60_000;
 
@@ -32,7 +36,7 @@ export const DEVICE_STATUS_MAX_AGE_MS = 60_000;
 @Component({
     selector: 'devices-page',
     standalone: true,
-    imports: [CommonModule, FormsModule, UserBlockComponent, DeviceIpBlockComponent, Tabs, TabList, TabPanel, TabPanels, Tab, PageTitleComponent, SwitcherComponent],
+    imports: [CommonModule, FormsModule, UserBlockComponent, DeviceIpBlockComponent, Tabs, TabList, TabPanel, TabPanels, Tab, PageTitleComponent, SwitcherComponent, LongPressDirective, Checkbox, Button],
     templateUrl: './devices.page.html',
     styleUrls: ['../../../page.css', './devices.page.css']
 })
@@ -54,9 +58,19 @@ export class DevicesPage implements OnInit {
 
     value: string | number = "device";
 
+    // gruppi
+    selectedGroups: GroupType[] = [];
+    readonly groups = signal<GroupType[]>([]);
+    readonly groupsLoading = signal(true);
+    readonly groupsError = signal<string | null>(null);
+    readonly isGroupsInSelection = signal<boolean>(false);
+    readonly isGroupsDeleteInWaiting = signal<boolean>(false);
+
     private readonly api = inject<ApiUrlService>(ApiUrlService);
     private readonly deviceApi = inject(DeviceApiService);
     private router = inject(Router);
+    private readonly groupsApi = inject(GroupsApiService);
+    readonly navigationData = this.router.currentNavigation()?.extras.state;    // passato dalla navigazione
     private readonly permissionService = inject(PermissionService);
     private readonly darkModeService = inject(DarkModeService);
 
@@ -139,7 +153,12 @@ export class DevicesPage implements OnInit {
     }
 
     ngOnInit(): void {
+        // dalle pagine dei gruppi si torna direttamente sul tab dei gruppi
+        if (this.navigationData?.['tab'] === 'groups') {
+            this.value = 'groups';
+        }
         void this.loadDevices();
+        void this.loadGroups();
     }
 
     itemEmojIcon(emojIconName: string) {
@@ -337,6 +356,117 @@ export class DevicesPage implements OnInit {
                 }
             }
         );
+    }
+
+    addGroup() {
+        this.router.navigate(
+            ['/new-group'],
+            {
+                state: {
+                    from: 'devicesPage'
+                }
+            }
+        );
+    }
+
+    // il pulsante + del titolo crea un gruppo sul tab dei gruppi, altrimenti un dispositivo
+    addFromTitle() {
+        if (this.value === 'groups') {
+            this.addGroup();
+            return;
+        }
+        this.addDevice();
+    }
+
+    private loadGroups(): Promise<void> {
+        this.groupsLoading.set(true);
+        this.groupsError.set(null);
+
+        return firstValueFrom(this.groupsApi.searchGroups())
+            .then((groups: GroupType[]) => {
+                console.log('gruppi arrivati');
+                console.log(groups);
+                this.groups.set(
+                    groups.map((group: GroupType) => ({
+                        ...group,
+                        device_list: group.device_list || ''
+                    }))
+                );
+                this.groupsLoading.set(false);
+            })
+            .catch((error: unknown) => {
+                console.log('errore in loadGroups della pagina dispositivi');
+                console.log(error);
+
+                const candidate = error as { error?: { error?: string }; message?: string };
+                this.groupsError.set(
+                    candidate.error?.error ?? candidate.message ?? 'Impossibile caricare i gruppi'
+                );
+                this.groupsLoading.set(false);
+            });
+    }
+
+    groupDeviceCount(group: GroupType): number {
+        return (group.device_list || '')
+            .split(',')
+            .filter((id: string) => !!id.trim())
+            .length;
+    }
+
+    gotoDetailsGroup(group: GroupType) {
+        this.router.navigate(['group-page', group.id], {
+            queryParams: {},
+            state: {
+                details: group
+            }
+        });
+    }
+
+    onGroupLongPress(group: GroupType) {
+        console.log('inizio della selezione dei gruppi');
+        this.isGroupsInSelection.set(true);
+    }
+
+    toggleSelectedGroup(group: GroupType, event: CheckboxChangeEvent) {
+        this.selectedGroups =
+            this.selectedGroups.filter((selected: GroupType) => selected.id !== group.id);
+        if (!!event.checked) {
+            this.selectedGroups.push(group);
+        }
+    }
+
+    // A differenza delle stanze si resta sulla pagina: la lista si ricarica
+    // e la selezione si chiude.
+    deleteMultiGroup() {
+        if (this.selectedGroups.length === 0) {
+            this.isGroupsInSelection.set(false);
+            return;
+        }
+        this.isGroupsDeleteInWaiting.set(true);
+
+        firstValueFrom(this.groupsApi.deleteGroups(this.selectedGroups))
+            .then(() => {
+                this.selectedGroups = [];
+                this.isGroupsInSelection.set(false);
+                this.isGroupsDeleteInWaiting.set(false);
+                return this.loadGroups();
+            })
+            .catch((error: unknown) => {
+                console.log('errore in deleteMultiGroup');
+                console.log(error);
+                this.isGroupsDeleteInWaiting.set(false);
+            });
+    }
+
+    cancelGroupsSelection() {
+        this.selectedGroups = [];
+        this.isGroupsInSelection.set(false);
+    }
+
+    // Il click sulla checkbox non deve arrivare alla riga (apertura del gruppo).
+    // Niente preventDefault: sulla checkbox annullerebbe il cambio di stato.
+    stopPropagation(event: MouseEvent) {
+        event.stopPropagation();
     }
 
     activeTab(tabName: string) {

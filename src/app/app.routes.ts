@@ -143,6 +143,30 @@ export const routes: Routes = [
     },
 
     {
+        path: 'group-page/:id',
+        canActivate: [routeAccessGuard],
+        data: {
+            accessControl: {
+                permission: 'READ_GROUP'
+            }
+        },
+        loadComponent: () =>
+            import('./pages/group/group.page').then(m => m.GroupPage)
+    },
+
+    {
+        path: 'new-group',
+        canActivate: [routeAccessGuard],
+        data: {
+            accessControl: {
+                permission: 'CREATE_GROUPS'
+            }
+        },
+        loadComponent: () =>
+            import('./pages/new-group/new-group.page').then(m => m.NewGroupPage)
+    },
+
+    {
         path: 'waste-collection',
         canActivate: [routeAccessGuard],
         loadComponent: () =>

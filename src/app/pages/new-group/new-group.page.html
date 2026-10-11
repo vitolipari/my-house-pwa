@@ -1,0 +1,120 @@
+<page-title
+    [title]="'Nuovo Gruppo'"
+    [hasPlusButton]="false"
+    [iconID]="'icon-541'"
+></page-title>
+
+<div
+        class="columns"
+        style="margin: 2rem; padding-top: 2rem;"
+>
+
+    <div class="card flex justify-center signup-field">
+        <div class="flex flex-col gap-2 field" style="margin-bottom: 0px !important;">
+            <label for="name">Nome</label>
+            <input
+                pInputText
+                id="name"
+                aria-describedby="name-help"
+                placeholder="Nuovo Gruppo"
+                class="fixed-value-input"
+                [ngModel]="data().name"
+                (ngModelChange)="setName($event)"
+            />
+        </div>
+        <small id="name-help">Il nome del gruppo di dispositivi.</small>
+    </div>
+
+    <div class="card flex justify-center signup-field">
+        <div class="flex flex-col gap-2 field" style="margin-bottom: 0px !important;">
+            <label for="description">Descrizione</label>
+            <input
+                pInputText
+                id="description"
+                aria-describedby="description-help"
+                placeholder="Descrizione"
+                class="fixed-value-input"
+                [ngModel]="data().description"
+                (ngModelChange)="setDescription($event)"
+            />
+        </div>
+        <small id="description-help">A cosa serve il gruppo (facoltativa).</small>
+    </div>
+
+    @if (devicesLoading()) {
+        <p>Caricamento dispositivi…</p>
+    } @else if (devicesError()) {
+        <p class="devices-error">{{ devicesError() }}</p>
+    } @else if (devices().length === 0) {
+        <p>Nessun dispositivo registrato.</p>
+    } @else {
+
+        <div>Dispositivi</div>
+
+        <div class="device-list-container">
+            @for (device of devices(); track device.id) {
+                <div class="device-row">
+
+                    <div>
+                        <p-checkbox
+                            (onChange)="toggleSelctedDevice(device, $event)"
+                            [binary]="true"
+                            size="small"
+                            style="margin: 1rem;"
+                        />
+                    </div>
+
+                    @if( !!device.imgIcon ) {
+                        <img class="device-row-img" [src]="device.imgIcon">
+                    }
+                    @else {
+                        @if( !!device.emoj ) {
+                            <div class="device-row-emoj">{{ itemEmojIcon( device.emoj ) }}</div>
+                        }
+                        @else {
+                            <svg class="device-row-svg">
+                                <use
+                                    [attr.href]="'#' + (device.svgIcon ?? 'icon-602')"
+                                    [attr.xlink:href]="'#' + (device.svgIcon ?? 'icon-602')">
+                                </use>
+                            </svg>
+                        }
+                    }
+                    <div class="device-row-info">
+                        <div>
+                            <strong>{{ device.name }}</strong>
+                        </div>
+                        <div class="device-row-data">
+                            <div class="device-row-ip">{{ device.ip }}</div>
+                        </div>
+                    </div>
+
+                </div>
+            }
+        </div>
+    }
+
+    @if (savingError()) {
+        <small class="error-message">{{ savingError() }}</small>
+    }
+
+    @if (!!isReadyToSet()) {
+        <div id="signup-button">
+            @if (!!isSavingInWait()) {
+                <svg class="svg-icon inside-button" style="position: static; top: 1.1rem; left: 3.8rem;">
+                    <use href="#orologio-1-1"></use>
+                </svg>
+            }
+            <p-button
+                label="{{ !!isSavingInWait() ? 'in attesa' : 'conferma' }}"
+                type="submit"
+                [disabled]="!!isSavingInWait()"
+                [rounded]="true"
+                [size]="'small'"
+                [style]="{padding: '0px 20px 0px '+ ( !isSavingInWait() ? '20px' : '32px' ), marginTop: '2rem'}"
+                (click)="addNewGroup()"
+            ></p-button>
+        </div>
+    }
+
+</div>
