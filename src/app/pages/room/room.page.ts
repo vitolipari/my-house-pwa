@@ -91,6 +91,8 @@ export class RoomPage implements OnInit {
             // bisogna caricare i dati della stanza
             // perché non sono arrivati dalla navigazione interna
 
+            console.log('dati della room assenti, parte la chiamata');
+
             this.roomDataLoading.set(true);
 
             firstValueFrom(this.roomsApi.searchRooms({id: this.pathVariables['id']}))
@@ -131,6 +133,9 @@ export class RoomPage implements OnInit {
         return (
             firstValueFrom(this.deviceApi.search({zones: [this.pathVariables['id']]}))
                 .then((devices: DeviceType[]) => {
+
+                    console.log('arrivati i dati dei proppri devices');
+
                     // this.devices.set( devices );
                     this.devicesLoading.set(false);
 
@@ -141,7 +146,8 @@ export class RoomPage implements OnInit {
                     }));
 
 
-                    console.log('devices arrivati');
+                    console.log('propri devices arrivati');
+                    console.log(devices);
                     console.log(this.room());
                 })
                 .catch((error: unknown) => {
@@ -158,6 +164,7 @@ export class RoomPage implements OnInit {
 
         return firstValueFrom(this.deviceApi.list())
             .then((devices: DeviceType[]) => {
+                console.log('arrivati i dati dei devices');
                 this.devices.set([
                     ...devices
                         .filter((device: DeviceType) => (
@@ -168,6 +175,7 @@ export class RoomPage implements OnInit {
                 this.devicesLoading.set(false);
                 console.log('devices arrivati');
                 console.log(devices);
+                console.log('fine log dei devices arrivati');
             })
             .catch((error: unknown) => {
                 console.log('errore in loadDevices della nuova stanza');
@@ -242,11 +250,15 @@ export class RoomPage implements OnInit {
 
     getMainChannel(device: DeviceSmallType): string {
         let d: DeviceType | undefined =
-            this.devices()
+            (this.room()?.devices || [])
                 .find((dd: DeviceType) => dd.id === device.id)
         ;
         let mainChannelText: string = '';
+        console.log('contorllo se il dispostitivo esiste');
+        console.log(d);
+        console.log(device);
         if(!d) return mainChannelText;
+        console.log('contorllo se il dispostitivo é anche un sensore');
 
         // d = extractRealDeviceType( d );
         // let powerChannelIndex: number =
@@ -273,6 +285,7 @@ export class RoomPage implements OnInit {
         // return (`${d.channel.reduce(getLastElementOr, null)}: ${d.status.reduce(getLastElementOr, null)}`);
 
         if (isSensorDevice(d)) {
+            console.log('il dispostitivo é anche un sensore');
             const powerChannelIndex: number = d.channel.lastIndexOf('power');
             const power = (powerChannelIndex !== -1) ? d.value[powerChannelIndex] : null;
             if (power !== null && power !== undefined) {
@@ -285,7 +298,7 @@ export class RoomPage implements OnInit {
 
     getMainChannelLastTimeUpdated(device: DeviceSmallType): string {
         let d: DeviceType | undefined =
-            this.devices()
+            (this.room()?.devices || [])
                 .find((dd: DeviceType) => dd.id === device.id)
         ;
         if(!d) return '';
