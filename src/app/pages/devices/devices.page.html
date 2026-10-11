@@ -188,6 +188,7 @@
         <p-tabpanel value="groups">
             @if( !!isGroupsInSelection() ) {
                 <div id="delete-button">
+                    <!--
                     <p-button
                         label="annulla"
                         [rounded]="true"
@@ -196,6 +197,7 @@
                         [disabled]="!!isGroupsDeleteInWaiting()"
                         (click)="cancelGroupsSelection()"
                     ></p-button>
+                    -->
                     @if (!!isGroupsDeleteInWaiting()) {
                         <svg class="svg-icon inside-button" style="position: static; top: 1rem; left: 1.5rem;">
                             <use href="#orologio-1-1"></use>
@@ -204,7 +206,7 @@
                     @else {
                         <svg
                             class="svg-icon inside-button"
-                            style="position: static; top: 0.4rem; left: 1.8rem;"
+                            style="position: static; top: 0rem; left: 2rem;"
                         >
                             <use href="#icon-102"></use>
                         </svg>

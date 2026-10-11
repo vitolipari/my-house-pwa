@@ -1,7 +1,7 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {PageTitleComponent} from '../../components/page-title.component/page-title.component';
 import {ActivatedRoute, Router} from '@angular/router';
-import {DeviceSmallType, DeviceType, GroupType} from '../devices/devices.models';
+import {DeviceSmallType, DeviceType, GroupType, isSensorDevice} from '../devices/devices.models';
 import {firstValueFrom} from 'rxjs';
 import {DeviceApiService} from '../devices/device-api';
 import {GroupsApiService} from '../groups/groups-api';
@@ -11,6 +11,7 @@ import {Button} from 'primeng/button';
 import {InputText} from 'primeng/inputtext';
 import {FormsModule} from '@angular/forms';
 import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
+import moment from 'moment';
 
 @Component({
   selector: 'app-group.page',
@@ -141,7 +142,105 @@ export class GroupPage implements OnInit {
         return emoj(emojIconName || '');
     }
 
+    getMainChannel(device: DeviceSmallType): string {
+
+        let d: DeviceType | undefined =
+            this.devices()
+                .find((dd: DeviceType) => dd.id === device.id)
+        ;
+            // (this.group()?.device_list.split(',') || [])
+            //     .filter((x: any) => !!x)
+            //     .map((id: string) => parseInt(''+ id))
+            //     .find((dd: DeviceType) => dd.id === device.id)
+        ;
+        let mainChannelText: string = '';
+        console.log('contorllo se il dispostitivo esiste');
+        console.log(d);
+        console.log(device);
+        console.log(this.group()?.devices);
+        console.log(this.group());
+        if(!d) return mainChannelText;
+        console.log('contorllo se il dispostitivo é anche un sensore');
+
+        // d = extractRealDeviceType( d );
+        // let powerChannelIndex: number =
+        //     d.channel
+        //         .map((ch: string, index: number) => (ch === 'power') ? index : -1)
+        //         .filter((chIndex: number) => chIndex !== -1)
+        //         .reduce(getLastElementOr, -1)
+        // ;
+        // if( powerChannelIndex !== -1 ) {
+        //     // mainChannelText += d.channel[powerChannelIndex];
+        //     mainChannelText += d.value[powerChannelIndex];
+        //     mainChannelText += d.unit[powerChannelIndex];
+        //
+        //     // minThreshold: []
+        //     // maxThreshold: []
+        //
+        // }
+        //
+        // /*
+        // MeteredSwitchType
+        //  */
+        //
+        // if( d.channel.reduce(getLastElementOr, null) === 'output' ) return ' ';
+        // return (`${d.channel.reduce(getLastElementOr, null)}: ${d.status.reduce(getLastElementOr, null)}`);
+
+        if (isSensorDevice(d)) {
+            console.log('il dispostitivo é anche un sensore');
+            const powerChannelIndex: number = d.channel.lastIndexOf('power');
+            const power = (powerChannelIndex !== -1) ? d.value[powerChannelIndex] : null;
+            if (power !== null && power !== undefined) {
+                return `${power} ${d.unit?.[powerChannelIndex] ?? ''}`.trim();
+            }
+        }
+
+        return mainChannelText;
+    }
+
+    getMainChannelLastTimeUpdated(device: DeviceSmallType): string {
+        let d: DeviceType | undefined =
+            this.devices()
+                .find((dd: DeviceType) => dd.id === device.id)
+        ;
+        if(!d) return '';
+        return ''+ moment(d.lastTime.reduce(getLastElementOr, null)).format('DD/MM/YYYY HH:mm');
+    }
+
+
+    /**
+     * valori possibili di ritorno:
+     * -1 sotto la soglia minima
+     * 0 entro le sooglie
+     * +1 sopra la soglia massima
+     * @param device
+     */
+    thresholdIndicator(device: DeviceSmallType){
+        let d: DeviceType | undefined =
+            this.devices()
+                .find((dd: DeviceType) => dd.id === device.id)
+        ;
+        if(!d) return 0;
+
+        if (isSensorDevice(d)) {
+            const powerChannelIndex: number = d.channel.lastIndexOf('power');
+            const power = (powerChannelIndex !== -1) ? (d.value[powerChannelIndex] || 0) : 0;
+            if( !! d.minThreshold[powerChannelIndex] ) {
+                if( power < d.minThreshold[powerChannelIndex] ) return -1;
+            }
+            if( !! d.maxThreshold[powerChannelIndex] ) {
+                if( power > d.maxThreshold[powerChannelIndex] ) return 1;
+            }
+        }
+
+        return 0;
+    }
+
+
+
     wifiSignalInOpacityRange(device: DeviceSmallType) {
+
+
         if (!!device.signalStatus) {
             const wifiSignal: number = device.signalStatus;
             let wifiSignalPercent: number = Math.max(0, Math.min(100, 2 * (wifiSignal + 100)));
@@ -154,7 +253,9 @@ export class GroupPage implements OnInit {
             return wifiSignalPercent / 100;
         }
 
-        // RSSI non letto: l'indicatore resta invisibile
+        // RSSI non letto: il Core usa 0, valore impossibile per una misura in
+        // dBm. L'indicatore resta invisibile invece di mostrare un segnale
+        // intermedio mai misurato.
         return 0;
     }
 
