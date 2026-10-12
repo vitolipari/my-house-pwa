@@ -1,0 +1,48 @@
+svg {
+  touch-action: none; // IMPORTANTISSIMO per iPhone
+  user-select: none;
+}
+
+#timeText {
+  font-size: 2.5em;
+}
+
+
+.debug-table-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.debug-table-field {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.debug-table-value {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+
+.button-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+
+.button-row > DIV {
+  display: flex;
+  flex-direction: row;
+  height: 2rem;
+}
+
+
+:host{
+  -webkit-touch-callout: none; /* Disabilita menu su iOS */
+  -webkit-user-select: none;   /* Disabilita selezione testo */
+  user-select: none;
+}

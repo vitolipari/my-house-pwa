@@ -166,6 +166,43 @@ export const routes: Routes = [
             import('./pages/new-group/new-group.page').then(m => m.NewGroupPage)
     },
 
+
+    {
+        path: 'timers-page',
+        canActivate: [routeAccessGuard],
+        data: {
+            accessControl: {
+                permission: 'READ_TIMERS'
+            }
+        },
+        loadComponent: () =>
+            import('./pages/timer/timers/timers.page').then(m => m.TimersPage)
+    },
+
+    {
+        path: 'timer-page/:id',
+        data: {
+            accessControl: {
+                permission: 'READ_TIMER'
+            }
+        },
+        loadComponent: () =>
+            import('./pages/timer/timer/timer.page').then(m => m.TimerPage)
+    },
+
+    {
+        path: 'new-timer',
+        data: {
+            accessControl: {
+                permission: ['CREATE_TIMER', 'READ_TIMER', 'READ_TIMERS']
+            }
+        },
+        loadComponent: () =>
+            import('./pages/timer/new-timer/new-timer.page').then(m => m.NewTimerPage)
+    },
+
+
+
     {
         path: 'waste-collection',
         canActivate: [routeAccessGuard],

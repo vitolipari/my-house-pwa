@@ -1,0 +1,21 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 16 16"
+  [attr.fill]="'transparent'"
+>
+  <circle
+    cx="8"
+    cy="8"
+    r="6"
+    [attr.stroke]="!disabled ? activeColor : disabledColor"
+    [attr.stroke-width]="spessore"
+  />
+  <line
+    [attr.x1]="4"
+    [attr.y1]="4"
+    [attr.x2]="12"
+    [attr.y2]="12"
+    [attr.stroke]="!disabled ? activeColor : disabledColor"
+    [attr.stroke-width]="spessore"
+  ></line>
+</svg>

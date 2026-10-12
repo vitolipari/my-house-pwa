@@ -1,0 +1,147 @@
+
+<svg
+  #svg
+  id="dial"
+  [attr.viewBox]="'0 0 '+ (2 * center.x) +' '+ (2 * center.y)"
+>
+
+  <!--
+  <rect
+    [attr.x]="0"
+    [attr.y]="0"
+    [attr.height]="(2 * center.x)"
+    [attr.width]="(2 * center.y)"
+    [attr.stroke]="midnightLineColor"
+    [attr.stroke-width]="1"
+    [attr.fill]="'#0001'"
+  />
+  -->
+
+  <!-- gruppo rotante -->
+  <g
+    id="wheel"
+    #wheel
+    [attr.transform]="'rotate(' + rotation + ' '+ (center.x) +' '+ (center.y) +')'"
+    (pointerdown)="onPointerDown($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp()"
+    (pointerleave)="onPointerUp()"
+  >
+    @for (segment of elements; let i = $index; track segment) {
+        <rect
+          [attr.x]="center.x - (segment.width / 2)"
+          [attr.y]="center.y + circleInnerRay"
+          [attr.width]="segment.width"
+          [attr.height]="segment.height"
+          [attr.rx]="1"
+          [attr.ry]="1"
+          [attr.fill]="(
+
+            (!!isDebug ? ((3  * _minuteScale) === segment.minuteIndex) : false)
+              ? ('#ff4646')
+              : (
+                (currentSegmeent * _minuteScale) === segment.minuteIndex
+                  ? currentMinuteColor
+                  : (
+                    !!segment.active
+                      ? activeMinuteColor
+                      : disabledMinuteColor
+                  )
+              )
+
+          )"
+          [attr.transform]="'rotate('+ (360 * (-i) * _minuteScale / MINUTES_IN_A_DAY) +' '+ (center.x) +' '+ (center.y) +')'"
+        />
+
+    }
+    <line
+      [attr.x1]="center.x"
+      [attr.y1]="center.y"
+      [attr.x2]="center.x"
+      [attr.y2]="center.y + circleOuterRay + 4"
+      [attr.stroke]="midnightLineColor"
+      [attr.stroke-width]="1"
+    ></line>
+  </g>
+
+  <polygon
+    [attr.points]="center.x +' '+ (center.y + circleInnerRay - 2) +', '+ (center.x - 4) +' '+ (center.y + circleInnerRay - 8) +', '+ (center.x + 4) +' '+ (center.y + circleInnerRay - 8)"
+    [attr.fill]="midnightIndicatorColor"
+  />
+
+  <polygon
+    [attr.points]="center.x +' '+ (center.y + circleOuterRay + 2) +', '+ (center.x - 4) +' '+ (center.y + circleOuterRay + 8) +', '+ (center.x + 4) +' '+ (center.y + circleOuterRay + 8)"
+    [attr.fill]="midnightIndicatorColor"
+  />
+
+  <text
+    id="timeText"
+    [attr.x]="center.x - circleInnerRay + 10"
+    [attr.y]="center.y + 15"
+  >{{ minuteToTime(currentSegmeent * _minuteScale).text }}</text>
+
+</svg>
+
+
+<!-- button -->
+<div class="button-row">
+
+  <div
+    (click)="activationButtonChengeState()"
+  >
+    <app-ok
+      [disabled]="!buttonStateActive"
+    />
+  </div>
+
+
+  <div
+    (click)="deActivationButtonChengeState()"
+  >
+    <app-avoid
+      [disabled]="!deactivationButtonStateActive"
+    />
+
+  </div>
+
+</div>
+
+
+<!-- button -->
+<div
+  (click)="clearActivationButton()"
+>
+  clear
+</div>
+
+
+<!-- debug -->
+@if (!!isDebug) {
+
+<div #movementPos id="movementPos" style="position: absolute">{{ currentX }}, {{ currentY }}, {{ angle }}</div>
+
+<div>
+  <div class="debug-table-row">
+    <div class="debug-table-field">rotation</div>
+    <div class="debug-table-value">{{ rotation }}</div>
+  </div>
+
+  <div class="debug-table-row">
+    <div class="debug-table-field">last minuteIndex</div>
+    <div class="debug-table-value">{{ currentSegmeent }}</div>
+  </div>
+
+  <div class="debug-table-row">
+    <div class="debug-table-field">minute scale</div>
+    <div class="debug-table-value">{{ _minuteScale }}</div>
+  </div>
+
+  <div class="debug-table-row">
+    <div class="debug-table-field"></div>
+    <div class="debug-table-value"></div>
+  </div>
+
+</div>
+
+
+}

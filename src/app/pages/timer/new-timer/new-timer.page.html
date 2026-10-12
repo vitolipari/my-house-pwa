@@ -1,0 +1,122 @@
+<p>Nome del timer</p>
+<input type="text" pInputText [(ngModel)]="timer.name" />
+
+<p>scala: {{ minuteScale }}</p>
+
+<div class="card flex justify-center center-in-block" style="width: 100%; height: 20px;">
+    <p-slider
+        [(ngModel)]="minuteScale"
+        [step]="5"
+        [min]="5"
+        [max]="60"
+        (ngModelChange)="onSlide()"
+        (onSlideEnd)="onSlideEnd()"
+        class="w-56"
+        style="height: 30px; width: 75%;"
+    />
+</div>
+
+<timer-wheel
+    [minuteScale]="minuteScale"
+    [timerDay]="dayTimer"
+    (rotationChange)="getRotateChange($event)"
+    (onTimerSet)="getTimerSet($event)"
+    [isDebug]="isDebug"
+>
+
+</timer-wheel>
+
+
+
+<p>Settimana</p>
+<div class="block-row" style="width: 90%; justify-content: space-evenly; margin: 2rem auto;">
+    <div class="tag {{ !!timer.weekDays[0] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(0)">L</div>
+    <div class="tag {{ !!timer.weekDays[1] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(1)">Ma</div>
+    <div class="tag {{ !!timer.weekDays[2] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(2)">Me</div>
+    <div class="tag {{ !!timer.weekDays[3] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(3)">G</div>
+    <div class="tag {{ !!timer.weekDays[4] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(4)">V</div>
+    <div class="tag {{ !!timer.weekDays[5] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(5)">S</div>
+    <div class="tag {{ !!timer.weekDays[6] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(6)">D</div>
+</div>
+
+<div class="block-row" style="width: 80%;">
+    <div>Festivi</div>
+    <div></div>
+</div>
+
+
+<div class="block-row" style="width: 80%;">
+    <p-datepicker
+        [(ngModel)]="timer.start"
+        dateFormat="dd/mm"
+        placeholder="dd/mm"
+        pInputMask="99/99"
+        [showIcon]="true"
+        inputId="icondisplay"
+        [showOnFocus]="true"
+        [iconDisplay]="'input'"
+    />
+</div>
+
+<div class="block-row" style="width: 80%;">
+    <p-datepicker
+        [(ngModel)]="timer.end"
+        dateFormat="dd/mm"
+        placeholder="dd/mm"
+        pInputMask="99/99"
+        [showIcon]="true"
+        inputId="icondisplay"
+        [showOnFocus]="true"
+        [iconDisplay]="'input'"
+    />
+</div>
+
+
+
+
+
+@if( isDebug ) {
+
+    <div class="block-row" style="width: 80%;">
+        <div>Rotation</div>
+        <div>{{ rotateChange * 10 }}</div>
+    </div>
+
+    <div class="block-row" style="width: 80%;">
+        <div>timer day data</div>
+        <div>{{ dayTimer }}</div>
+    </div>
+
+    <div class="block-row" style="width: 80%;">
+        <div>bits</div>
+        <div style="width: 1440px; display: flex; flex-direction: row">
+            @for (segment of timer.dayMinutes; let i = $index; track i) {
+                <div [id]="'bit-' +i" class="segmentBit" [style.background]="segment ? '#444' : '#ccc'"></div>
+            }
+        </div>
+    </div>
+
+    <div class="block-row" style="width: 80%;">
+        <div></div>
+        <div></div>
+    </div>
+
+    <div class="block-row" style="width: 80%;">
+        <div></div>
+        <div></div>
+    </div>
+
+    <div>inizio</div>
+    <div>fine</div>
+    <div>week</div>
+    <div>festivi</div>
+    <div>lista intervalli</div>
+    <div>lista intervalli</div>
+    <div>lista intervalli</div>
+    <div>lista intervalli</div>
+    <div>lista intervalli</div>
+
+    <!--@for (e of elements; let i = $index; track e) {-->
+        <!--  <div>{{ e | json }}</div>-->
+        <!--}-->
+}

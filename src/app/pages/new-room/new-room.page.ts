@@ -1,12 +1,12 @@
 import {ChangeDetectorRef, Component, computed, effect, inject, OnInit, signal} from '@angular/core';
 import {PageTitleComponent} from '../../components/page-title.component/page-title.component';
 import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {InputText} from 'primeng/inputtext';
 import {SwitcherComponent} from '../../components/switcher/switcher.component';
 import {DeviceSmallType, DeviceType, ZoneType} from '../devices/devices.models';
 import {firstValueFrom} from 'rxjs';
 import {DeviceApiService} from '../devices/device-api';
 import {emoj} from '../../utils/string-utils';
+import {InputText} from 'primeng/inputtext';
 import {Button, ButtonModule} from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import {
