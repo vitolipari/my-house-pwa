@@ -7,6 +7,7 @@ import {
     LoginRequest,
     SignUpRequest
 } from '../models/auth.models';
+import {clearOfflineCache} from '../interceptor/offline-cache.interceptor';
 
 @Injectable({
     providedIn: 'root'
@@ -174,6 +175,7 @@ export class AuthService {
     clearLoginData(): void {
         localStorage.removeItem(this.tokenKey);
         localStorage.removeItem(this.userKey);
+        clearOfflineCache();
         // this.clearTemporaryLinkContext();
         this.currentUser.set(null);
     }

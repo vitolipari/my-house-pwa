@@ -9,6 +9,7 @@ import {secureConInterceptor} from './modules/secure-con/securecon.interceptor';
 import {providePrimeNG} from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import {apiBaseUrlInterceptor} from './interceptor/api-base-url-interceptor';
+import {offlineCacheInterceptor} from './interceptor/offline-cache.interceptor';
 
 
 // {
@@ -25,6 +26,7 @@ export const appConfig: ApplicationConfig = {
         provideHttpClient(
             withFetch(),
             withInterceptors([
+                offlineCacheInterceptor,
                 apiBaseUrlInterceptor,
                 authTokenInterceptor,
                 secureConInterceptor

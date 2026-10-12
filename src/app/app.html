@@ -16,6 +16,12 @@
     </aside>
 }
 
+@if (coreOffline()) {
+    <aside class="pwa-notice" role="status" aria-live="polite">
+        <span>Core non raggiungibile: dati dell'ultima lettura.</span>
+    </aside>
+}
+
 
     @if ( user(); as user ) {
         <app-header

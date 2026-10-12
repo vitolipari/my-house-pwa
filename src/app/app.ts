@@ -9,6 +9,7 @@ import {filter} from 'rxjs/operators';
 import { DrawerModule } from 'primeng/drawer';
 import {MobileMenuComponent} from './components/menu-component/mobile-menu.component';
 import {PwaInstallService} from './services/pwa-install';
+import {coreOffline} from './interceptor/offline-cache.interceptor';
 
 
 @Component({
@@ -31,6 +32,7 @@ export class App {
     readonly availableUpdate = this.swUpdateService.availableUpdate;
     readonly secondsUntilReload = this.swUpdateService.secondsUntilReload;
     readonly canInstallPwa = this.pwaInstallService.canInstall;
+    readonly coreOffline = coreOffline;
     darkModeService = inject(DarkModeService);
 
     // user: LoggedUser | null;
