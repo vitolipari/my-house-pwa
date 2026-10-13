@@ -1,6 +1,6 @@
-import {Component, Input} from '@angular/core';
+import {Component, inject, Input, signal} from '@angular/core';
 import { Segment } from "./segment";
-import {MINUTES_IN_A_DAY, TimerType} from '../timer.models';
+import {EventTimerType, MINUTES_IN_A_DAY, TimerType} from '../timer.models';
 import {bitsToBase64} from '../../../utils/base64';
 import {InputText} from 'primeng/inputtext';
 import {Button, ButtonModule} from 'primeng/button';
@@ -10,6 +10,12 @@ import { SliderModule } from 'primeng/slider';
 import { DatePickerModule } from 'primeng/datepicker';
 import {TimerWheel} from './timer-wheel';
 import {FormsModule} from '@angular/forms';
+import {PageTitleComponent} from '../../../components/page-title.component/page-title.component';
+import {SwitcherComponent} from '../../../components/switcher/switcher.component';
+import {RoomsApiService} from '../../rooms/rooms-api';
+import {Router} from '@angular/router';
+import {TimerApiService} from '../timer-api';
+import {firstValueFrom} from 'rxjs';
 
 
 @Component({
@@ -23,7 +29,9 @@ import {FormsModule} from '@angular/forms';
         DatePickerModule,
         SliderModule,
         Button,
-        FormsModule
+        FormsModule,
+        PageTitleComponent,
+        SwitcherComponent
     ],
   templateUrl: './new-timer.page.html',
   styleUrl: './new-timer.page.css',
@@ -45,8 +53,15 @@ export class NewTimerPage {
         end: '31/12',
         dateFormat: 'mmdd',
         weekDays: [true, true, true, true, true, false, false],
-        avoidDate: []
+        avoidDate: [],
+        isHolidays: false
     }
+
+    protected readonly inWaiting = signal<boolean>(false);
+
+    private readonly timerApi = inject(TimerApiService);
+    private readonly router = inject(Router);
+
     @Input()
     set timerData(data: TimerType) {
         this.timer = { ...this.timer, ...data };
@@ -85,10 +100,11 @@ export class NewTimerPage {
         ;
 
         this.dayTimer = bitsToBase64( this.timer.dayMinutes );
+        this.timer.dayMinutesPack = this.dayTimer;
 
 
-        console.log( this.timer.dayMinutes );
-        console.log( this.dayTimer );
+        // console.log( this.timer.dayMinutes );
+        // console.log( this.dayTimer );
 
 
 
@@ -117,6 +133,34 @@ export class NewTimerPage {
         this.timer.weekDays[dayWeekIndex] = !this.timer.weekDays[dayWeekIndex];
     }
 
+
+    protected setHolidays(event: boolean) {
+        this.timer.isHolidays = !!event;
+    }
+
+    addNewTimer() {
+        console.log(this.timer);
+
+
+        return firstValueFrom(this.timerApi.newTimer(this.timer))
+            .then((data: EventTimerType[]) => {
+
+                this.router.navigate(
+                    ['/rooms-page'],
+                    {
+                        state: {
+                            from: 'newTimerPage',
+                            data: data
+                        }
+                    }
+                );
+            })
+            .catch((error: unknown) => {
+                console.log('errore in addNewRoom');
+                console.log(error);
+            });
+
+    }
 
 
 }

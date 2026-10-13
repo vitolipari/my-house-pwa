@@ -345,6 +345,9 @@ export class TimerWheel implements OnInit {
   }
 
   activationButtonChengeState() {
+
+      console.log('activationButtonChengeState');
+
     this.buttonStateActive = !this.buttonStateActive;
     this.deactivationButtonStateActive = false;
 

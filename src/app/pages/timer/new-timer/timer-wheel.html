@@ -86,33 +86,29 @@
 <!-- button -->
 <div class="button-row">
 
-  <div
-    (click)="activationButtonChengeState()"
-  >
-    <app-ok
-      [disabled]="!buttonStateActive"
-    />
-  </div>
-
+    <div style="opacity: 0">nel mezzo del cammin</div>
 
   <div
-    (click)="deActivationButtonChengeState()"
+      class="activate-button"
+      (click)="!buttonStateActive ? activationButtonChengeState() : deActivationButtonChengeState()"
+      [class]="!!buttonStateActive ? 'in-activation' : ''"
   >
-    <app-avoid
-      [disabled]="!deactivationButtonStateActive"
-    />
-
+      attiva
   </div>
+
+    <div>
+        <svg
+            class="svg-icon inside-button"
+            style="position: static; top: 0.4rem; left: 1.8rem;"
+            (click)="clearActivationButton()"
+        >
+            <use href="#icon-102-red-trash"></use>
+        </svg>
+    </div>
 
 </div>
 
 
-<!-- button -->
-<div
-  (click)="clearActivationButton()"
->
-  clear
-</div>
 
 
 <!-- debug -->

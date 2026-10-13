@@ -1,0 +1,41 @@
+SPAN.p-slider-handle,
+::ng-deep span.p-slider-handle
+{
+    opacity: 0 !important;
+}
+
+.block-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-self: center;
+    align-items: center;
+    width: 100%;
+
+}
+
+.block-row > div.tag {
+    border: solid 0.5px var(--color-background-2);
+    padding: 0rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    width: calc(100% / 8);
+    margin: 0rem 0.2rem;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.block-row > div.tag.enabled {
+    background: #0aff97;
+}
+
+::ng-deep.input-like,
+.p-input-text
+{
+    background: var(--color-background-3) !important;
+    border-color: var(--color-background-2) !important;
+    color: var(--p-inputtext-color);
+}

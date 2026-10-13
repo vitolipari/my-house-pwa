@@ -1,48 +1,70 @@
 svg {
-  touch-action: none; // IMPORTANTISSIMO per iPhone
-  user-select: none;
+    touch-action: none; // IMPORTANTISSIMO per iPhone
+    user-select: none;
 }
 
 #timeText {
-  font-size: 2.5em;
+    font-size: 2.5em;
 }
 
 
 .debug-table-row {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
 }
 
 .debug-table-field {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
 }
 
 .debug-table-value {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+:host {
+    -webkit-touch-callout: none; /* Disabilita menu su iOS */
+    -webkit-user-select: none; /* Disabilita selezione testo */
+    user-select: none;
 }
 
 
 .button-row {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: 1rem;
 }
 
 
 .button-row > DIV {
-  display: flex;
-  flex-direction: row;
-  height: 2rem;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.activate-button {
+    border: solid 0.5px var(--color-background-2);
+    padding: 0rem 1.2rem;
+    border-radius: 100rem;
+    cursor: pointer;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.activate-button.in-activation {
+    background: #0aff97;
 }
 
 
-:host{
-  -webkit-touch-callout: none; /* Disabilita menu su iOS */
-  -webkit-user-select: none;   /* Disabilita selezione testo */
-  user-select: none;
-}
+
