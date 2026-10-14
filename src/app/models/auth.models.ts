@@ -45,7 +45,8 @@ export interface ConfirmRequest {
 }
 
 export interface RouteAccessConfig {
-    permission: string;
+    // con un elenco servono tutti i permessi
+    permission: string | string[];
     requiredRoles?: string[];
     requiredPermissions?: string[];
     requiredFeatureFlags?: string[];

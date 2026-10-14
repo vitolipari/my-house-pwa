@@ -122,6 +122,7 @@ export const routes: Routes = [
 
     {
         path: 'room-page/:id',
+        canActivate: [routeAccessGuard],
         data: {
             accessControl: {
                 permission: 'READ_ROOM'
@@ -133,6 +134,7 @@ export const routes: Routes = [
 
     {
         path: 'new-room',
+        canActivate: [routeAccessGuard],
         data: {
             accessControl: {
                 permission: ['READ_ROOMS', 'READ_ROOM', 'CREATE_ROOM']
@@ -181,6 +183,7 @@ export const routes: Routes = [
 
     {
         path: 'timer-page/:id',
+        canActivate: [routeAccessGuard],
         data: {
             accessControl: {
                 permission: 'READ_TIMER'
@@ -192,6 +195,7 @@ export const routes: Routes = [
 
     {
         path: 'new-timer',
+        canActivate: [routeAccessGuard],
         data: {
             accessControl: {
                 permission: ['CREATE_TIMER', 'READ_TIMER', 'READ_TIMERS']

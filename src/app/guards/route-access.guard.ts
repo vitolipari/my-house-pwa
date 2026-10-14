@@ -42,12 +42,25 @@ export const routeAccessGuard: CanActivateFn = (
                     return true;
                 }
                 else {
-                    if(user.permissions.includes(config.permission)) {
+                    // un solo permesso o un elenco: servono tutti, ciascuno come permesso o come autorizzazione
+                    // senza permessi (es. admin) l'accesso resta negato, come prima
+                    const permissions: string[] = ([] as string[]).concat(config.permission ?? []);
+
+                    if(permissions.length === 0) {
+                        console.log('route-access.guard nessun permesso nella configurazione');
+                        return router.createUrlTree([config?.redirectTo?.forbidden ?? '/unauthorized']);
+                    }
+
+                    if(permissions.every((permission: string) => user.permissions.includes(permission))) {
                         console.log('route-access.guard accesso per permesso');
                         // return router.createUrlTree(['/dashboard', {permissionAccessType: 'role or persmission'}]);
                         return true;
                     }
-                    if(user.authorizations.includes(config.permission)) {
+                    if(
+                        permissions.every((permission: string) =>
+                            user.permissions.includes(permission) || user.authorizations.includes(permission)
+                        )
+                    ) {
                         console.log('route-access.guard accesso per autorizzazione');
                         // return router.createUrlTree(['/dashboard', {permissionAccessType: 'authorizated'}]);
                         return true;
