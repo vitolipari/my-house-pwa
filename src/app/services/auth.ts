@@ -22,7 +22,7 @@ export class AuthService {
 
 
     readonly currentUser = signal<LoggedUser | null>(null);
-    readonly isAuthenticated = computed(() => !!this.currentUser || this.hasToken());
+    readonly isAuthenticated = computed(() => !!this.currentUser() || this.hasToken());
 
     login(payload: LoginRequest): Promise<LoggedUser> {
 
@@ -66,6 +66,11 @@ export class AuthService {
                     this.currentUser.set(updatedUser);
                     return updatedUser;
                 })
+                .catch((e: any) => {
+                    console.log('errore in editProfile');
+                    console.log(e);
+                    return Promise.reject(e);
+                })
         );
     }
 
@@ -107,9 +112,36 @@ export class AuthService {
                         }
                         return Promise.reject('no-user');
                     })
+                    .catch((e: any) => {
+                        console.log('errore in ensureUserLoaded: chiamata me');
+                        console.log(e);
+                        return Promise.reject(e);
+                    })
                 );
 
         }
+
+    }
+
+    /**
+     * Carica l'utente all'avvio dell'app, prima della prima navigazione, così
+     * l'header compare anche aprendo direttamente l'URL di una pagina.
+     * Non blocca mai l'avvio: senza token o in caso di errore decidono splash e guard.
+     */
+    loadUserAtStartup(): Promise<void> {
+
+        if (!this.hasToken()) {
+            return Promise.resolve();
+        }
+
+        return (
+            this.ensureUserLoaded()
+                .then(() => undefined)
+                .catch((e: any) => {
+                    console.log('errore in loadUserAtStartup');
+                    console.log(e);
+                })
+        );
 
     }
 

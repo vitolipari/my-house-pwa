@@ -1,4 +1,4 @@
-import {ApplicationConfig, provideBrowserGlobalErrorListeners, isDevMode} from '@angular/core';
+import {ApplicationConfig, provideBrowserGlobalErrorListeners, isDevMode, provideAppInitializer, inject} from '@angular/core';
 import {provideRouter} from '@angular/router';
 import {routes} from './app.routes';
 import {provideHttpClient, withFetch, withInterceptors} from '@angular/common/http';
@@ -10,6 +10,7 @@ import {providePrimeNG} from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import {apiBaseUrlInterceptor} from './interceptor/api-base-url-interceptor';
 import {offlineCacheInterceptor} from './interceptor/offline-cache.interceptor';
+import {AuthService} from './services/auth';
 
 
 // {
@@ -41,6 +42,8 @@ export const appConfig: ApplicationConfig = {
             theme: {
                 preset: Aura
             }
-        })
+        }),
+        // utente caricato prima della prima navigazione, qualunque sia l'URL di ingresso
+        provideAppInitializer(() => inject(AuthService).loadUserAtStartup())
     ]
 };
