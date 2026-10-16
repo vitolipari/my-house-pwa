@@ -184,3 +184,47 @@
 }
 
 
+::ng-deep .p-popover-content {
+    padding: 0.5rem;
+    /*display: flex;*/
+    /*flex-direction: column;*/
+    /*justify-content: space-between;*/
+    /*align-items: flex-start;*/
+}
+
+
+.page-menu {
+    display: flex;
+    flex-direction: column;
+    min-width: 5rem;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.page-menu > DIV {
+    display: flex;
+    flex-direction: row;
+    min-width: 100%;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin: 0.5rem 0rem;
+}
+
+.page-menu > DIV > SVG,
+.page-menu > DIV > svg
+{
+    height: 20px !important;
+    width: 20px !important;
+    margin: 0rem 0.5rem;
+    /*position: relative !important;*/
+    /*top: 1px;*/
+    /*left: 23px;*/
+    /*display: inline-block;*/
+    /*z-index: 1;*/
+}
+
+.page-menu > DIV > DIV
+{
+    margin-right: 0.5rem;
+    padding-right: 0.5rem;
+}

@@ -11,6 +11,10 @@
 
 }
 
+:host > * {
+    flex: 1;
+}
+
 :host SVG, svg {
     width: var(--title-height);
     height: var(--title-height);

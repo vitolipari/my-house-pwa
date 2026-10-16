@@ -1,10 +1,56 @@
-<page-title
-    [title]="'Stanza'"
-    [hasPlusButton]="false"
+<!--
     [hasEditButton]="!isInEdit()"
     [iconID]="'BxsDoorOpen'"
     (editButtonClick)="editData()"
+-->
+<page-title
+    [title]="'Stanza'"
+    [hasPlusButton]="false"
+    [hasMenuButton]="true"
+    [menu]="roomMenu"
 ></page-title>
+
+<ng-template #roomMenu let-popover>
+    <div class="page-menu">
+        <div (click)="editData(); popover.hide()">
+            <svg class="svg-icon" style="position: static;">
+                <use href="#icon-407"></use>
+            </svg>
+            <div>Modifica</div>
+        </div>
+        <div (click)="duplicate(); popover.hide()">
+            <svg class="svg-icon" style="position: static;">
+                <use href="#icon-529"></use>
+            </svg>
+            <div>Duplpica</div>
+        </div>
+        <div (click)="deleteRoom(); popover.hide()">
+            <svg class="svg-icon" style="">
+                <use href="#icon-102-red-trash"></use>
+            </svg>
+            <div>Elimina</div>
+        </div>
+    </div>
+</ng-template>
+<p-drawer
+    [(visible)]="openConfirmDeletion"
+    position="bottom"
+    [modal]="true"
+    [dismissible]="true"
+    [showCloseIcon]="false"
+    [style]="{
+        height: '55vh',
+        borderTopLeftRadius: '24px',
+        borderTopRightRadius: '24px'
+      }"
+>
+    <div>
+        confermi eliminazione?
+    </div>
+</p-drawer>
+
+
+
 
 <div style="padding: 1rem;">
 

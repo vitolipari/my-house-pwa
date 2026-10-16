@@ -4,3 +4,80 @@
     [iconID]="'icon-446'"
     (plusButtonClick)="addNewTimer()"
 ></page-title>
+
+
+<div>
+
+    @if(!!isInWaiting()) {
+        <div>caricamento...</div>
+    }
+    @else {
+
+        <div>
+            cerca
+        </div>
+
+        @for (timer of timers(); track timer.id) {
+
+            <div class="timer-block">
+                <div class="timer-block-section first">
+                    <div>{{ timer.name }}</div>
+                    <div class="sub-row">
+                        <div>{{ timer.start }} - {{ timer.end }}</div>
+                        <div class="week-days-container">
+                            <div class="week-days {{ !!timer.weekDays[0] ? 'active' : '' }}">L</div>
+                            <div class="week-days {{ !!timer.weekDays[1] ? 'active' : '' }}">M</div>
+                            <div class="week-days {{ !!timer.weekDays[2] ? 'active' : '' }}">M</div>
+                            <div class="week-days {{ !timer.weekDays[3] ? 'active' : '' }}">G</div>
+                            <div class="week-days {{ !!timer.weekDays[4] ? 'active' : '' }}">V</div>
+                            <div class="week-days {{ !!timer.weekDays[5] ? 'active' : '' }}">S</div>
+                            <div class="week-days {{ !!timer.weekDays[6] ? 'active' : '' }}">D</div>
+                        </div>
+                        <div class="has-holidays {{ !!timer.isHolidays ? 'active': '' }}">{{ emoj('party_popper') }}</div>
+                    </div>
+                </div>
+
+
+                <div class="timer-block-section" style="margin-right: 0rem; margin-left: 1.5rem;">
+                    <svg viewBox="0 0 100 100">
+                        <circle
+                            [attr.r]="circle.r"
+                            [attr.cx]="circle.x"
+                            [attr.cy]="circle.y"
+                            fill="none"
+                            stroke="var(--color-background-1)"
+                            [attr.stroke-width]=" circle.width "
+                        ></circle>
+                        @for(arc of timer.arcs; track $index) {
+                            <path
+                                [attr.d]="arc"
+                                fill="none"
+                                stroke="var(--color-ambient-2)"
+                                [attr.stroke-width]=" circle.width "
+                            ></path>
+                        }
+                    </svg>
+                </div>
+
+                <div class="timer-block-section action">
+                    @if( !!isTimerInWaiting( timer ) ) {
+                        <svg class="svg-icon inside-device-list-status" style="position: static; top: 1.1rem; left: 3.8rem;">
+                            <use href="#orologio-1-1"></use>
+                        </svg>
+                    }
+                    @else {
+                        <switcher-component
+                            [check]="!!timer.enabled"
+                            [isReadOnly]="false"
+                            [inWait]="!!isTimerInWaiting( timer )"
+                            (toggle)="toggleEnableTimer(timer, $event)"
+                        ></switcher-component>
+                    }
+                </div>
+            </div>
+        }
+    }
+
+
+
+</div>

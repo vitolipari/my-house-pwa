@@ -16,6 +16,7 @@ import {Button} from 'primeng/button';
 import {InputText} from 'primeng/inputtext';
 import {FormBuilder, FormsModule, Validators} from '@angular/forms';
 import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
+import {Drawer} from 'primeng/drawer';
 
 @Component({
   selector: 'app-room.page',
@@ -25,7 +26,8 @@ import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
         Button,
         InputText,
         FormsModule,
-        Checkbox
+        Checkbox,
+        Drawer
     ],
   templateUrl: './room.page.html',
   styleUrl: './room.page.css',
@@ -34,6 +36,7 @@ export class RoomPage implements OnInit {
 
 
     selectedDevices: DeviceType[] = [];
+    openConfirmDeletion: boolean = false;
 
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
@@ -569,4 +572,14 @@ export class RoomPage implements OnInit {
         reader.readAsDataURL(file);
 
     }
+
+    protected deleteRoom() {
+        this.openConfirmDeletion = true;
+    }
+
+    protected duplicate() {
+
+    }
+
+
 }

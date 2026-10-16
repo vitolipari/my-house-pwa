@@ -1,4 +1,5 @@
 export type TimerType = {
+    enabled: boolean;
     name: string;
     dayMinutes: boolean[];
     dayMinutesPack?: string;
@@ -8,6 +9,7 @@ export type TimerType = {
     weekDays: boolean[];
     avoidDate: Date[] | number[] | string[];
     isHolidays: boolean;
+    note?: string;
 };
 
 export const MINUTES_IN_A_DAY: number = 1440;
@@ -38,3 +40,10 @@ export type DeviceEventTimerActionType = {
     map?: any;
 };
 
+
+export type FullTimerType = TimerType & {
+    id: number;
+    slots: EventTimerType[]
+    // TODO EventTimerActionType
+    // TODO DeviceEventTimerActionType
+};

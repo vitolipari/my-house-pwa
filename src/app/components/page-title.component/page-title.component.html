@@ -3,33 +3,56 @@
     <use
         [attr.href]="'#' + iconID"
         [attr.xlink:href]="'#' + iconID">
-    ></use>
+        >
+    </use>
 </svg>
-<h2>{{ title }}</h2>
-@if( !!hasPlusButton ) {
+<h2 style="white-space: nowrap; text-align: center;">{{ title }}</h2>
+@if (!!hasPlusButton) {
     <svg
         (click)="plusButtonCallback()"
     >
         <use
             [attr.href]="'#icon-112'"
             [attr.xlink:href]="'#icon-112'">
-            ></use>
+            >
+        </use>
     </svg>
 }
+
+
 @else {
 
-    @if( !!hasEditButton ) {
+    @if (!!hasEditButton) {
         <svg
             (click)="editButtonCallback()"
         >
             <use
                 [attr.href]="'#icon-407'"
                 [attr.xlink:href]="'#icon-407'">
-                ></use>
+                >
+            </use>
         </svg>
-    }
-    @else {
-        <div id="page-title-spacer"></div>
+    } @else {
+        @if (!!hasMenuButton) {
+            <div class="card flex justify-center">
+                <p-button
+                    (click)="op.toggle($event)"
+                    icon="pi pi-ellipsis-v"
+                    variant="text"
+                />
+                <p-popover #op>
+                    @if (!!menu) {
+                        <ng-container
+                            [ngTemplateOutlet]="menu"
+                            [ngTemplateOutletContext]="{ $implicit: op }"
+                        ></ng-container>
+                    }
+                </p-popover>
+            </div>
+        }
+        @else {
+            <div id="page-title-spacer"></div>
+        }
     }
 
 }

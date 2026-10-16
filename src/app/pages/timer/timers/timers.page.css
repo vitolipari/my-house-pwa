@@ -1,0 +1,134 @@
+.timer-block {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    align-items: center;
+    background: var(--color-background-3);
+    border-radius: 6px;
+    margin: 0.5rem auto;
+    min-width: 90vw;
+    width: 100%;
+    max-width: 95vw;
+    padding: 0.5rem 1rem;
+    height: 4rem;
+
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+}
+
+.timer-block-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+
+    align-items: flex-start;;
+    /*margin: 0.5rem auto;*/
+    /*min-width: 90vw;*/
+    /*width: 100%;*/
+    /*max-width: 95vw;*/
+    /*padding: 0.6rem;*/
+    height: 100%;
+
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+}
+
+.timer-block-section.first {
+    flex: 1;
+}
+
+.timer-block-section.action {
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row;
+    position: relative;
+    left: 10px;
+    align-items: center;
+    width: 4rem;
+}
+
+.timer-block-section.action > * {
+
+}
+
+::ng-deep.switch-component-container {
+    margin-right: 0rem !important;
+}
+
+.timer-block-section > * {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+
+    align-items: center;
+    /*margin: 0.5rem auto;*/
+    /*min-width: 90vw;*/
+    /*width: 100%;*/
+    /*max-width: 95vw;*/
+    /*padding: 0.6rem;*/
+
+
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+}
+
+
+.timer-block-section > SVG,
+.timer-block-section > svg
+{
+    width: auto;
+    height: 100%;
+    object-fit: contain;
+    aspect-ratio: 1 / 1;
+    flex: 1;
+    transform: rotate(-90deg);
+}
+
+.sub-row,
+.sub-row > *,
+.week-days,
+.week-days,
+.has-holidays,
+.has-holidays.active
+{
+    font-size: var(--tiny-font-size);
+    color: var(--color-text-1);
+    font-family: var(--page-font);
+}
+
+.sub-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between !important;
+    width: 100%;
+    min-width: 100%;
+}
+
+
+.week-days-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.week-days {
+    color: var(--color-text-0);
+    opacity: 0.3;
+}
+
+.week-days.active {
+    color: var(--color-text-0);
+    opacity: 1;
+}
+
+.has-holidays {
+    opacity: 0.3;
+}
+
+.has-holidays.active {
+    opacity: 1;
+}
+
+

@@ -47,6 +47,7 @@ export class NewTimerPage {
     isDebug: boolean = false;
 
     timer: TimerType = {
+        enabled: true,
         name: 'timer',
         dayMinutes: [],
         start: '01/01',
@@ -139,9 +140,10 @@ export class NewTimerPage {
     }
 
     addNewTimer() {
+
+        this.timer.enabled = true;
+        this.timer.note = '';
         console.log(this.timer);
-
-
         return firstValueFrom(this.timerApi.newTimer(this.timer))
             .then((data: EventTimerType[]) => {
 
@@ -163,4 +165,7 @@ export class NewTimerPage {
     }
 
 
+    protected openMenu() {
+
+    }
 }
