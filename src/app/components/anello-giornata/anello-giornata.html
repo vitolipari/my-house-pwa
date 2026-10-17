@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" id="anello{{ !!id ? '-'+ id : ''}}">
+    <defs>
+        <linearGradient
+            id="gradAlba"
+            gradientUnits="userSpaceOnUse"
+            [attr.x1]="inizioAlba.x"
+            [attr.y1]="inizioAlba.y"
+            [attr.x2]="fineAlba.x"
+            [attr.y2]="fineAlba.y"
+        >
+            <stop offset="0%" stop-color="#0000dd"/>
+            <stop offset="100%" stop-color="#ffff00"/>
+        </linearGradient>
+
+        <linearGradient
+            id="gradTramonto"
+            gradientUnits="userSpaceOnUse"
+            [attr.x1]="inizioTramonto.x"
+            [attr.y1]="inizioTramonto.y"
+            [attr.x2]="fineTramonto.x"
+            [attr.y2]="fineTramonto.y"
+        >
+            <stop offset="0%" stop-color="#ffff00"/>
+            <stop offset="50%" stop-color="#ff0000"/>
+            <stop offset="100%" stop-color="#0000dd"/>
+        </linearGradient>
+
+
+        <filter id="neon" x="-30%" y="-30%" width="160%" height="160%" filterUnits="userSpaceOnUse">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="sfocato"/>
+            <feMerge>
+                <feMergeNode in="sfocato"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+
+<!--            id="{{ !!id ? id : 'archi' }}"-->
+        <g
+            [attr.id]="'archi'+ (!!id ? ('-'+ id) : '')"
+            fill="none"
+            [attr.stroke-width]="spessore * 2 / 3"
+            stroke-linecap="butt"
+        >
+            <path [attr.d]="arcoNotte" stroke="#0000dd"/>
+            <path [attr.d]="arcoAlba" stroke="url(#gradAlba)"/>
+            <path [attr.d]="arcoGiorno" stroke="#ffff00"/>
+            <path [attr.d]="arcoTramonto" stroke="url(#gradTramonto)"/>
+        </g>
+
+    </defs>
+
+
+    <!-- alone -- >
+    <use href="#archi" class="alone"/>
+    < !-- anello nitido -- >
+    <use href="#archi" class="nucleo"/>
+    -->
+
+
+<!--        filter="url(#neon)"-->
+    <use
+        [attr.href]="'#archi'+ (!!id ? ('-'+ id) : '')"
+        [attr.filter]="!!isNeon ? 'url(#neon)' : ''"
+    />
+
+    <!--
+    <g font-family="sans-serif" font-size="12" text-anchor="middle" fill="#555">
+        <text x="150" y="12">0</text>
+        <text x="292" y="154">6</text>
+        <text x="150" y="298">12</text>
+        <text x="8" y="154">18</text>
+    </g>
+    -->
+</svg>

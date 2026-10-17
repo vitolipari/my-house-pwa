@@ -1,7 +1,50 @@
 <page-title
-    [title]="'Nuovo Timer'"
+    [title]=" !!isInDetailsMode ? 'Timer': 'Nuovo Timer'"
     [hasPlusButton]="false"
+    [hasMenuButton]="true"
+    [menu]="timerMenu"
 ></page-title>
+
+
+<ng-template #timerMenu let-popover>
+    <div class="page-menu">
+        <div (click)="editData(); popover.hide()">
+            <svg class="svg-icon" style="position: static;">
+                <use href="#icon-407"></use>
+            </svg>
+            <div>Modifica</div>
+        </div>
+        <div (click)="duplicate(); popover.hide()">
+            <svg class="svg-icon" style="position: static;">
+                <use href="#icon-529"></use>
+            </svg>
+            <div>Duplica</div>
+        </div>
+        <div (click)="deleteTimer(); popover.hide()">
+            <svg class="svg-icon" style="">
+                <use href="#icon-102-red-trash"></use>
+            </svg>
+            <div>Elimina</div>
+        </div>
+    </div>
+</ng-template>
+<p-drawer
+    [(visible)]="openConfirmDeletion"
+    position="bottom"
+    [modal]="true"
+    [dismissible]="true"
+    [showCloseIcon]="false"
+    [style]="{
+        height: '55vh',
+        borderTopLeftRadius: '24px',
+        borderTopRightRadius: '24px'
+      }"
+>
+    <div>
+        confermi eliminazione?
+    </div>
+</p-drawer>
+
 
 <div
     class="columns"
@@ -17,6 +60,8 @@
                 placeholder="Nuova Timer"
                 class="fixed-value-input"
                 [(ngModel)]="timer.name"
+                [readonly]="!!isInDetailsMode"
+                [disabled]="!!isInDetailsMode"
             />
         </div>
         <small id="name-help">Il nome della stanza o della zona.</small>
@@ -28,58 +73,129 @@
         -->
     </div>
 
-    <p>scala: {{ minuteScale }}min</p>
 
-    <div
-        class="card flex justify-center center-in-block"
-        style="width: 100%; height: 40px; display: flex; justify-content: space-around; margin-bottom: 1rem;"
-    >
-        <p-slider
-            [(ngModel)]="minuteScale"
-            [step]="5"
-            [min]="5"
-            [max]="60"
-            (ngModelChange)="onSlide()"
-            (onSlideEnd)="onSlideEnd()"
-            class="w-56"
-            style="height: 40px; width: 100%;"
-        />
-    </div>
+    @if( !!isInDetailsMode ) {
+        <div class="quadrante">
+            <svg viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+                <circle
+                    [attr.r]="circle.r"
+                    [attr.cx]="circle.x"
+                    [attr.cy]="circle.y"
+                    fill="none"
+                    stroke="var(--color-background-2)"
+                    [attr.stroke-width]="circle.width"
+                ></circle>
+                @for(arc of detailsTimer.arcs; track $index) {
+                    <path
+                        [attr.d]="arc"
+                        fill="none"
+                        stroke="var(--color-ambient-2)"
+                        [attr.stroke-width]="circle.width"
 
-    <timer-wheel
-        [minuteScale]="minuteScale"
-        [timerDay]="dayTimer"
-        (rotationChange)="getRotateChange($event)"
-        (onTimerSet)="getTimerSet($event)"
-        [isDebug]="isDebug"
-    >
+                    ></path>
+                }
+            </svg>
 
-    </timer-wheel>
+            <!--
+            lo usiamo nella creazione e nell'edit
+            <app-anello-giornata
+                [alba]="6.75"
+                [tramonto]="18.2"
+                [spessore]="circle.width"
+                [cx]="circle.x"
+                [cy]="circle.y"
+                [r]="circle.r"
+            ></app-anello-giornata>
+            -->
 
+            <app-anello-giornata
+                [alba]="6.75"
+                [tramonto]="18.2"
+                [spessore]="circle.width / 5"
+                [cx]="circle.x"
+                [cy]="circle.y"
+                [r]="(circle.r - circle.width) * 1.49"
+                [isNeon]="false"
+                [id]="'small-day-arc'"
+            ></app-anello-giornata>
+            <!--
+            -->
+        </div>
+    }
+    @else {
+
+        <p>scala: {{ minuteScale }}min</p>
+
+        <div
+            class="card flex justify-center center-in-block"
+            style="width: 100%; height: 40px; display: flex; justify-content: space-around; margin-bottom: 1rem;"
+        >
+            <p-slider
+                [(ngModel)]="minuteScale"
+                [step]="5"
+                [min]="5"
+                [max]="60"
+                (ngModelChange)="onSlide()"
+                (onSlideEnd)="onSlideEnd()"
+                class="w-56"
+                style="height: 40px; width: 100%;"
+            />
+        </div>
+
+        <timer-wheel
+            [minuteScale]="minuteScale"
+            [timerDay]="dayTimer"
+            (rotationChange)="getRotateChange($event)"
+            (onTimerSet)="getTimerSet($event)"
+            [isDebug]="isDebug"
+        >
+
+        </timer-wheel>
+
+    }
 
 
     <div>Settimana</div>
-    <div class="block-row" style="width: 100%; justify-content: space-evenly; margin-bottom: 2rem;">
-        <div class="tag {{ !!timer.weekDays[0] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(0)">L</div>
-        <div class="tag {{ !!timer.weekDays[1] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(1)">Ma</div>
-        <div class="tag {{ !!timer.weekDays[2] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(2)">Me</div>
-        <div class="tag {{ !!timer.weekDays[3] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(3)">G</div>
-        <div class="tag {{ !!timer.weekDays[4] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(4)">V</div>
-        <div class="tag {{ !!timer.weekDays[5] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(5)">S</div>
-        <div class="tag {{ !!timer.weekDays[6] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(6)">D</div>
-    </div>
+
+    @if( !!isInDetailsMode ) {
+        <div class="block-row" style="width: 100%; justify-content: space-evenly; margin-bottom: 2rem;">
+            <div class="tag {{ detailsTimer.weekDays[0] ? 'enabled' : 'disabled' }}" >L</div>
+            <div class="tag {{ detailsTimer.weekDays[1] ? 'enabled' : 'disabled' }}" >Ma</div>
+            <div class="tag {{ detailsTimer.weekDays[2] ? 'enabled' : 'disabled' }}" >Me</div>
+            <div class="tag {{ detailsTimer.weekDays[3] ? 'enabled' : 'disabled' }}" >G</div>
+            <div class="tag {{ detailsTimer.weekDays[4] ? 'enabled' : 'disabled' }}" >V</div>
+            <div class="tag {{ detailsTimer.weekDays[5] ? 'enabled' : 'disabled' }}" >S</div>
+            <div class="tag {{ detailsTimer.weekDays[6] ? 'enabled' : 'disabled' }}" >D</div>
+        </div>
+    }
+    @else {
+        <div class="block-row" style="width: 100%; justify-content: space-evenly; margin-bottom: 2rem;">
+            <div class="tag {{ !!timer.weekDays[0] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(0)">L</div>
+            <div class="tag {{ !!timer.weekDays[1] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(1)">Ma</div>
+            <div class="tag {{ !!timer.weekDays[2] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(2)">Me</div>
+            <div class="tag {{ !!timer.weekDays[3] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(3)">G</div>
+            <div class="tag {{ !!timer.weekDays[4] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(4)">V</div>
+            <div class="tag {{ !!timer.weekDays[5] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(5)">S</div>
+            <div class="tag {{ !!timer.weekDays[6] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(6)">D</div>
+        </div>
+    }
+
 
     <div class="block-row" style="margin-bottom: 2rem;">
         <div>Festivi</div>
         <div>
-            <!--
-                [check]="!!deviceChannelStatus(device, 'output')"
-                [inWait]="isDeviceInWaiting( device )"
-            -->
-            <switcher-component
-                [isReadOnly]="false"
-                (toggle)="setHolidays($event)"
-            ></switcher-component>
+            @if( !!isInDetailsMode ) {
+                <switcher-component
+                    [isReadOnly]="true"
+                    [check]="!!detailsTimer.enabled"
+                ></switcher-component>
+            }
+            @else {
+                <switcher-component
+                    [isReadOnly]="false"
+                    (toggle)="setHolidays($event)"
+                ></switcher-component>
+            }
         </div>
     </div>
 
@@ -96,6 +212,8 @@
             [showOnFocus]="true"
             [iconDisplay]="'input'"
             class="fixed-value-input input-like"
+            [readonlyInput]="!!isInDetailsMode"
+            [disabled]="!!isInDetailsMode"
         />
     </div>
 
@@ -111,74 +229,33 @@
             [showOnFocus]="true"
             [iconDisplay]="'input'"
             class="fixed-value-input input-like"
+            [readonlyInput]="!!isInDetailsMode"
+            [disabled]="!!isInDetailsMode"
         />
     </div>
 
 
 
-    <div id="signup-button">
-        @if (!!inWaiting()) {
-            <svg class="svg-icon inside-button" style="position: static; top: 1.1rem; left: 3.8rem;">
-                <use href="#orologio-1-1"></use>
-            </svg>
-        }
-        <p-button
-            label="{{ !!inWaiting() ? 'in attesa' : 'conferma' }}"
-            type="submit"
-            [disabled]="!!inWaiting()"
-            [rounded]="true"
-            [size]="'small'"
-            [style]="{padding: '0px 20px 0px '+ ( !inWaiting() ? '20px' : '32px' ), marginTop: '2rem'}"
-            (click)="addNewTimer()"
-        ></p-button>
-    </div>
-
-
-
-    @if( isDebug ) {
-
-        <div class="block-row" style="width: 80%;">
-            <div>Rotation</div>
-            <div>{{ rotateChange * 10 }}</div>
+    @if( !isInDetailsMode && !isInEditMode ) {
+        <div id="signup-button">
+            @if (!!inWaiting()) {
+                <svg class="svg-icon inside-button" style="position: static; top: 1.1rem; left: 3.8rem;">
+                    <use href="#orologio-1-1"></use>
+                </svg>
+            }
+            <p-button
+                label="{{ !!inWaiting() ? 'in attesa' : 'conferma' }}"
+                type="submit"
+                [disabled]="!!inWaiting()"
+                [rounded]="true"
+                [size]="'small'"
+                [style]="{padding: '0px 20px 0px '+ ( !inWaiting() ? '20px' : '32px' ), marginTop: '2rem'}"
+                (click)="addNewTimer()"
+            ></p-button>
         </div>
-
-        <div class="block-row" style="width: 80%;">
-            <div>timer day data</div>
-            <div>{{ dayTimer }}</div>
-        </div>
-
-        <div class="block-row" style="width: 80%;">
-            <div>bits</div>
-            <div style="width: 1440px; display: flex; flex-direction: row">
-                @for (segment of timer.dayMinutes; let i = $index; track i) {
-                    <div [id]="'bit-' +i" class="segmentBit" [style.background]="segment ? '#444' : '#ccc'"></div>
-                }
-            </div>
-        </div>
-
-        <div class="block-row" style="width: 80%;">
-            <div></div>
-            <div></div>
-        </div>
-
-        <div class="block-row" style="width: 80%;">
-            <div></div>
-            <div></div>
-        </div>
-
-        <div>inizio</div>
-        <div>fine</div>
-        <div>week</div>
-        <div>festivi</div>
-        <div>lista intervalli</div>
-        <div>lista intervalli</div>
-        <div>lista intervalli</div>
-        <div>lista intervalli</div>
-        <div>lista intervalli</div>
-
-        <!--@for (e of elements; let i = $index; track e) {-->
-            <!--  <div>{{ e | json }}</div>-->
-            <!--}-->
     }
+
+
+
 </div>
 

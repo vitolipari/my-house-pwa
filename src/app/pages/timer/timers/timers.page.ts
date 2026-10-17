@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {Component, inject, OnInit, signal, WritableSignal} from '@angular/core';
 import {PageTitleComponent} from '../../../components/page-title.component/page-title.component';
 import {Router} from '@angular/router';
 import {TimerApiService} from '../timer-api';
@@ -8,6 +8,12 @@ import {base64ToBits} from '../../../utils/base64';
 import {JsonPipe} from '@angular/common';
 import {SwitcherComponent} from '../../../components/switcher/switcher.component';
 import {emoj} from '../../../utils/string-utils';
+import {LongPressDirective} from '../../../directives/long-press.directive';
+import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
+import {ZoneType} from '../../devices/devices.models';
+import {Button} from 'primeng/button';
+import {FormsModule} from '@angular/forms';
+import {InputText} from 'primeng/inputtext';
 
 
 @Component({
@@ -15,7 +21,12 @@ import {emoj} from '../../../utils/string-utils';
     imports: [
         PageTitleComponent,
         JsonPipe,
-        SwitcherComponent
+        SwitcherComponent,
+        LongPressDirective,
+        Checkbox,
+        Button,
+        FormsModule,
+        InputText
     ],
   templateUrl: './timers.page.html',
   styleUrl: './timers.page.css',
@@ -30,15 +41,21 @@ export class TimersPage implements OnInit {
         width: 15
     };
 
-    readonly router = inject(Router);
-    readonly timerApi: TimerApiService = inject(TimerApiService);
+    protected isWeekDayActive: boolean[] = [false, false, false, false, false, false, false];
+    readonly emoj = emoj;
+    searchName: string = ''
+
+    protected readonly timers = signal<(FullTimerType & { sectors: number[][]; arcs: string[]; })[]>([]);
     isInWaiting = signal(false);
     isWaitingTimer = signal([0]);
-    readonly emoj = emoj;
+    readonly isInSelection = signal<boolean>(false);
 
+    readonly router = inject(Router);
+    readonly timerApi: TimerApiService = inject(TimerApiService);
     // signal: in modalità zoneless una proprietà semplice aggiornata in un then non ridisegna il template
-    protected readonly timers = signal<(FullTimerType & { sectors: number[][]; arcs: string[]; })[]>([]);
-    protected isWeekDayActive: boolean[] = [false, false, false, false, false, false, false];
+    private selectedTimers: (FullTimerType & { sectors: number[][]; arcs: string[] })[] = [];
+    protected readonly isInDeleteMultiTimersInWaiting = signal<boolean>(false);
+    protected readonly isInSearchWaiting = signal<boolean>(false);
 
     protected addNewTimer() {
         this.router.navigate(
@@ -73,7 +90,7 @@ export class TimersPage implements OnInit {
         }
          */
         return (
-            firstValueFrom(this.timerApi.searchTimers())
+            firstValueFrom(this.timerApi.searchTimers({name: this.searchName ?? undefined}))
                 .then((timers: FullTimerType[]) => {
 
                     const list = timers as (FullTimerType & { sectors: number[][]; arcs: string[]; })[];
@@ -180,5 +197,47 @@ export class TimersPage implements OnInit {
             })
         ;
 
+    }
+
+    protected onLongPress(timers: WritableSignal<(FullTimerType & { sectors: number[][]; arcs: string[] })[]>) {
+        this.isInSelection.set(true);
+    }
+
+    toggleSelctedTimers(timer: (FullTimerType & { sectors: number[][]; arcs: string[] }), event: CheckboxChangeEvent) {
+
+        this.selectedTimers =
+            this.selectedTimers.filter((selected: (FullTimerType & { sectors: number[][]; arcs: string[] }),) => selected.id !== timer.id);
+        if (!!event.checked) {
+            this.selectedTimers.push(timer);
+        }
+
+        console.log(this.selectedTimers);
+    }
+
+    stopPropagation(event: MouseEvent) {
+        event.stopPropagation();
+    }
+
+    protected deleteMultiTimers() {
+        this.isInDeleteMultiTimersInWaiting.update(() => true);
+        firstValueFrom(this.timerApi.deleteTimers(this.selectedTimers.map((t: (FullTimerType & { sectors: number[][]; arcs: string[] })) => t.id)))
+            .then(() => {
+                this.isInDeleteMultiTimersInWaiting.update(() => false);
+                this.router.navigate(['/timers-page']);
+                window.location.reload();
+            })
+            .catch((e) => {
+                console.log(e);
+            })
+        ;
+    }
+
+    protected gotoTimerPage(timer: FullTimerType & { sectors: number[][]; arcs: string[] }) {
+        this.router.navigate(['/timer-page', timer.id], {
+            queryParams: {},
+            state: {
+                details: timer
+            }
+        });
     }
 }

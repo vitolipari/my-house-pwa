@@ -1,0 +1,12 @@
+.anello {
+    overflow: visible;
+}
+
+.alone {
+    filter: blur(10px);
+    opacity: 0.9;
+}
+
+.nucleo {
+    filter: brightness(1.15);
+}

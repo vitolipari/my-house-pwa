@@ -13,15 +13,94 @@
     }
     @else {
 
-        <div>
-            cerca
+        <div id="top-bar">
+            @if(!!isInSelection()) {
+                <div id="delete-button">
+                    @if (!!isInDeleteMultiTimersInWaiting()) {
+                        <svg
+                            class="svg-icon inside-button"
+                            style="position: static; top: 1rem; left: 1.5rem;"
+                        >
+                            <use href="#orologio-1-1"></use>
+                        </svg>
+                    }
+                    @else {
+                        <svg
+                            class="svg-icon inside-button"
+                            style="position: static; top: 0.4rem; left: 1.8rem;"
+                        >
+                            <use href="#icon-102"></use>
+                        </svg>
+                    }
+                    <p-button
+                        label="{{ !!isInDeleteMultiTimersInWaiting() ? 'in attesa' : 'elimina' }}"
+                        type="submit"
+                        [disabled]="!!isInDeleteMultiTimersInWaiting()"
+                        [rounded]="true"
+                        [size]="'small'"
+                        [style]="{
+                            padding: '0px 20px 0px '+ ( !isInDeleteMultiTimersInWaiting() ? '20px' : '32px' ),
+                            background: 'var(--dark-red-color)',
+                            border: 'none',
+                            paddingLeft: '2rem',
+                            minWidth: '6rem'
+                        }"
+                        (click)="deleteMultiTimers()"
+                    ></p-button>
+                </div>
+            }
+            @else {
+                <div>
+                    <input
+                        pInputText
+                        id="name"
+                        aria-describedby="name-help"
+                        placeholder="cerca"
+                        class="fixed-value-input"
+                        [(ngModel)]="searchName"
+                    />
+                </div>
+                <div>
+                    <p-button
+                        label="{{ !!isInSearchWaiting() ? 'in attesa' : 'cerca' }}"
+                        type="submit"
+                        [disabled]="!!isInSearchWaiting()"
+                        [rounded]="true"
+                        [size]="'small'"
+                        [style]="{padding: '0px 20px 0px '+ ( !isInSearchWaiting() ? '20px' : '32px' )}"
+                        (click)="searchTimers()"
+                    ></p-button>
+                </div>
+            }
         </div>
 
         @for (timer of timers(); track timer.id) {
 
-            <div class="timer-block">
+            <div
+                class="timer-block"
+                (longPress)="onLongPress(timers)"
+                (click)="gotoTimerPage(timer)"
+            >
+                <div class="timer-block-section selection">
+                    @if(!!isInSelection()) {
+                        <div
+                            style=""
+                        >
+                            <p-checkbox
+                                (onChange)="toggleSelctedTimers(timer, $event)"
+                                (click)="stopPropagation($event)"
+                                [binary]="true"
+                                inputId="size_small"
+                                name="size"
+                                value="Small"
+                                size="small"
+                                style="margin: 0rem 0.75rem 0rem 0rem;"
+                            />
+                        </div>
+                    }
+                </div>
                 <div class="timer-block-section first">
-                    <div>{{ timer.name }}</div>
+                    <div class="timer-name">{{ timer.name }}</div>
                     <div class="sub-row">
                         <div>{{ timer.start }} - {{ timer.end }}</div>
                         <div class="week-days-container">
@@ -54,6 +133,7 @@
                                 fill="none"
                                 stroke="var(--color-ambient-2)"
                                 [attr.stroke-width]=" circle.width "
+
                             ></path>
                         }
                     </svg>

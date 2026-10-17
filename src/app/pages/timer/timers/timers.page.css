@@ -36,6 +36,8 @@
 
 .timer-block-section.first {
     flex: 1;
+    /* senza min-width: 0 un flex item non si restringe sotto la larghezza del testo */
+    min-width: 0;
 }
 
 .timer-block-section.action {
@@ -131,4 +133,32 @@
     opacity: 1;
 }
 
+.timer-name {
+    /* block e non flex: text-overflow non si applica al testo di un contenitore flex */
+    display: block !important;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#top-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    /*align-items: center;*/
+    align-items: first baseline;
+    width: 100%;
+    min-width: 100%;
+    margin-bottom: 1rem;
+    padding: 0rem 1rem;
+}
+
+
+#delete-button {
+    align-items: inherit;
+    justify-content: flex-end;
+    display: flex;
+    flex: 1;
+}
 

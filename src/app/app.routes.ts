@@ -186,11 +186,13 @@ export const routes: Routes = [
         canActivate: [routeAccessGuard],
         data: {
             accessControl: {
-                permission: 'READ_TIMER'
+                permission: 'READ_TIMER',
+                isReadOnly: true
             }
         },
         loadComponent: () =>
-            import('./pages/timer/timer/timer.page').then(m => m.TimerPage)
+            // import('./pages/timer/timer/timer.page').then(m => m.TimerPage)
+            import('./pages/timer/new-timer/new-timer.page').then(m => m.NewTimerPage)
     },
 
     {

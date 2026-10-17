@@ -94,10 +94,10 @@ export class TimerApiService {
     // }
 
 
-    // deleteRooms(rooms: ZoneType[]): Observable<ZoneType> {
-    //     let url = `${this.baseUrl}/rooms?ids=${ rooms.map((room: ZoneType) => room.id).join(',') }`;
-    //     return this.http.delete<ZoneType>(url);
-    // }
+    deleteTimers(ids: number[]): Observable<number[]> {
+        let url = `${this.baseUrl}/timers?ids=${ ids.join(',') }`;
+        return this.http.delete<number[]>(url);
+    }
 
 
     toggleTimer(id: number, event: boolean): Observable<void> {
