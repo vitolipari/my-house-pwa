@@ -54,9 +54,15 @@ export class TimerWheel implements OnInit {
   set timerDay( dayTimer: string ) {
     this.rawDayTimer = dayTimer;
 
-    // TODO
-    // let dayTimerBits: boolean[] = base64ToBits( this.rawDayTimer, MINUTES_IN_A_DAY);
-
+    // ricostruisce i segmenti solo se il valore è diverso da quanto mostrato:
+    // il padre rimanda indietro ogni modifica della ruota e createSegments azzera la rotazione
+    if( this.elements.length > 0 ) {
+      let dayTimerBits: boolean[] = base64ToBits( this.rawDayTimer, MINUTES_IN_A_DAY);
+      let isChanged: boolean = this.elements.some((seg: Segment) => seg.active !== !!dayTimerBits[seg.minuteIndex]);
+      if( isChanged ) {
+        this.createSegments(dayTimerBits);
+      }
+    }
 
   }
 
@@ -104,7 +110,7 @@ export class TimerWheel implements OnInit {
   }
 
   ngOnInit(): void {
-    this.createSegments();
+    this.createSegments( base64ToBits( this.rawDayTimer, MINUTES_IN_A_DAY) );
   }
 
 

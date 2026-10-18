@@ -88,6 +88,11 @@ export class TimerApiService {
         return this.http.post<EventTimerType[]>(url, data);
     }
 
+    updateTimer(id: number, data: TimerType): Observable<EventTimerType[]> {
+        let url = `${this.baseUrl}/timer/${ id }`;
+        return this.http.put<EventTimerType[]>(url, data);
+    }
+
     // editRoom(data: ZoneType): Observable<ZoneType> {
     //     let url = `${this.baseUrl}/room/${ data.id }`;
     //     return this.http.put<ZoneType>(url, data);

@@ -54,13 +54,24 @@ SPAN.p-slider-handle,
 }
 
 .quadrante > svg,
-.quadrante > app-anello-giornata {
+.quadrante > app-anello-giornata,
+.quadrante > timer-wheel
+{
     grid-area: 1 / 1;
+}
+
+/* alto quanto il suo svg e non quanto timer-wheel (che ha anche i pulsanti): così ruota attorno al centro */
+.quadrante > app-anello-giornata {
+    align-self: start;
 }
 
 ::ng-deep app-anello-giornata {
     z-index: -1;
     opacity: 0.3;
+}
+
+::ng-deep timer-wheel  {
+    z-index: 1;
 }
 
 ::ng-deep app-anello-giornata svg {
@@ -70,3 +81,43 @@ SPAN.p-slider-handle,
 ::ng-deep #anello-small-day-arc {
     opacity: 0.2;
 }
+
+
+
+.page-menu {
+    display: flex;
+    flex-direction: column;
+    min-width: 5rem;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.page-menu > DIV {
+    display: flex;
+    flex-direction: row;
+    min-width: 100%;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin: 0.5rem 0rem;
+}
+
+.page-menu > DIV > SVG,
+.page-menu > DIV > svg
+{
+    height: 20px !important;
+    width: 20px !important;
+    margin: 0rem 0.5rem;
+    /*position: relative !important;*/
+    /*top: 1px;*/
+    /*left: 23px;*/
+    /*display: inline-block;*/
+    /*z-index: 1;*/
+}
+
+.page-menu > DIV > DIV
+{
+    margin-right: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+

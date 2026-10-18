@@ -47,6 +47,7 @@ export class NewTimerPage {
 
 
 
+
     rotateEvent!: number;
     rotateChange!: number;
     minuteScale: number = 10;
@@ -76,11 +77,12 @@ export class NewTimerPage {
         width: 20
     };
 
-    isInDetailsMode: boolean = false;
-    isInEditMode: boolean = false;
-
-
+    readonly isInDetailsMode = signal<boolean>(false);
+    readonly isInEditMode = signal<boolean>(false);
+    readonly isInDeleteTimerInWaiting = signal<boolean>(false);
     protected readonly inWaiting = signal<boolean>(false);
+
+
 
     private readonly timerApi = inject(TimerApiService);
     private readonly router = inject(Router);
@@ -113,7 +115,7 @@ export class NewTimerPage {
         if( !!this.routeInfo && !!this.routeInfo['accessControl'] && !!this.routeInfo['accessControl'].isReadOnly ) {
             // siamo nella pagina di sola lettura
 
-            this.isInDetailsMode = true;
+            this.isInDetailsMode.update(() => true);
 
 
             // const sole = this.albaTramontoService.calcolaAlbaTramonto(new Date(), 41.9028, 12.4964);
@@ -194,6 +196,7 @@ export class NewTimerPage {
 
 
                         this.detailsTimer = timer;
+                        this.timer = timer;
 
                         this.inWaiting.update(() => false);
 
@@ -270,6 +273,7 @@ export class NewTimerPage {
                 ;
 
                 // this.detailsTimer = this.navigationData['details'];
+                this.timer = this.navigationData['details'];
             }
         }
         else {
@@ -354,11 +358,12 @@ export class NewTimerPage {
         this.timer.enabled = true;
         this.timer.note = '';
         console.log(this.timer);
+        this.inWaiting.set(true);
         return firstValueFrom(this.timerApi.newTimer(this.timer))
             .then((data: EventTimerType[]) => {
 
                 this.router.navigate(
-                    ['/rooms-page'],
+                    ['//timers-page'],
                     {
                         state: {
                             from: 'newTimerPage',
@@ -375,6 +380,33 @@ export class NewTimerPage {
     }
 
 
+    // salva le modifiche con PUT /timer/:id e torna all'elenco dei timer
+    updateTimer() {
+
+        this.inWaiting.set(true);
+        return firstValueFrom(this.timerApi.updateTimer(parseInt(this.pathVariables['id']), this.timer))
+            .then((data: EventTimerType[]) => {
+
+                this.inWaiting.set(false);
+                this.router.navigate(
+                    ['/timers-page'],
+                    {
+                        state: {
+                            from: 'editTimerPage',
+                            data: data
+                        }
+                    }
+                );
+            })
+            .catch((error: unknown) => {
+                console.log('errore in updateTimer della pagina timer');
+                console.log(error);
+                this.inWaiting.set(false);
+            });
+
+    }
+
+
     protected openMenu() {
 
     }
@@ -384,6 +416,44 @@ export class NewTimerPage {
         // TODO: navigare in edit
         // navigare in new-timer ma con i dati passati
 
+        // il template sblocca i campi solo leggendo isInDetailsMode: va spento qui
+        this.isInDetailsMode.set(false);
+        this.isInEditMode.set(true);
+        console.log('is in edit abilitato');
+
+        // la ruota legge dayTimer: il Core manda solo gli slot, quindi si ricava da lì
+        if( !!this.detailsTimer ) {
+            this.timer.dayMinutes = this.slotsToDayMinutes(this.detailsTimer.slots ?? []);
+            this.dayTimer = bitsToBase64( this.timer.dayMinutes );
+            this.timer.dayMinutesPack = this.dayTimer;
+        }
+
+    }
+
+
+    // minuti attivi della giornata ricavati dagli slot HHMM del Core (2400 = fine giornata)
+    slotsToDayMinutes(slots: EventTimerType[]): boolean[] {
+        const hhmmToMinute = (hhmm: string | number | Date): number => {
+            const text: string = ('' + hhmm).padStart(4, '0');
+            return (parseInt(text.slice(0, 2)) * 60) + parseInt(text.slice(2, 4));
+        };
+
+        const dayMinutes: boolean[] = Array(MINUTES_IN_A_DAY).fill(false);
+
+        slots
+            .forEach((slot: EventTimerType) => {
+                const from: number = hhmmToMinute(slot.trigger_time);
+                const to: number = Math.min(hhmmToMinute(slot.slot_until), MINUTES_IN_A_DAY);
+
+                if( !isNaN(from) && !isNaN(to) ) {
+                    for( let m = from; m < to; m++ ) {
+                        dayMinutes[m] = true;
+                    }
+                }
+            })
+        ;
+
+        return dayMinutes;
     }
 
     protected duplicate() {
@@ -392,5 +462,23 @@ export class NewTimerPage {
 
     protected deleteTimer() {
         this.openConfirmDeletion = true;
+    }
+
+
+    confirmDeleteTimer() {
+
+        this.isInDeleteTimerInWaiting.update(() => true);
+        firstValueFrom(this.timerApi.deleteTimers([(this.timer as any).id || this.detailsTimer.id]))
+            .then(() => {
+                this.isInDeleteTimerInWaiting.update(() => false);
+                this.router.navigate(['/timers-page']);
+                // window.location.reload();
+            })
+            .catch((e) => {
+                console.log(e);
+            })
+        ;
+
+
     }
 }

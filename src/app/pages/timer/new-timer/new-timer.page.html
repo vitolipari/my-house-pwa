@@ -1,7 +1,7 @@
 <page-title
-    [title]=" !!isInDetailsMode ? 'Timer': 'Nuovo Timer'"
+    [title]=" !!isInDetailsMode() ? 'Timer': ( !!isInEditMode() ? 'Modifica Timer' : 'Nuovo Timer' )"
     [hasPlusButton]="false"
-    [hasMenuButton]="true"
+    [hasMenuButton]="(!!isInDetailsMode() || !!isInEditMode())"
     [menu]="timerMenu"
 ></page-title>
 
@@ -40,8 +40,53 @@
         borderTopRightRadius: '24px'
       }"
 >
-    <div>
-        confermi eliminazione?
+    <div
+        style="
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+        "
+    >
+        <div
+            style="
+                font-family: var(--page-font);
+                font-size: var(--main-font-size);
+                color: var(--color-text-2);
+            "
+        >confermi eliminazione?</div>
+        <div
+            style="margin: 2rem 0rem 5rem 0rem; height: 4rem;"
+        >
+            @if(!!isInDeleteTimerInWaiting()) {
+                <svg
+                    class="svg-icon"
+                    style="width: 3rem;"
+                >
+                    <use href="#orologio-1-1"></use>
+                </svg>
+            }
+            @else {
+                <img
+                    src="/assets/images/trash.png"
+                    style="height: 100%"
+                >
+            }
+        </div>
+        <div>
+            <div
+                style="
+                      cursor: pointer;
+                      font-family: var(--page-font);
+                      font-size: var(--main-font-size);
+                      color: var(--theme-color);
+                      background: var(--color-red-outer-glow);
+                      border-radius: 100px;
+                      padding: 0.1rem 1rem;
+                "
+                (click)="!isInDeleteTimerInWaiting() ? confirmDeleteTimer() : null"
+                >conferma</div>
+        </div>
     </div>
 </p-drawer>
 
@@ -60,8 +105,8 @@
                 placeholder="Nuova Timer"
                 class="fixed-value-input"
                 [(ngModel)]="timer.name"
-                [readonly]="!!isInDetailsMode"
-                [disabled]="!!isInDetailsMode"
+                [readonly]="!!isInDetailsMode()"
+                [disabled]="!!isInDetailsMode()"
             />
         </div>
         <small id="name-help">Il nome della stanza o della zona.</small>
@@ -74,7 +119,7 @@
     </div>
 
 
-    @if( !!isInDetailsMode ) {
+    @if( !!isInDetailsMode() ) {
         <div class="quadrante">
             <svg viewBox="0 0 100 100" style="transform: rotate(-90deg);">
                 <circle
@@ -95,18 +140,6 @@
                     ></path>
                 }
             </svg>
-
-            <!--
-            lo usiamo nella creazione e nell'edit
-            <app-anello-giornata
-                [alba]="6.75"
-                [tramonto]="18.2"
-                [spessore]="circle.width"
-                [cx]="circle.x"
-                [cy]="circle.y"
-                [r]="circle.r"
-            ></app-anello-giornata>
-            -->
 
             <app-anello-giornata
                 [alba]="6.75"
@@ -138,26 +171,42 @@
                 (ngModelChange)="onSlide()"
                 (onSlideEnd)="onSlideEnd()"
                 class="w-56"
-                style="height: 40px; width: 100%;"
+                style="height: 12px; width: 100%;"
             />
+
+
         </div>
 
-        <timer-wheel
-            [minuteScale]="minuteScale"
-            [timerDay]="dayTimer"
-            (rotationChange)="getRotateChange($event)"
-            (onTimerSet)="getTimerSet($event)"
-            [isDebug]="isDebug"
-        >
-
-        </timer-wheel>
-
+        <div class="quadrante">
+            <timer-wheel
+                #ruota
+                [minuteScale]="minuteScale"
+                [timerDay]="dayTimer"
+                (rotationChange)="getRotateChange($event)"
+                (onTimerSet)="getTimerSet($event)"
+                [isDebug]="isDebug"
+            ></timer-wheel>
+            <!--
+            ruota insieme alla ruota: scaleY(-1) porta la mezzanotte in basso e le ore in senso antiorario,
+            come i segmenti di timer-wheel; poi la stessa rotazione in gradi della ruota
+            -->
+            <app-anello-giornata
+                [alba]="6.75"
+                [tramonto]="18.2"
+                [spessore]="24"
+                [cx]="circle.x"
+                [cy]="circle.y"
+                [r]="36"
+                [style.transform]="'rotate(' + ruota.rotation + 'deg) scaleY(-1)'"
+                [style]="{opacity: 0.2}"
+            ></app-anello-giornata>
+        </div>
     }
 
 
     <div>Settimana</div>
 
-    @if( !!isInDetailsMode ) {
+    @if( !!isInDetailsMode() ) {
         <div class="block-row" style="width: 100%; justify-content: space-evenly; margin-bottom: 2rem;">
             <div class="tag {{ detailsTimer.weekDays[0] ? 'enabled' : 'disabled' }}" >L</div>
             <div class="tag {{ detailsTimer.weekDays[1] ? 'enabled' : 'disabled' }}" >Ma</div>
@@ -184,15 +233,16 @@
     <div class="block-row" style="margin-bottom: 2rem;">
         <div>Festivi</div>
         <div>
-            @if( !!isInDetailsMode ) {
+            @if( !!isInDetailsMode() ) {
                 <switcher-component
                     [isReadOnly]="true"
-                    [check]="!!detailsTimer.enabled"
+                    [check]="!!detailsTimer.isHolidays"
                 ></switcher-component>
             }
             @else {
                 <switcher-component
                     [isReadOnly]="false"
+                    [check]="!!timer.isHolidays"
                     (toggle)="setHolidays($event)"
                 ></switcher-component>
             }
@@ -212,8 +262,8 @@
             [showOnFocus]="true"
             [iconDisplay]="'input'"
             class="fixed-value-input input-like"
-            [readonlyInput]="!!isInDetailsMode"
-            [disabled]="!!isInDetailsMode"
+            [readonlyInput]="!!isInDetailsMode()"
+            [disabled]="!!isInDetailsMode()"
         />
     </div>
 
@@ -229,17 +279,20 @@
             [showOnFocus]="true"
             [iconDisplay]="'input'"
             class="fixed-value-input input-like"
-            [readonlyInput]="!!isInDetailsMode"
-            [disabled]="!!isInDetailsMode"
+            [readonlyInput]="!!isInDetailsMode()"
+            [disabled]="!!isInDetailsMode()"
         />
     </div>
 
 
 
-    @if( !isInDetailsMode && !isInEditMode ) {
+    @if( !isInDetailsMode() ) {
         <div id="signup-button">
             @if (!!inWaiting()) {
-                <svg class="svg-icon inside-button" style="position: static; top: 1.1rem; left: 3.8rem;">
+                <svg
+                    class="svg-icon inside-button"
+                    style="position: static; top: 0.3rem; left: 1.5rem;"
+                >
                     <use href="#orologio-1-1"></use>
                 </svg>
             }
@@ -250,7 +303,7 @@
                 [rounded]="true"
                 [size]="'small'"
                 [style]="{padding: '0px 20px 0px '+ ( !inWaiting() ? '20px' : '32px' ), marginTop: '2rem'}"
-                (click)="addNewTimer()"
+                (click)="!inWaiting() ? (!!isInEditMode() ? updateTimer() : addNewTimer()) : null"
             ></p-button>
         </div>
     }
