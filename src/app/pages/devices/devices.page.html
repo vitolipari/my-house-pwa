@@ -14,7 +14,7 @@
                 <svg>
                     <use
                         [attr.href]="'#icon-587'"
-                        [attr.xlink:href]="'#icon-587'">
+                        [attr.xlink:href]="'#icon-587'"
                         ></use>
                 </svg>
                 @if( value === 'device' ) {
@@ -30,7 +30,7 @@
                 <svg>
                     <use
                         [attr.href]="'#icon-541'"
-                        [attr.xlink:href]="'#icon-541'">
+                        [attr.xlink:href]="'#icon-541'"
                         ></use>
                 </svg>
                 @if( value === 'groups' ) {
@@ -51,7 +51,7 @@
                 <svg>
                     <use
                         [attr.href]="'#icon-585'"
-                        [attr.xlink:href]="'#icon-585'">
+                        [attr.xlink:href]="'#icon-585'"
                         ></use>
                 </svg>
                 @if( value === 'network' ) {
@@ -81,6 +81,37 @@
             } @else {
                 <div class="registered-devices">
 
+                    <div style="display: flex; justify-content: flex-end; flex-direction: row;">
+                        <div
+                            style="
+                                display: flex;
+                                justify-content: flex-end;
+                                flex-direction: row;
+                                padding: 0.2rem 1rem;
+                                background: var(--color-background-2);
+                                border-radius: 100px;
+                            "
+                            (click)="goToMatterPage()"
+                        >
+                            <svg
+                                style="
+                                    opacity: 1;
+                                    margin: 0rem 0.5rem 0rem 0rem;
+                                    height: 100%;
+                                    width: 1rem;
+                                    aspect-ratio: 1/1;
+                                    object-fit: contain;
+                                "
+                            >
+                                <use
+                                    [attr.href]="'#icon-615'"
+                                    [attr.xlink:href]="'#icon-615'"
+                                ></use>
+                            </svg>
+                            <span>Matter</span>
+                        </div>
+                    </div>
+
 
                     @for(group of deviceGroups(); track group.room.id) {
                         <div>{{ group.room.name }}</div>
@@ -88,7 +119,13 @@
 
                         @for (device of group.devices; track device.id) {
 
+                            <device-block-component
+                                [device]="device"
+                                [noDetails]="false"
+                                [noNavigateToDetails]="false"
+                            ></device-block-component>
 
+                            <!--
                             <div class="device-row" (click)="gotoDeviceDetailsPage(device.id)">
                                 @if( !!device.imgIcon ) {
                                     <img class="device-row-img" [src]="device.imgIcon">
@@ -113,22 +150,48 @@
                                 <div class="device-row-info">
                                     <div>
                                         <strong>{{ device.name }}</strong>
-    <!--                                    <div>STANZA</div>-->
+
                                     </div>
 
                                     <div class="device-row-data">
                                         <div class="device-row-ip">
-                                            <div>{{ device.ip }}</div>
+                                            <div>{{ device.ip || 'no-ip' }}</div>
                                             <div class="device-mac">{{ device.mac }}</div>
                                         </div>
                                         <div class="device-row-ip">
-                                            <div class="device-mac to-right" style="color: {{ (thresholdIndicator(device) !== 0) ? '#ff0000' : '' }}">{{ getMainChannel(device) }}</div>
-                                            <div class="device-mac to-right">{{ getMainChannelLastTimeUpdated(device) }}</div>
+
+                                            @if (device.type.id === 'TEMPERATURE_HUMIDITY_SENSOR') {
+                                                <svg style="height: calc( var(--micro-font-size) + 4px); margin-right: 0.2rem;">
+                                                    <use
+                                                        [attr.href]="'#battery-' + (sensorChannelText(device, 'battery') || 'empty')"
+                                                        [attr.xlink:href]="'#battery-' + (sensorChannelText(device, 'battery') || 'empty')"
+                                                    >
+                                                    </use>
+                                                </svg>
+                                            }
+                                            @else {
+                                                <div class="device-mac to-right" style="color: {{ (thresholdIndicator(device) !== 0) ? '#ff0000' : '' }}">{{ getMainChannel(device) }}</div>
+                                            }
+                                            <div
+                                                class="device-mac to-right"
+                                                style="display: flex; flex-direction: row; justify-content: space-evenly; width: 100%; height: calc( var(--micro-font-size) + 4px); max-width: 5.5rem;"
+                                            >
+                                                <svg style="height: inherit; margin-right: 0.2rem;">
+                                                    <use
+                                                        [attr.href]="'#icon-198'"
+                                                        [attr.xlink:href]="'#icon-198'"
+                                                    >
+                                                    </use>
+                                                </svg>
+                                                {{ getMainChannelLastTimeUpdated(device) }}
+                                            </div>
                                         </div>
                                         <div class="device-row-status">
                                             <div>
                                                 <span [style]="'opacity: '+ wifiSignalInOpacityRange(device) +';'">WiFi</span>
-                                                <div class="wifi-signal-line" [style]="'width: '+ (wifiSignalInOpacityRange(device) * 100) +'%;'"></div>
+                                                <div class="wifi-signal-line-container" [style]="'width: 100%; opacity: '+ ((wifiSignalInOpacityRange(device) > 0.1) ? '1;': '0;')">
+                                                    <div class="wifi-signal-line" [style]="'width: '+ (wifiSignalInOpacityRange(device) * 100) +'%;'"></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -141,7 +204,7 @@
                                     </svg>
                                 }
                                 @else {
-                                    @if(( ''+ device.type.id).trim().toLowerCase().indexOf('switch') !== -1 ) {
+                                    @if(( ''+ device.category.id).trim().toLowerCase().indexOf('actuator') !== -1 ) {
                                         <switcher-component
                                             [isReadOnly]="false"
                                             [check]="!!deviceChannelStatus(device, 'output')"
@@ -150,7 +213,34 @@
                                         ></switcher-component>
                                     }
                                     @else {
-                                        @if( (''+ device.type.id).trim().toLowerCase().indexOf('sensor') !== -1 ) {
+                                        @if( (''+ device.category.id).trim().toLowerCase().indexOf('sensor') !== -1 ) {
+
+                                            @switch (device.type.id) {
+                                                @case ('TEMPERATURE_HUMIDITY_SENSOR') {
+                                                    <div class="ht-status">
+                                                        <div>
+                                                            <svg #temperatureIcon>
+                                                                <use
+                                                                    [attr.href]="'#TemperatureFill'"
+                                                                    [attr.xlink:href]="'#TemperatureFill'">
+                                                                    >
+                                                                </use>
+                                                            </svg>
+                                                            {{ sensorChannelText(device, 'temperature') }}
+                                                        </div>
+                                                        <div>
+                                                            <svg #humidityIcon>
+                                                                <use
+                                                                    [attr.href]="'#temperature_01'"
+                                                                    [attr.xlink:href]="'#temperature_01'">
+                                                                    >
+                                                                </use>
+                                                            </svg>
+                                                            {{ sensorChannelText(device, 'humidity') }}
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }
 
                                         }
                                         @else {
@@ -161,23 +251,9 @@
 
 
                             </div>
+                            -->
 
 
-
-    <!--                        <article class="registered-device">-->
-    <!--                            <div>-->
-    <!--                                <strong>{{ device.name }}</strong>-->
-    <!--                                <span>{{ device.where.name || 'Posizione non indicata' }}</span>-->
-    <!--                            </div>-->
-    <!--                            <dl>-->
-    <!--                                <div><dt>Categoria</dt><dd>{{ device.category.name || device.category.id || 'Non classificato' }}</dd></div>-->
-    <!--                                <div><dt>Tipo</dt><dd>{{ device.type.name || device.type.id || 'Non classificato' }}</dd></div>-->
-    <!--                                @if (device.catalogItemId) {-->
-    <!--                                    <div><dt>Catalogo</dt><dd>{{ device.catalogItemId }}</dd></div>-->
-    <!--                                }-->
-    <!--                                <div><dt>Famiglia</dt><dd>{{ device.family }}</dd></div>-->
-    <!--                            </dl>-->
-    <!--                        </article>-->
                         }
                     }
 

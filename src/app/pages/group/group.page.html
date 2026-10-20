@@ -54,6 +54,15 @@
         }
 
         @for (device of groupDevices(); track device.id) {
+
+
+            <device-block-component
+                [device]="device"
+                [noDetails]="false"
+                [noNavigateToDetails]="true"
+            ></device-block-component>
+
+            <!--
             <div class="device-row">
                 @if( !!device.imgIcon ) {
                     <img class="device-row-img" [src]="device.imgIcon">
@@ -93,6 +102,7 @@
                     </div>
                 </div>
             </div>
+            -->
         }
     }
 

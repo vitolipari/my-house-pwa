@@ -53,6 +53,20 @@
 
         <div class="device-list-container">
             @for (device of devices(); track device.id) {
+
+
+
+                <device-block-component
+                    [device]="device"
+                    [noDetails]="false"
+                    [noNavigateToDetails]="true"
+                    [noDeviceStatus]="true"
+                    [isCheckable]="true"
+                    (deviceToggle)="toggleSelctedDevice(device, $event)"
+                ></device-block-component>
+
+
+                <!--
                 <div class="device-row">
 
                     <div>
@@ -90,6 +104,7 @@
                     </div>
 
                 </div>
+                -->
             }
         </div>
     }

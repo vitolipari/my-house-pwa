@@ -1,0 +1,160 @@
+<div class="device-row" (click)="gotoDeviceDetailsPage(device.id)">
+
+
+    <!-- Selezione ---------------------------------------------------------------------------------->
+    @if(!!isCheckable) {
+        <div>
+            <p-checkbox
+                (onChange)="toggleSelctedDevice($event)"
+                [binary]="true"
+                size="small"
+                style="margin: 1rem;"
+            />
+        </div>
+    }
+
+
+
+
+    <!-- Icona ---------------------------------------------------------------------------------->
+    @if( !!device.imgIcon ) {
+        <img class="device-row-img" [src]="device.imgIcon">
+    }
+    @else {
+        @if( !!device.emoj ) {
+            <div class="device-row-emoj">{{ itemEmojIcon( device.emoj ) }}</div>
+        }
+        @else {
+            <svg
+                class="device-row-svg"
+            >
+                <use
+                    [attr.href]="'#' + (device.svgIcon ?? 'icon-602')"
+                    [attr.xlink:href]="'#' + (device.svgIcon ?? 'icon-602')">
+                    >
+                </use>
+            </svg>
+        }
+
+    }
+
+
+    <div class="device-row-info">
+
+        <!-- Nome ---------------------------------------------------------------------------------->
+        <div>
+            <strong>{{ device.name }}</strong>
+        </div>
+
+
+        <!-- Info di mezzo ---------------------------------------------------------------------------------->
+        @if(!noDeviceStatus) {
+            <div class="device-row-data">
+                <div class="device-row-ip">
+                    <div>{{ device.ip || 'no-ip' }}</div>
+                    <div class="device-mac">{{ device.mac }}</div>
+                </div>
+                <div class="device-row-ip">
+
+                    @if (device.type.id === 'TEMPERATURE_HUMIDITY_SENSOR') {
+                        <svg style="height: calc( var(--micro-font-size) + 4px); margin-right: 0.2rem;">
+                            <use
+                                [attr.href]="'#battery-' + (sensorChannelText(device, 'battery') || 'empty')"
+                                [attr.xlink:href]="'#battery-' + (sensorChannelText(device, 'battery') || 'empty')"
+                            >
+                            </use>
+                        </svg>
+                    }
+                    @else {
+                        <div class="device-mac to-right" style="color: {{ (thresholdIndicator(device) !== 0) ? '#ff0000' : '' }}">{{ getMainChannel(device) }}</div>
+                    }
+                    <div
+                        class="device-mac to-right"
+                        style="display: flex; flex-direction: row; justify-content: space-evenly; width: 100%; height: calc( var(--micro-font-size) + 4px); max-width: 5.5rem;"
+                    >
+                        <svg style="height: inherit; margin-right: 0.2rem;">
+                            <use
+                                [attr.href]="'#icon-198'"
+                                [attr.xlink:href]="'#icon-198'"
+                            >
+                            </use>
+                        </svg>
+                        {{ getMainChannelLastTimeUpdated(device) }}
+                    </div>
+                </div>
+                <div class="device-row-status">
+                    <div>
+                        <span [style]="'opacity: '+ wifiSignalInOpacityRange(device) +';'">WiFi</span>
+                        <div class="wifi-signal-line-container" [style]="'width: 100%; opacity: '+ ((wifiSignalInOpacityRange(device) > 0.1) ? '1;': '0;')">
+                            <div class="wifi-signal-line" [style]="'width: '+ (wifiSignalInOpacityRange(device) * 100) +'%;'"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+
+
+
+
+    <!-- status ---------------------------------------------------------------------------------->
+    @if(!noDeviceStatus) {
+
+        @if( isDeviceStatusInWaiting() ) {
+            <svg class="svg-icon inside-device-list-status" style="position: static; top: 1.1rem; left: 3.8rem;">
+                <use href="#orologio-1-1"></use>
+            </svg>
+        }
+        @else {
+            @if(( ''+ device.category.id).trim().toLowerCase().indexOf('actuator') !== -1 ) {
+                <switcher-component
+                    [isReadOnly]="false"
+                    [check]="!!deviceChannelStatus(device, 'output')"
+                    [inWait]="isDeviceStatusInWaiting()"
+                    [inError]="isSwitchInError()"
+                    (toggle)="switchAction(device, $event)"
+                ></switcher-component>
+            }
+            @else {
+                @if( (''+ device.category.id).trim().toLowerCase().indexOf('sensor') !== -1 ) {
+
+                    @switch (device.type.id) {
+                        @case ('TEMPERATURE_HUMIDITY_SENSOR') {
+                            <div class="ht-status">
+                                <div>
+                                    <svg #temperatureIcon>
+                                        <use
+                                            [attr.href]="'#TemperatureFill'"
+                                            [attr.xlink:href]="'#TemperatureFill'">
+                                            >
+                                        </use>
+                                    </svg>
+                                    {{ sensorChannelText(device, 'temperature') }}
+                                </div>
+                                <div>
+                                    <svg #humidityIcon>
+                                        <use
+                                            [attr.href]="'#temperature_01'"
+                                            [attr.xlink:href]="'#temperature_01'">
+                                            >
+                                        </use>
+                                    </svg>
+                                    {{ sensorChannelText(device, 'humidity') }}
+                                </div>
+                            </div>
+                        }
+                    }
+
+                }
+                @else {
+
+                }
+            }
+        }
+    }
+
+
+
+
+</div>

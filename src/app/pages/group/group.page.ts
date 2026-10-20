@@ -12,6 +12,7 @@ import {InputText} from 'primeng/inputtext';
 import {FormsModule} from '@angular/forms';
 import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
 import moment from 'moment';
+import {DeviceBlockComponent} from '../../components/device-block/device-block.component/device-block.component';
 
 @Component({
   selector: 'app-group.page',
@@ -20,7 +21,8 @@ import moment from 'moment';
         Button,
         InputText,
         FormsModule,
-        Checkbox
+        Checkbox,
+        DeviceBlockComponent
     ],
   templateUrl: './group.page.html',
   styleUrl: './group.page.css',

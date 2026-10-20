@@ -10,6 +10,7 @@ import {Button} from 'primeng/button';
 import {GroupsApiService} from '../groups/groups-api';
 import {Router} from '@angular/router';
 import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
+import {DeviceBlockComponent} from '../../components/device-block/device-block.component/device-block.component';
 
 
 @Component({
@@ -19,7 +20,8 @@ import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
         FormsModule,
         InputText,
         Button,
-        Checkbox
+        Checkbox,
+        DeviceBlockComponent
     ],
   templateUrl: './new-group.page.html',
   styleUrl: './new-group.page.css',
@@ -91,13 +93,13 @@ export class NewGroupPage implements OnInit {
         this.data.update((data: GroupType) => ({...data, description}));
     }
 
-    protected toggleSelctedDevice(device: DeviceType, event: CheckboxChangeEvent) {
+    protected toggleSelctedDevice(device: DeviceType, event: boolean) {
         const ids: string[] =
             (this.data().device_list || '')
                 .split(',')
                 .filter((id: string) => !!id && id !== String(device.id))
         ;
-        if( !!event.checked ) {
+        if( !!event ) {
             ids.push(String(device.id));
         }
         this.data.update((data: GroupType) => ({

@@ -40,12 +40,12 @@ p-tab > DIV > SPAN, B {
     margin-left: 0.3rem;
 }
 
-/*
 .registered-devices {
-    display: grid;
-    gap: 1rem;
+    display: flex;
+    flex-direction: column;
 }
 
+/*
 
 .registered-device {
     display: grid;
@@ -142,10 +142,19 @@ p-tab > DIV > SPAN, B {
     font-size: var(--micro-font-size) !important;
 }
 
+.device-row-ip {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /*width: 100%;*/
+    align-items: flex-start;
+}
+
 .device-row-ip,
 .device-row-ip > DIV
 {
     font-size: inherit;
+    /*flex: 1;*/
 }
 
 .device-row-status {
@@ -161,9 +170,16 @@ p-tab > DIV > SPAN, B {
     font-size: var(--tiny-font-size);
 }
 
+
+.wifi-signal-line-container {
+    background: var(--color-background-2);
+    height: 2px;
+    border-radius: 4px;
+}
+
 .wifi-signal-line {
     background: var(--color-text-0);
-    height: 4px;
+    height: 2px;
     border-radius: 4px;
     opacity: 0.5;
 }
@@ -193,4 +209,27 @@ p-tab > DIV > SPAN, B {
     justify-content: flex-end;
     align-items: center;
     padding: 0.5rem 0;
+}
+
+
+.ht-status {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: flex-end;
+}
+
+.ht-status > DIV {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    min-width: 5rem;
+}
+
+
+.ht-status > DIV > SVG,
+.ht-status > DIV > svg
+{
+    margin-right: 0rem;
 }

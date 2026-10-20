@@ -135,7 +135,7 @@ export class RoomsPage implements OnInit {
 
                 this.router.navigate(['/'], {
                     queryParams: {
-                        from: 'MILTI_DELETE_ROOMS'
+                        from: 'MULTI_DELETE_ROOMS'
                     },
                     state: {
                         deleted: this.selectedRooms

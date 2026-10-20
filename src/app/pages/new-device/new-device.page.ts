@@ -10,6 +10,7 @@ import {emoj} from '../../utils/string-utils';
 import {RadioButton, RadioButtonModule} from 'primeng/radiobutton';
 import {getLastElementOr} from '../../utils/array-util';
 import {
+    CommissioningJob,
     DeviceCatalogItem,
     DeviceCategory,
     DeviceTaxonomy,
@@ -19,7 +20,9 @@ import {
     MeteredSwitchType,
     ShellyFamilyType,
     SwitchType,
+    TuyaFamilyType,
     VOID_DEVICE,
+    VOID_DEVICE_FAMILY,
     VOID_METRED_SWITCH,
     VOID_SHELLY_FAMILY,
     VOID_SWITCH,
@@ -874,7 +877,13 @@ export class NewDevicePage implements OnInit {
     @ViewChild("knownDevice", {static: true, read: ElementRef}) knownDeviceElement!: ElementRef<HTMLDivElement>;
     @ViewChild("knownDeviceIcon", {static: true, read: ElementRef}) knownDeviceIcon!: ElementRef<SVGElement>;
     @ViewChild("deviceName", {static: true, read: ElementRef}) deviceName!: ElementRef<HTMLInputElement>;
-    @ViewChild("deviceTuyaMac", {static: true, read: ElementRef}) deviceTuyaMac!: ElementRef<HTMLInputElement>;
+    @ViewChild("deviceTuyaMac", {static: false, read: ElementRef}) deviceTuyaMac!: ElementRef<HTMLInputElement>;
+    @ViewChild("deviceTuyaVirtualID", {static: false, read: ElementRef}) deviceTuyaVirtualID!: ElementRef<HTMLInputElement>;
+    @ViewChild("matterPairingCode", {static: false, read: ElementRef}) matterPairingCode!: ElementRef<HTMLInputElement>;
+
+    // commissioning Matter: errore da mostrare e tipo proposto dal Core in base ai cluster del nodo
+    readonly matterError = signal<string | null>(null);
+    readonly matterDetectedType = signal<string | null>(null);
 
     ngOnInit() {
 
@@ -944,9 +953,9 @@ export class NewDevicePage implements OnInit {
                 .reduce(getLastElementOr, this.sections.init.value)
         ;
 
-        // console.log('navigazione negli step');
-        // console.log(this.currentStep);
-        // console.log(this.activeAccordionValue);
+        console.log('navigazione negli step');
+        console.log(this.currentStep);
+        console.log(this.activeAccordionValue);
     }
 
 
@@ -1138,6 +1147,15 @@ export class NewDevicePage implements OnInit {
                 });
 
                 break;
+
+            // l'id dell'hardware sarà il node ID restituito dal commissioning
+            case 'matter':
+                this.newDevice.set({
+                    ...this.newDevice(),
+                    hardware: {...VOID_DEVICE_FAMILY, id: ''},
+                });
+
+                break;
         }
 
 
@@ -1145,9 +1163,12 @@ export class NewDevicePage implements OnInit {
         console.log('newDevice');
         console.log(this.newDevice);
 
-        this.loadIpDevices();
+        if( this.integration.trim().toLowerCase() === 'shelly' ) {
+            this.loadIpDevices();
+        }
         this.loadRooms();
         this.navigateToNextStepFrom(this.sections.feature);
+        // this.navigateToNextStepFrom(this.sections.commissioning);
 
     }
 
@@ -1563,7 +1584,7 @@ export class NewDevicePage implements OnInit {
                     this.isRoomsInWaiting.set(false);
                 })
                 .catch((e: any) => {
-                    console.log('errore in loadRooms');
+                    console.log('errore in loadRooms: stanze per il nuovo dispositivo');
                     console.log(e);
 
                     // l'errore arriva in modo asincrono: il try/catch esterno non
@@ -1600,7 +1621,7 @@ export class NewDevicePage implements OnInit {
                     this.isCopied.set(true);
                 })
                 .catch((e: any) => {
-                    console.log('errore in copyNewDeviceData');
+                    console.log('errore in copyNewDeviceData: copia del nuovo dispositivo negli appunti');
                     console.log(e);
                 })
             ;
@@ -1666,7 +1687,84 @@ export class NewDevicePage implements OnInit {
             name: this.deviceName.nativeElement.value
         }));
     }
+
+    protected setTuyaDeviceData() {
+
+        // console.log('dispositivo aggiornato con il Tuya Device ID')
+        // console.log(this.deviceTuyaMac);
+        // console.log(this.deviceTuyaMac.nativeElement);
+        // console.log(this.deviceTuyaMac.nativeElement.value);
+
+        // basta uno dei due: il Core ricava l'altro dal cloud Tuya
+        if(!!this.deviceTuyaVirtualID.nativeElement.value.trim() || !!this.deviceTuyaMac.nativeElement.value.trim()) {
+            this.newDevice.update(() => ({
+                ...this.newDevice(),
+                // il MAC sta nel campo di primo livello, come per Shelly
+                mac: this.deviceTuyaMac.nativeElement.value.trim(),
+                // il Tuya Device ID è l'external_id dell'hardware nel Core; vuoto = assente
+                hardware: {
+                    ...this.newDevice().hardware,
+                    id: this.deviceTuyaVirtualID.nativeElement.value.trim()
+                } as TuyaFamilyType
+            }));
+            console.log(this.newDevice);
+
+            this.navigateToNextStepFrom(this.sections.commissioning);
+        }
+
+    }
+
+
+    // Porta il dispositivo nella fabric LipariOS con il codice manuale o il testo del QR (MT:...):
+    // a job completato il node ID diventa hardware.id e si passa al passo successivo
+    protected startMatterCommissioning() {
+        const pairingCode = this.matterPairingCode.nativeElement.value.trim();
+        if (!pairingCode) {
+            this.matterError.set('Inserisci il codice di pairing del dispositivo');
+            return;
+        }
+
+        this.inWaiting.set(true);
+        this.matterError.set(null);
+        this.matterDetectedType.set(null);
+
+        firstValueFrom(this.deviceApi.commissionMatter({pairingCode}))
+            .then((job: CommissioningJob) => this.waitMatterCommissioningJob(job.id, 150))
+            .then((job: CommissioningJob) => {
+                this.inWaiting.set(false);
+                if (job.status !== 'COMPLETED' || !job.device?.matterNodeId) {
+                    this.matterError.set(job.error || 'Commissioning non concluso: riprova');
+                    return;
+                }
+                this.matterDetectedType.set(job.device.detectedDeviceType);
+                this.newDevice.update(() => ({
+                    ...this.newDevice(),
+                    ip: job.device!.address ?? '',
+                    hardware: {...this.newDevice().hardware, id: job.device!.matterNodeId!}
+                }));
+                this.navigateToNextStepFrom(this.sections.commissioning);
+            })
+            .catch((e: any) => {
+                console.log('errore in startMatterCommissioning: commissioning del dispositivo Matter');
+                console.log(e);
+                this.matterError.set(e?.error?.error || 'Commissioning Matter non riuscito');
+                this.inWaiting.set(false);
+            });
+    }
+
+    // controlla il job una volta al secondo finché finisce o finiscono i tentativi
+    private waitMatterCommissioningJob(jobId: string, attempts: number): Promise<CommissioningJob> {
+        return new Promise<void>(resolve => setTimeout(resolve, 1000))
+            .then(() => firstValueFrom(this.deviceApi.commissioningJob(jobId)))
+            .then((job: CommissioningJob) => (
+                (job.status === 'COMPLETED' || job.status === 'FAILED' || attempts <= 1)
+                    ? job
+                    : this.waitMatterCommissioningJob(jobId, attempts - 1)
+            ))
+            .catch((e: any) => {
+                console.log(`errore in waitMatterCommissioningJob: lettura del job ${jobId}`);
+                console.log(e);
+                return Promise.reject(e);
+            });
+    }
 }
-
-
-

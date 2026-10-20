@@ -17,6 +17,7 @@ import {InputText} from 'primeng/inputtext';
 import {FormBuilder, FormsModule, Validators} from '@angular/forms';
 import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
 import {Drawer} from 'primeng/drawer';
+import {DeviceBlockComponent} from '../../components/device-block/device-block.component/device-block.component';
 
 @Component({
   selector: 'app-room.page',
@@ -27,7 +28,8 @@ import {Drawer} from 'primeng/drawer';
         InputText,
         FormsModule,
         Checkbox,
-        Drawer
+        Drawer,
+        DeviceBlockComponent
     ],
   templateUrl: './room.page.html',
   styleUrl: './room.page.css',

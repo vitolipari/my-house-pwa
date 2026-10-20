@@ -376,7 +376,45 @@
                 <div style="padding-top: 2rem;">
 
 
-                    @if( deviceKnowledgeType === 'knownDevice' ) {
+                    <!-- Matter: nodo nuovo o già associato a un altro ecosistema, sempre con il codice di pairing -->
+                    @if( integration === 'matter' ) {
+                        <div class="base-text-style row-field">
+                            <label for="matterPairingCode">Codice</label>
+                            <input
+                                #matterPairingCode
+                                pInputText
+                                id="matterPairingCode"
+                                placeholder="Codice manuale o testo del QR (MT:...)"
+                                class="fixed-value-input"
+                            />
+                        </div>
+                        <small>
+                            Se il dispositivo è già in Apple Casa, Google Home o Alexa, apri prima dall'app
+                            dell'ecosistema la condivisione con un'altra app e usa il nuovo codice.
+                        </small>
+                        @if( matterError() ) {
+                            <p class="taxonomy-error">{{ matterError() }}</p>
+                        }
+                        @if( matterDetectedType() && matterDetectedType() !== selectedFunctionalType ) {
+                            <p class="taxonomy-error">
+                                Il dispositivo sembra un {{ matterDetectedType() }}: il salvataggio come
+                                {{ selectedFunctionalType }} potrebbe essere rifiutato.
+                            </p>
+                        }
+                        <div class="base-text-style">
+                            <p-button
+                                class="content-single-button-at-right"
+                                [label]="inWaiting() ? 'associazione…' : 'associa'"
+                                type="button"
+                                [rounded]="true"
+                                [size]="'small'"
+                                [disabled]="inWaiting()"
+                                [style]="{padding: '0px 20px 0px '+ ( !inWaiting() ? '20px' : '32px' ), marginTop: '2rem'}"
+                                (click)="startMatterCommissioning();"
+                            ></p-button>
+                        </div>
+                    }
+                    @else if( deviceKnowledgeType === 'knownDevice' ) {
 
 
                         @switch ( integration ) {
@@ -422,15 +460,37 @@
                             }
                             @case ('tuya' ) {
                                 <div class="base-text-style row-field">
-                                    <label for="deviceTuyaMac">MAC Dispositivo</label>
+                                    <label for="deviceTuyaVirtualID">Device ID</label>
+                                    <input
+                                        #deviceTuyaVirtualID
+                                        pInputText
+                                        id="deviceTuyaVirtualID"
+                                        aria-describedby="deviceTuyaVirtualID-help"
+                                        placeholder="Device ID dall'app Tuya"
+                                        class="fixed-value-input"
+                                    />
+                                </div>
+                                <div class="base-text-style row-field">
+                                    <label for="deviceTuyaMac">MAC</label>
                                     <input
                                         #deviceTuyaMac
                                         pInputText
                                         id="deviceTuyaMac"
                                         aria-describedby="deviceTuyaMac-help"
-                                        placeholder="dispositivo"
+                                        placeholder="Device MAC dall'app Tuya"
                                         class="fixed-value-input"
                                     />
+                                </div>
+                                <div class="base-text-style">
+                                    <p-button
+                                        class="content-single-button-at-right"
+                                        label="continua"
+                                        type="button"
+                                        [rounded]="true"
+                                        [size]="'small'"
+                                        [style]="{padding: '0px 20px 0px '+ ( !inWaiting() ? '20px' : '32px' ), marginTop: '2rem'}"
+                                        (click)="setTuyaDeviceData();"
+                                    ></p-button>
                                 </div>
                             }
                             @default {
