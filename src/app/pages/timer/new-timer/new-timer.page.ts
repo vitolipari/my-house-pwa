@@ -17,10 +17,13 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {TimerApiService} from '../timer-api';
 import {firstValueFrom} from 'rxjs';
 import {PermissionService} from '../../../services/permission.service';
-import {ZoneType} from '../../devices/devices.models';
+import {DeviceType, ZoneType} from '../../devices/devices.models';
 import {getLastElementOr} from '../../../utils/array-util';
 import {Drawer} from 'primeng/drawer';
 import {AnelloGiornata} from '../../../components/anello-giornata/anello-giornata';
+import {DatePipe, SlicePipe} from '@angular/common';
+import {DeviceBlockComponent} from '../../../components/device-block/device-block.component/device-block.component';
+import {DeviceApiService} from '../../devices/device-api';
 
 
 @Component({
@@ -38,7 +41,10 @@ import {AnelloGiornata} from '../../../components/anello-giornata/anello-giornat
         PageTitleComponent,
         SwitcherComponent,
         Drawer,
-        AnelloGiornata
+        AnelloGiornata,
+        DatePipe,
+        SlicePipe,
+        DeviceBlockComponent
     ],
   templateUrl: './new-timer.page.html',
   styleUrl: './new-timer.page.css',
@@ -55,7 +61,7 @@ export class NewTimerPage {
     dayTimer!: string;
     isDebug: boolean = false;
 
-    timer: TimerType = {
+    timer: TimerType & {devices?: DeviceType[]} = {
         enabled: true,
         name: 'timer',
         dayMinutes: [],
@@ -76,11 +82,13 @@ export class NewTimerPage {
         r: 35,
         width: 20
     };
+    openConfirmDeletion: boolean = false;
 
     readonly isInDetailsMode = signal<boolean>(false);
     readonly isInEditMode = signal<boolean>(false);
     readonly isInDeleteTimerInWaiting = signal<boolean>(false);
     protected readonly inWaiting = signal<boolean>(false);
+    private isDeviceWaiting = signal<boolean>(false);
 
 
 
@@ -88,14 +96,14 @@ export class NewTimerPage {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     private readonly permissionService = inject(PermissionService);
-    // private readonly albaTramontoService = inject(AnelloGiornataService);
+    private readonly deviceApi = inject(DeviceApiService);
 
 
     readonly routeInfo = this.route.snapshot.data; // oggetto data della rotta = accessControl.permission
     readonly pathVariables = this.route.snapshot.params; // oggetto con i pathVariables
     readonly routeParamater = this.route.snapshot.queryParams; // oggetto con la query string
     readonly navigationData = this.router.currentNavigation()?.extras.state;    // passato dalla navigazione
-    openConfirmDeletion: boolean = false;
+    private devices: DeviceType[] = [];
 
 
 
@@ -278,6 +286,7 @@ export class NewTimerPage {
         }
         else {
             // siamo in nuovo timer
+            this.loadDevices();
         }
 
     }
@@ -428,7 +437,42 @@ export class NewTimerPage {
             this.timer.dayMinutesPack = this.dayTimer;
         }
 
+
+        return this.loadDevices()
+            // .then((devices: DeviceType[]) => {
+            //     this.detailsTimer.d
+            // })
+            // .catch((error: unknown) => {
+            //     console.log('errore in loadDevices del nuovo gruppo');
+            //     console.log(error);
+            // })
+            ;
+
+
     }
+
+    loadDevices(): Promise<DeviceType[]> {
+        this.isDeviceWaiting.set(true);
+
+        return (
+            firstValueFrom(this.deviceApi.list())
+                .then((devices: DeviceType[]) => {
+                    this.timer.devices = devices;
+
+                    this.isDeviceWaiting.set(false);
+                    console.log('dispositivi arrivati per il nuovo gruppo');
+                    return devices;
+                })
+                .catch((error: unknown) => {
+                    console.log('errore in loadDevices del nuovo gruppo');
+                    console.log(error);
+
+                    this.isDeviceWaiting.set(false);
+                    return Promise.reject(error);
+                })
+        );
+    }
+
 
 
     // minuti attivi della giornata ricavati dagli slot HHMM del Core (2400 = fine giornata)
@@ -480,5 +524,9 @@ export class NewTimerPage {
         ;
 
 
+    }
+
+    protected toggleSelctedDevice(device: DeviceType, event: boolean) {
+        // TODO
     }
 }

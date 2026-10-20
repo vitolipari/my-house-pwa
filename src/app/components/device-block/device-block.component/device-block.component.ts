@@ -36,6 +36,7 @@ export class DeviceBlockComponent implements OnInit {
     @Input() noNavigateToDetails: boolean = false;
     @Input() noDeviceStatus: boolean = false;
     @Input() isCheckable: boolean = false;
+    @Input() checked: boolean | undefined | null;
 
     @Output() deviceToggle = new EventEmitter<boolean>();
 

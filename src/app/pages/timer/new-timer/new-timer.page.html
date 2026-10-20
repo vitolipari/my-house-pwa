@@ -204,6 +204,21 @@
     }
 
 
+
+    @if( !!isInDetailsMode() ) {
+        <div class="slot-block">
+            <div class="block-title">Attivazioni</div>
+            @for( slot of detailsTimer.slots; track slot.id ) {
+                <div class="slot-row">
+                    <div class="">{{ (''+ slot.trigger_time) | slice:0:2 }}:{{ (''+ slot.trigger_time) | slice:2:4 }}</div>
+                    <div class="">•</div>
+                    <div class="">{{ (''+ slot.slot_until) | slice:0:2 }}:{{ (''+ slot.slot_until) | slice:2:4 }}</div>
+                </div>
+            }
+        </div>
+    }
+
+
     <div>Settimana</div>
 
     @if( !!isInDetailsMode() ) {
@@ -286,6 +301,85 @@
 
 
 
+
+    @if(!!isInEditMode()) {
+        <!-- TODO caricare tutti i dispositivi e far trovare quelli associati come selezionati -->
+        <div class="block-title">Dispositivi</div>
+        @for( device of detailsTimer.devices; track device.id ) {
+
+            <device-block-component
+                [device]="device"
+                [noDetails]="false"
+                [noNavigateToDetails]="false"
+                [noDeviceStatus]="false"
+                [isCheckable]="true"
+                [checked]="true"
+                (deviceToggle)="toggleSelctedDevice(device, $event)"
+            ></device-block-component>
+
+        }
+        @for( device of timer.devices; track device.id ) {
+
+            <device-block-component
+                [device]="device"
+                [noDetails]="false"
+                [noNavigateToDetails]="false"
+                [noDeviceStatus]="false"
+                [isCheckable]="true"
+                (deviceToggle)="toggleSelctedDevice(device, $event)"
+            ></device-block-component>
+
+        }
+
+
+
+        <div class="block-title">Gruppi [TODO]</div>
+    }
+    @else {
+
+        @if(!!isInDetailsMode()) {
+            <!-- caricare tutti i dispositivi associati -->
+
+            <div class="block-title">Dispositivi</div>
+            @for( device of detailsTimer.devices; track device.id ) {
+
+                <device-block-component
+                    [device]="device"
+                    [noDetails]="false"
+                    [noNavigateToDetails]="false"
+                    [noDeviceStatus]="false"
+                    [isCheckable]="false"
+                    (deviceToggle)="toggleSelctedDevice(device, $event)"
+                ></device-block-component>
+
+            }
+
+            <div class="block-title">Gruppi [TODO]</div>
+
+        }
+        @else {
+
+            <div class="block-title">Dispositivi</div>
+            @for( device of timer.devices; track device.id ) {
+
+                <device-block-component
+                    [device]="device"
+                    [noDetails]="false"
+                    [noNavigateToDetails]="false"
+                    [noDeviceStatus]="false"
+                    [isCheckable]="true"
+                    (deviceToggle)="toggleSelctedDevice(device, $event)"
+                ></device-block-component>
+
+            }
+
+            <div class="block-title">Gruppi [TODO]</div>
+
+        }
+
+    }
+
+
     @if( !isInDetailsMode() ) {
         <div id="signup-button">
             @if (!!inWaiting()) {
@@ -307,6 +401,9 @@
             ></p-button>
         </div>
     }
+
+
+
 
 
 

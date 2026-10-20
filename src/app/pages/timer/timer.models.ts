@@ -1,3 +1,5 @@
+import {DeviceType} from '../devices/devices.models';
+
 export type TimerType = {
     enabled: boolean;
     name: string;
@@ -43,7 +45,8 @@ export type DeviceEventTimerActionType = {
 
 export type FullTimerType = TimerType & {
     id: number;
-    slots: EventTimerType[]
+    slots: EventTimerType[];
+    devices: DeviceType[];
     // TODO EventTimerActionType
     // TODO DeviceEventTimerActionType
 };
