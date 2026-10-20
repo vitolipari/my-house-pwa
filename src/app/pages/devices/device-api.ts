@@ -74,4 +74,9 @@ export class DeviceApiService {
     loadDeviceStatus(deviceId: number | string): Observable<DeviceType> {
         return this.http.get<DeviceType>(`${this.baseUrl}/device/status/${deviceId}`);
     }
+
+    // azione TIPO:VALORE su un canale dell'attuatore; il canale è la chiave del DeviceType (es. output)
+    deviceAction(deviceId: number | string, channel: string, action: string): Observable<unknown> {
+        return this.http.put<unknown>(`${this.baseUrl}/device/${deviceId}/action`, {channel, action});
+    }
 }
