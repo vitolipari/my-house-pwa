@@ -8,7 +8,8 @@ import {
     DeviceCatalogItem,
     DeviceType,
     DeviceTaxonomy,
-    DiscoveryResult
+    DiscoveryResult,
+    MatterBridgeStatus
 } from './devices.models';
 
 @Injectable({providedIn: 'root'})
@@ -43,6 +44,7 @@ export class DeviceApiService {
         availability?: string;
         lastTime?: string | number;
         signalStatus?: string;
+        matter?: 'NATIVE' | 'BRIDGED';
     }): Observable<DeviceType[]> {
         return this.http.get<DeviceType[]>(`${this.baseUrl}/devices`, {params});
     }
@@ -69,6 +71,19 @@ export class DeviceApiService {
 
     commissioningJob(jobId: string): Observable<CommissioningJob> {
         return this.http.get<CommissioningJob>(`${this.baseUrl}/devices/matter/commission/${jobId}`);
+    }
+
+    // Bridge Matter: stato, riapertura del pairing per un altro ecosistema, rimozione di un ecosistema
+    matterBridge(): Observable<MatterBridgeStatus> {
+        return this.http.get<MatterBridgeStatus>(`${this.baseUrl}/devices/matter/bridge`);
+    }
+
+    openMatterBridgePairing(): Observable<MatterBridgeStatus> {
+        return this.http.post<MatterBridgeStatus>(`${this.baseUrl}/devices/matter/bridge/pairing`, {});
+    }
+
+    removeMatterBridgeFabric(fabricIndex: number): Observable<MatterBridgeStatus> {
+        return this.http.delete<MatterBridgeStatus>(`${this.baseUrl}/devices/matter/bridge/fabric/${fabricIndex}`);
     }
 
     loadDeviceStatus(deviceId: number | string): Observable<DeviceType> {

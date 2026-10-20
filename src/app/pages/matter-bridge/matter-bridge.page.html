@@ -1,0 +1,57 @@
+<page-title
+    [title]="'Matter'"
+    [hasPlusButton]="false"
+    [iconID]="'icon-615'"
+></page-title>
+
+<main class="matter-page">
+    <header>
+        <p>Il Bridge Matter rende disponibili i dispositivi di LipariOS in Apple Casa, Google Home e Alexa.</p>
+    </header>
+
+    @if (error()) {
+        <p class="message error" role="alert">{{ error() }}</p>
+    }
+
+    @if (loading()) {
+        <p class="message">Caricamento dello stato del Bridge…</p>
+    } @else if (status(); as bridge) {
+
+        @if (!bridge.ready) {
+            <p class="message error">Bridge Matter non attivo{{ bridge.reason ? ': ' + bridge.reason : '' }}</p>
+        } @else {
+            <section class="card">
+                <strong>{{ bridge.devices }} dispositivi pubblicati</strong>
+
+                @if ((!bridge.commissioned || pairingOpen()) && bridge.qrPairingCode) {
+                    <p>Nell'app dell'ecosistema scegli «Aggiungi dispositivo Matter» e inquadra il codice.</p>
+                    <qrcode
+                        [qrdata]="bridge.qrPairingCode"
+                        [width]="220"
+                        [errorCorrectionLevel]="'M'"
+                    ></qrcode>
+                    <p class="pairing-code">Codice manuale: <strong>{{ bridge.manualPairingCode }}</strong></p>
+                } @else {
+                    <p class="hint">Per aggiungere un altro ecosistema riapri il pairing e usa il codice che compare.</p>
+                    <button type="button" class="action" [disabled]="inWaiting()" (click)="openPairing()">
+                        Aggiungi a un altro ecosistema
+                    </button>
+                }
+            </section>
+
+            <section class="card">
+                <strong>Ecosistemi collegati</strong>
+                @for (fabric of bridge.fabrics; track fabric.fabricIndex) {
+                    <div class="fabric-row">
+                        <span>{{ fabric.label || ('Ecosistema ' + fabric.fabricIndex) }}</span>
+                        <button type="button" class="action danger" [disabled]="inWaiting()" (click)="removeFabric(fabric.fabricIndex)">
+                            Rimuovi
+                        </button>
+                    </div>
+                } @empty {
+                    <p class="hint">Nessun ecosistema collegato.</p>
+                }
+            </section>
+        }
+    }
+</main>

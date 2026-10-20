@@ -97,6 +97,18 @@ export const routes: Routes = [
     },
 
     {
+        path: 'matter-bridge',
+        canActivate: [routeAccessGuard],
+        data: {
+            accessControl: {
+                permission: 'ADD_HOUSE_DEVICES'
+            }
+        },
+        loadComponent: () =>
+            import('./pages/matter-bridge/matter-bridge.page').then(m => m.MatterBridgePage)
+    },
+
+    {
         path: 'device-details/:id',
         canActivate: [routeAccessGuard],
         data: {

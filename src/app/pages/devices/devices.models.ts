@@ -231,6 +231,8 @@ export type ShellyFamilyType = DeviceFamilyType & {
     }
 }
 
+// associazione Matter del dispositivo: mode NATIVE (nodo nella fabric LipariOS) o BRIDGED (pubblicato dal Bridge);
+// nodeID e fabricID solo per i nodi nativi, bridgeEndpiontIDs per gli endpoint del Bridge LipariOS
 export type MatterType = {
     id: number | string;
     mode: string;
@@ -277,7 +279,7 @@ export type DeviceType = {
     family: string;
     hardware: DeviceFamilyType;
     model: string;
-    matter: MatterType;
+    matter: MatterType | null;
     name: string;
     ip: string;
     mac: string;
@@ -502,13 +504,17 @@ export let VOID_SHELLY_FAMILY: ShellyFamilyType = {
     }
 }
 
-export let VOID_MATTER: MatterType = {
-    id: 0,
-    mode: '',
-    nodeID: 0,
-    fabricID: 0,
-    endpiontIDs: [0],
-    bridgeEndpiontIDs: [0]
+// stato del Bridge Matter (GET /devices/matter/bridge): codici di pairing, ecosistemi collegati e dispositivi pubblicati
+export type MatterBridgeStatus = {
+    enabled: boolean;
+    ready: boolean;
+    reason: string | null;
+    port: number;
+    commissioned: boolean;
+    manualPairingCode: string | null;
+    qrPairingCode: string | null;
+    fabrics: {fabricIndex: number; label: string; vendorId: number}[];
+    devices: number;
 }
 
 
@@ -536,7 +542,8 @@ export let VOID_DEVICE: DeviceType = {
     family: '',
     hardware: VOID_DEVICE_FAMILY,
     model: '',
-    matter: VOID_MATTER,
+    // nessuna associazione Matter finché il Core non la restituisce
+    matter: null,
     name: '',
     ip: '',
     mac: '',
