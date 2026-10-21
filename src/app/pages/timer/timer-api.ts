@@ -93,11 +93,11 @@ export class TimerApiService {
         return this.http.put<EventTimerType[]>(url, data);
     }
 
-    // editRoom(data: ZoneType): Observable<ZoneType> {
-    //     let url = `${this.baseUrl}/room/${ data.id }`;
-    //     return this.http.put<ZoneType>(url, data);
-    // }
 
+    linkDevicesToTimer(timerID: number, devicesID: number[]): Observable<void> {
+        let url = `${this.baseUrl}/timer/${ timerID }/devices?ids=${ devicesID.join(',') }`;
+        return this.http.put<void>(url, {});
+    }
 
     deleteTimers(ids: number[]): Observable<number[]> {
         let url = `${this.baseUrl}/timers?ids=${ ids.join(',') }`;

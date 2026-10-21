@@ -1,5 +1,5 @@
-import {Component, inject, Input, signal} from '@angular/core';
-import { Segment } from "./segment";
+import {Component, EventEmitter, inject, Input, Output, signal} from '@angular/core';
+import { isSegmentActive, Segment } from "./segment";
 import {EventTimerType, FullTimerType, MINUTES_IN_A_DAY, TimerType} from '../timer.models';
 import {bitsToBase64} from '../../../utils/base64';
 import {InputText} from 'primeng/inputtext';
@@ -42,7 +42,7 @@ import {DeviceApiService} from '../../devices/device-api';
         SwitcherComponent,
         Drawer,
         AnelloGiornata,
-        DatePipe,
+        // DatePipe,
         SlicePipe,
         DeviceBlockComponent
     ],
@@ -61,7 +61,7 @@ export class NewTimerPage {
     dayTimer!: string;
     isDebug: boolean = false;
 
-    timer: TimerType & {devices?: DeviceType[]} = {
+    timer: TimerType = {
         enabled: true,
         name: 'timer',
         dayMinutes: [],
@@ -84,12 +84,15 @@ export class NewTimerPage {
     };
     openConfirmDeletion: boolean = false;
 
+    isDevicePanel: boolean = false;
+    devices: (DeviceType & {isOwned: boolean})[] = [];
+
     readonly isInDetailsMode = signal<boolean>(false);
     readonly isInEditMode = signal<boolean>(false);
     readonly isInDeleteTimerInWaiting = signal<boolean>(false);
-    protected readonly inWaiting = signal<boolean>(false);
-    private isDeviceWaiting = signal<boolean>(false);
-
+    readonly inWaiting = signal<boolean>(false);
+    isDeviceWaiting = signal<boolean>(false);
+    readonly isInLinkTimerInWaiting = signal<boolean | null>(false);
 
 
     private readonly timerApi = inject(TimerApiService);
@@ -103,14 +106,18 @@ export class NewTimerPage {
     readonly pathVariables = this.route.snapshot.params; // oggetto con i pathVariables
     readonly routeParamater = this.route.snapshot.queryParams; // oggetto con la query string
     readonly navigationData = this.router.currentNavigation()?.extras.state;    // passato dalla navigazione
-    private devices: DeviceType[] = [];
-
+    selectedDevices: number[] = [];
 
 
     @Input()
     set timerData(data: TimerType) {
         this.timer = { ...this.timer, ...data };
     }
+
+
+    @Output() menuToggle = new EventEmitter<boolean>();
+    @Output() menuClose = new EventEmitter<boolean>();
+
 
 
     constructor() {
@@ -315,6 +322,9 @@ export class NewTimerPage {
 
         console.log( dayTimerRaw );
         dayTimerRaw
+            // solo i segmenti cambiati: gli altri conservano i minuti esatti delle sezioni
+            // impostate con una scala diversa, che altrimenti verrebbero cancellate
+            .filter((seg: Segment) => seg.active !== isSegmentActive(this.timer.dayMinutes, seg.minuteIndex, this.minuteScale))
             .forEach((seg: Segment) => {
                 for( let cs = seg.minuteIndex; cs < (seg.minuteIndex + this.minuteScale); cs++) {
                     // console.log(i, cs);
@@ -438,7 +448,7 @@ export class NewTimerPage {
         }
 
 
-        return this.loadDevices()
+
             // .then((devices: DeviceType[]) => {
             //     this.detailsTimer.d
             // })
@@ -457,10 +467,29 @@ export class NewTimerPage {
         return (
             firstValueFrom(this.deviceApi.list())
                 .then((devices: DeviceType[]) => {
-                    this.timer.devices = devices;
+                    this.devices =
+                        devices
+                            .map((device: DeviceType) => {
+                                return {
+                                    ...device,
+                                    // isOwned: this.selectedDevices.includes(parseInt(''+ device.id))
+                                    isOwned: this.detailsTimer.devices
+                                        .map((d: DeviceType) => parseInt(''+ d.id))
+                                        .includes(parseInt(''+ device.id))
+                                };
+                            })
+                    ;
+
+                    // si parte dai dispositivi già associati: il salvataggio sostituisce l'elenco intero
+                    this.selectedDevices =
+                        this.devices
+                            .filter((device: DeviceType & {isOwned: boolean}) => !!device.isOwned)
+                            .map((device: DeviceType & {isOwned: boolean}) => parseInt(''+ device.id))
+                    ;
 
                     this.isDeviceWaiting.set(false);
-                    console.log('dispositivi arrivati per il nuovo gruppo');
+                    console.log('dispositivi arrivati per il timer');
+                    console.log( this.devices );
                     return devices;
                 })
                 .catch((error: unknown) => {
@@ -526,7 +555,52 @@ export class NewTimerPage {
 
     }
 
+
+    openDevicePanel() {
+        this.isDevicePanel = true;
+        return this.loadDevices()
+
+    }
+
     protected toggleSelctedDevice(device: DeviceType, event: boolean) {
+        if(!!event) {
+            if( !this.selectedDevices.includes(parseInt(''+ device.id)) ) {
+                this.selectedDevices.push(parseInt(''+ device.id))
+            }
+        }
+        else {
+            this.selectedDevices =
+                this.selectedDevices
+                    .filter((id) => id !== parseInt(''+ device.id))
+            ;
+        }
+    }
+
+
+    protected addDeviceGroups() {
         // TODO
+
+    }
+
+    protected confirmDeviceLinkedTimer() {
+
+        this.isInLinkTimerInWaiting.update(() => true);
+
+        firstValueFrom(this.timerApi.linkDevicesToTimer(this.detailsTimer.id, this.selectedDevices))
+            .then(() => {
+
+                this.isInLinkTimerInWaiting.update(() => true);
+                this.isDevicePanel = false;
+
+                // this.router.navigate(['/timers-page']);
+                window.location.reload();
+
+            })
+            .catch((e) => {
+                console.log(e);
+            })
+
+
+        return null;
     }
 }

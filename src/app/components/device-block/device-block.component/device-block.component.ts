@@ -11,12 +11,14 @@ import {firstValueFrom} from 'rxjs';
 import {timestampInMilliseconds} from '../../../utils/time-utils';
 import {environment} from '../../../../environments';
 import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
+import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'device-block-component',
     imports: [
         SwitcherComponent,
-        Checkbox
+        Checkbox,
+        FormsModule
     ],
   templateUrl: './device-block.component.html',
   styleUrls: [
@@ -293,6 +295,6 @@ export class DeviceBlockComponent implements OnInit {
 
 
     protected toggleSelctedDevice(event: CheckboxChangeEvent) {
-        this.deviceToggle.emit( true );
+        this.deviceToggle.emit( !!event.checked );
     }
 }

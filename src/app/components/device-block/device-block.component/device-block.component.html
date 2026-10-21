@@ -7,7 +7,7 @@
             <p-checkbox
                 (onChange)="toggleSelctedDevice($event)"
                 [binary]="true"
-                [value]="!!checked"
+                [ngModel]="!!checked"
                 size="small"
                 style="margin: 1rem;"
             />

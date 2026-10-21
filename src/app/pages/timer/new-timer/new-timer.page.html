@@ -300,11 +300,22 @@
     </div>
 
 
-
-
-    @if(!!isInEditMode()) {
-        <!-- TODO caricare tutti i dispositivi e far trovare quelli associati come selezionati -->
-        <div class="block-title">Dispositivi</div>
+    @if( !!isInDetailsMode() || !!isInEditMode() ) {
+        <div class="block-row" style="margin-top: 2rem;">
+            <div class="block-title">
+                Dispositivi
+            </div>
+            <svg
+                style="height: 1.5rem; width: 1.5rem;"
+                (click)="openDevicePanel()"
+            >
+                <use
+                    [attr.href]="'#icon-112'"
+                    [attr.xlink:href]="'#icon-112'">
+                    >
+                </use>
+            </svg>
+        </div>
         @for( device of detailsTimer.devices; track device.id ) {
 
             <device-block-component
@@ -312,72 +323,30 @@
                 [noDetails]="false"
                 [noNavigateToDetails]="false"
                 [noDeviceStatus]="false"
-                [isCheckable]="true"
-                [checked]="true"
-                (deviceToggle)="toggleSelctedDevice(device, $event)"
-            ></device-block-component>
-
-        }
-        @for( device of timer.devices; track device.id ) {
-
-            <device-block-component
-                [device]="device"
-                [noDetails]="false"
-                [noNavigateToDetails]="false"
-                [noDeviceStatus]="false"
-                [isCheckable]="true"
+                [isCheckable]="false"
                 (deviceToggle)="toggleSelctedDevice(device, $event)"
             ></device-block-component>
 
         }
 
-
-
-        <div class="block-title">Gruppi [TODO]</div>
-    }
-    @else {
-
-        @if(!!isInDetailsMode()) {
-            <!-- caricare tutti i dispositivi associati -->
-
-            <div class="block-title">Dispositivi</div>
-            @for( device of detailsTimer.devices; track device.id ) {
-
-                <device-block-component
-                    [device]="device"
-                    [noDetails]="false"
-                    [noNavigateToDetails]="false"
-                    [noDeviceStatus]="false"
-                    [isCheckable]="false"
-                    (deviceToggle)="toggleSelctedDevice(device, $event)"
-                ></device-block-component>
-
-            }
-
+        <div class="block-row" style="margin-top: 2rem;">
             <div class="block-title">Gruppi [TODO]</div>
-
-        }
-        @else {
-
-            <div class="block-title">Dispositivi</div>
-            @for( device of timer.devices; track device.id ) {
-
-                <device-block-component
-                    [device]="device"
-                    [noDetails]="false"
-                    [noNavigateToDetails]="false"
-                    [noDeviceStatus]="false"
-                    [isCheckable]="true"
-                    (deviceToggle)="toggleSelctedDevice(device, $event)"
-                ></device-block-component>
-
-            }
-
-            <div class="block-title">Gruppi [TODO]</div>
-
-        }
-
+            <svg
+                style="height: 1.5rem; width: 1.5rem;"
+                (click)="addDeviceGroups()"
+            >
+                <use
+                    [attr.href]="'#icon-112'"
+                    [attr.xlink:href]="'#icon-112'">
+                    >
+                </use>
+            </svg>
+        </div>
     }
+
+
+
+
 
 
     @if( !isInDetailsMode() ) {
@@ -391,7 +360,7 @@
                 </svg>
             }
             <p-button
-                label="{{ !!inWaiting() ? 'in attesa' : 'conferma' }}"
+                label="{{ !!inWaiting() ? 'in attesa' : 'salva' }}"
                 type="submit"
                 [disabled]="!!inWaiting()"
                 [rounded]="true"
@@ -409,3 +378,72 @@
 
 </div>
 
+
+<p-drawer
+    [(visible)]="isDevicePanel"
+    position="bottom"
+    [modal]="true"
+    [dismissible]="true"
+    [showCloseIcon]="false"
+    [style]="{
+        height: '55vh',
+        borderTopLeftRadius: '24px',
+        borderTopRightRadius: '24px'
+      }"
+>
+    <div
+        style="
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            width: 100%;
+        "
+    >
+
+
+
+            @if(!!isDeviceWaiting()) {
+                <div>
+                    <svg class="svg-icon inside-button" style="position: static; top: 1rem; left: 1.5rem;">
+                        <use href="#orologio-1-1"></use>
+                    </svg>
+                    <div class="heartbeat-flash">scanning...</div>
+                </div>
+            }
+            @else {
+
+                @for( device of devices; track device.id ) {
+
+                    <device-block-component
+                        [device]="device"
+                        [noDetails]="false"
+                        [noNavigateToDetails]="true"
+                        [noDeviceStatus]="true"
+                        [isCheckable]="true"
+                        [checked]="device.isOwned"
+                        (deviceToggle)="toggleSelctedDevice(device, $event)"
+                    ></device-block-component>
+
+                }
+            }
+
+
+
+
+        <div style="margin-top: 2rem;">
+            <div
+                style="
+                    cursor: pointer;
+                    font-family: var(--page-font);
+                    font-size: var(--main-font-size);
+                    color: var(--color-text-2);
+                    background: var(--color-background-3);
+                    border-radius: 100px;
+                    padding: 0.1rem 1rem;
+                "
+                (click)="!isInLinkTimerInWaiting() ? confirmDeviceLinkedTimer() : null"
+            >conferma</div>
+        </div>
+    </div>
+</p-drawer>

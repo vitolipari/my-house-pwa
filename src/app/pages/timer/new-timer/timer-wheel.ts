@@ -2,7 +2,7 @@ import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} f
 import {JsonPipe} from '@angular/common';
 import moment from 'moment';
 import { base64ToBits } from "../../../utils/base64";
-import {Segment} from './segment';
+import {isSegmentActive, Segment} from './segment';
 import { MINUTES_IN_A_DAY } from "../timer.models";
 import {Avoid} from './avoid';
 import {Ok} from './ok';
@@ -58,7 +58,7 @@ export class TimerWheel implements OnInit {
     // il padre rimanda indietro ogni modifica della ruota e createSegments azzera la rotazione
     if( this.elements.length > 0 ) {
       let dayTimerBits: boolean[] = base64ToBits( this.rawDayTimer, MINUTES_IN_A_DAY);
-      let isChanged: boolean = this.elements.some((seg: Segment) => seg.active !== !!dayTimerBits[seg.minuteIndex]);
+      let isChanged: boolean = this.elements.some((seg: Segment) => seg.active !== isSegmentActive(dayTimerBits, seg.minuteIndex, this._minuteScale));
       if( isChanged ) {
         this.createSegments(dayTimerBits);
       }
@@ -123,7 +123,7 @@ export class TimerWheel implements OnInit {
           minuteIndex: i * this._minuteScale,
           active: (
             !!bits
-              ? ( !!bits[ (i * this._minuteScale) ] )
+              ? isSegmentActive(bits, (i * this._minuteScale), this._minuteScale)
               : false
           ),
           width: (2 * Math.PI / (MINUTES_IN_A_DAY / this._minuteScale)) * this.circleInnerRay,
