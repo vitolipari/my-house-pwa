@@ -82,7 +82,7 @@ export class DeviceBlockComponent implements OnInit {
         const d = this.device;
         if (!d || !isSensorDevice(d)) return '';
         const index = d.channel.indexOf(channelKey);
-        if (index === -1 || d.value[index] === null || d.value[index] === undefined) return '';
+        if (index === -1 || d.value?.[index] === null || d.value?.[index] === undefined) return '';
         return `${d.value[index]} ${d.unit?.[index] ?? ''}`.trim();
     }
 
@@ -107,12 +107,14 @@ export class DeviceBlockComponent implements OnInit {
 
         if (isSensorDevice(d)) {
             const powerChannelIndex: number = d.channel.lastIndexOf('power');
-            const power = (powerChannelIndex !== -1) ? (d.value[powerChannelIndex] || 0) : 0;
-            if( !! d.minThreshold[powerChannelIndex] ) {
-                if( power < d.minThreshold[powerChannelIndex] ) return -1;
+            const power = (powerChannelIndex !== -1) ? (d.value?.[powerChannelIndex] || 0) : 0;
+            const minThreshold = d.minThreshold?.[powerChannelIndex];
+            const maxThreshold = d.maxThreshold?.[powerChannelIndex];
+            if( !! minThreshold ) {
+                if( power < minThreshold ) return -1;
             }
-            if( !! d.maxThreshold[powerChannelIndex] ) {
-                if( power > d.maxThreshold[powerChannelIndex] ) return 1;
+            if( !! maxThreshold ) {
+                if( power > maxThreshold ) return 1;
             }
         }
 
@@ -217,12 +219,12 @@ export class DeviceBlockComponent implements OnInit {
 
         if (isSensorDevice(d)) {
             const powerChannelIndex: number = d.channel.lastIndexOf('power');
-            const power = (powerChannelIndex !== -1) ? d.value[powerChannelIndex] : null;
+            const power = (powerChannelIndex !== -1) ? d.value?.[powerChannelIndex] : null;
             if (power !== null && power !== undefined) {
                 return `${power} ${d.unit?.[powerChannelIndex] ?? ''}`.trim();
             }
             const batteryChannelIndex: number = d.channel.lastIndexOf('battery');
-            const battery = (batteryChannelIndex !== -1) ? d.value[batteryChannelIndex] : null;
+            const battery = (batteryChannelIndex !== -1) ? d.value?.[batteryChannelIndex] : null;
             if (battery !== null && battery !== undefined) {
                 // EnergySocket
                 const batteryIcon = `<svg

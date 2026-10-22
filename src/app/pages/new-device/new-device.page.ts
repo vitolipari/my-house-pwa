@@ -23,6 +23,8 @@ import {
     TuyaFamilyType,
     VOID_DEVICE,
     VOID_DEVICE_FAMILY,
+    VOID_DIMMER,
+    VOID_METRED_DIMMER,
     VOID_METRED_SWITCH,
     VOID_SHELLY_FAMILY,
     VOID_SWITCH,
@@ -1104,6 +1106,12 @@ export class NewDevicePage implements OnInit {
                 break;
             case 'METERED_SWITCH':
                 this.newDevice.set( VOID_METRED_SWITCH );
+                break;
+            case 'DIMMER':
+                this.newDevice.set( VOID_DIMMER );
+                break;
+            case 'METERED_DIMMER':
+                this.newDevice.set( VOID_METRED_DIMMER );
                 break;
             case 'TEMPERATURE_HUMIDITY_SENSOR':
                 this.newDevice.set( VOID_TEMPERATURE_HUMIDITY_SENSOR );
