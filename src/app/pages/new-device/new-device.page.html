@@ -685,6 +685,12 @@
                 <span>{{ !!selectedRoom ? selectedRoom.name : '' }}</span>
             </div>
 
+            @if( !!inWaiting() && isShellyGen1Device() ) {
+                <p class="base-text-style">
+                    Se il sensore è nuovo, premi ora il suo pulsante: viene configurato appena si sveglia (entro 45 secondi).
+                </p>
+            }
+
             <div id="signup-button">
                 @if (!!inWaiting()) {
                     <svg class="svg-icon inside-button" style="position: static; top: 1.1rem; left: 3.8rem;">

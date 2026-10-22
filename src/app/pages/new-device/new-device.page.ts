@@ -1648,6 +1648,14 @@ export class NewDevicePage implements OnInit {
         this.newDeviceDataTreePanelOpen.set(false);
     }
 
+    // Shelly di prima generazione (H&T a batteria): se è nuovo, il Core lo configura quando si sveglia
+    isShellyGen1Device(): boolean {
+        return (
+            this.integration.trim().toLowerCase() === 'shelly'
+            && (''+ (this.newDevice().hardware as ShellyFamilyType)?.gen) === '1'
+        );
+    }
+
     addNewDevice() {
         this.inWaiting.set(true);
 
