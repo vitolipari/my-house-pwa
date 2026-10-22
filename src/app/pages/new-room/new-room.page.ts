@@ -17,6 +17,7 @@ import {Listbox} from 'primeng/listbox';
 import {RoomsApiService} from '../rooms/rooms-api';
 import {Router} from '@angular/router';
 import {Checkbox, CheckboxChangeEvent, CheckboxModule} from 'primeng/checkbox';
+import {DeviceBlockComponent} from '../../components/device-block/device-block.component/device-block.component';
 
 
 
@@ -27,11 +28,12 @@ import {Checkbox, CheckboxChangeEvent, CheckboxModule} from 'primeng/checkbox';
         FormsModule,
         InputText,
         ReactiveFormsModule,
-        SwitcherComponent,
-        DeviceIpBlockComponent,
-        Listbox,
+        // SwitcherComponent,
+        // DeviceIpBlockComponent,
+        // Listbox,
         Button,
-        Checkbox
+        // Checkbox,
+        DeviceBlockComponent
     ],
   templateUrl: './new-room.page.html',
   styleUrl: './new-room.page.css',
@@ -42,6 +44,7 @@ export class NewRoomPage implements OnInit {
 
     // variables
     selectedDevices: DeviceType[] = [];
+    devices: (DeviceType & {isOwned: boolean})[] = [];
 
     // signals
     readonly data = signal<ZoneType>({
@@ -50,8 +53,8 @@ export class NewRoomPage implements OnInit {
         picture: '',
         device_list: ''
     });
+    readonly isDeviceWaiting = signal<boolean>(false);
     readonly errors = signal<{name:string; picture: string, devices: number[];} | null>(null);
-    readonly devices = signal<DeviceType[]>([]);
     readonly devicesLoading = signal(true);
     readonly devicesError = signal<string | null>(null);
     protected readonly isReadyToSet = computed(() => (
@@ -91,9 +94,10 @@ export class NewRoomPage implements OnInit {
 
         return firstValueFrom(this.deviceApi.list())
             .then((devices: DeviceType[]) => {
-                this.devices.set(
-                    devices.filter((device: DeviceType) => ((device.where.length === 0) || (!device.where)))
-                );
+                this.devices =
+                    this.devices
+                        .filter((device: DeviceType) => ((device.where.length === 0) || (!device.where)))
+                ;
                 this.devicesLoading.set(false);
                 console.log('devices arrivati');
                 console.log(devices);
@@ -242,21 +246,30 @@ export class NewRoomPage implements OnInit {
 
     }
 
-    protected toggleSelctedDevice(device: DeviceType, event: CheckboxChangeEvent) {
+    protected toggleSelctedDevice(device: DeviceType, event: boolean) {
 
-        if( !!event.checked ) {
-            this.selectedDevices = [...this.selectedDevices, device];
+
+        if(!!event) {
+            if( !this.selectedDevices.map((d: DeviceType) => d.id).includes(parseInt(''+ device.id)) ) {
+                this.selectedDevices.push(device);
+            }
         }
         else {
             this.selectedDevices =
                 this.selectedDevices
-                    .filter((sd: DeviceType) => sd.id !== device.id)
+                    .filter((d: DeviceType) => d.id !== parseInt(''+ device.id))
             ;
         }
+
+
         this.data.update(() => ({
             ...this.data(),
             devices: this.selectedDevices,
-            device_list: this.selectedDevices.map((device: DeviceType) => device.id).join(',')
+            device_list: this.selectedDevices.join(',')
         }));
+
+
+
+
     }
 }

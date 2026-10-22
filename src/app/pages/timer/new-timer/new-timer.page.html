@@ -1,5 +1,5 @@
 <page-title
-    [title]=" !!isInDetailsMode() ? 'Timer': ( !!isInEditMode() ? 'Modifica Timer' : 'Nuovo Timer' )"
+    [title]="!!isInDetailsMode() ? 'Timer': ( !!isInEditMode() ? 'Modifica Timer' : 'Nuovo Timer' )"
     [hasPlusButton]="false"
     [hasMenuButton]="(!!isInDetailsMode() || !!isInEditMode())"
     [menu]="timerMenu"

@@ -1,7 +1,7 @@
-import {ChangeDetectorRef, Component, ElementRef, inject, OnInit, signal, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, computed, ElementRef, inject, OnInit, signal, ViewChild} from '@angular/core';
 import {PageTitleComponent} from '../../components/page-title.component/page-title.component';
 import {ActivatedRoute, Router} from '@angular/router';
-import {DeviceSmallType, DeviceType, isSensorDevice, ZoneType} from '../devices/devices.models';
+import {DeviceSmallType, DeviceType, isSensorDevice, VOID_ZONE, ZoneType} from '../devices/devices.models';
 import {PermissionService} from '../../services/permission.service';
 import {firstValueFrom} from 'rxjs';
 import {DeviceApiService} from '../devices/device-api';
@@ -23,11 +23,11 @@ import {DeviceBlockComponent} from '../../components/device-block/device-block.c
   selector: 'app-room.page',
     imports: [
         PageTitleComponent,
-        SwitcherComponent,
+        // SwitcherComponent,
         Button,
         InputText,
         FormsModule,
-        Checkbox,
+        // Checkbox,
         Drawer,
         DeviceBlockComponent
     ],
@@ -37,7 +37,8 @@ import {DeviceBlockComponent} from '../../components/device-block/device-block.c
 export class RoomPage implements OnInit {
 
 
-    selectedDevices: DeviceType[] = [];
+    // selectedDevices: DeviceType[] = [];
+    selectedDevices: number[] = [];
     openConfirmDeletion: boolean = false;
 
     private readonly router = inject(Router);
@@ -47,16 +48,32 @@ export class RoomPage implements OnInit {
     private readonly roomsApi = inject(RoomsApiService);
     private readonly fb = inject(FormBuilder);
 
-    readonly room = signal<ZoneType>(null as unknown as ZoneType);
-    readonly isInEdit = signal<boolean>(false);
+
+    room = VOID_ZONE;
+    readonly errors = signal<{name:string; picture: string, devices: number[];} | null>({name: 'Nuova Stanza', picture: '', devices: []});
+
+    readonly isInDetailsMode = signal<boolean>(false);
+    readonly isInEditMode = signal<boolean>(false);
+
+    readonly isInDeleteRoomInWaiting = signal<boolean>(false);
+    readonly isInLinkRoomInWaiting = signal<boolean | null>(false);
+
     readonly devicesLoading = signal(false);
     readonly roomDataLoading = signal(false);
-    readonly devices = signal<DeviceType[]>([]);
-    readonly isDeviceStatusInWaiting = signal<{ id: number | string; inWaiting: boolean }[]>([{
-        id: 0,
-        inWaiting: false
-    }]);
+    // readonly availableDevices = signal<DeviceType[]>([]);
+    availableDevices: DeviceType[] = [];
+    // readonly isDeviceStatusInWaiting = signal<{ id: number | string; inWaiting: boolean }[]>([{
+    //     id: 0,
+    //     inWaiting: false
+    // }]);
     readonly devicesError = signal<string | null>(null);
+    isDeviceWaiting = signal<boolean>(false);
+
+    protected readonly isReadyToSet = computed(() => (
+        this.room.name.trim().length > 0
+        // && this.data().availableDevices.length > 0
+    ));
+    protected readonly isSavingInWait = signal<boolean>(false);
 
     readonly routeInfo = this.route.snapshot.data; // oggetto data della rotta = accessControl.permission
     readonly pathVariables = this.route.snapshot.params; // oggetto con i pathVariables
@@ -72,16 +89,106 @@ export class RoomPage implements OnInit {
         devices: ['', []]
     });
     protected readonly inWaiting = signal<boolean>(false);
+    isDevicePanel: boolean = false;
 
     constructor(private cdr: ChangeDetectorRef) {
         console.log('RoomPage constructor');
+
+
+            if( !this.navigationData || !this.navigationData['details'] ) {
+
+
+
+                if(!!this.pathVariables['id']) {
+                    // arrivato da url
+                    console.log('Stanza da navigazione URL');
+
+                    console.log('dati della room assenti, parte la chiamata');
+
+                    this.roomDataLoading.set(true);
+
+                    firstValueFrom(this.roomsApi.searchRooms({id: this.pathVariables['id']}))
+                        .then((rooms: ZoneType[]) => {
+
+                            console.log('caricati i dati della room attuale '+ this.pathVariables['id']);
+
+                            let dataRoom = rooms.reduce(getLastElementOr, null);
+
+                            this.room = {
+                                ...this.room,
+                                ...dataRoom,
+                                picture: rooms.reduce(getLastElementOr, {picture: ''}).picture,
+                                name: rooms.reduce(getLastElementOr, {name: 'Nessuna Stanza'}).name
+                            };
+                            this.room.devices = this.room.devices || [];
+
+                            this.roomForm.controls.roomName.setValue(this.room.name);
+                            this.roomDataLoading.set(false);
+
+                            this.isInDetailsMode.update(() => true);
+
+                            // alla fine del caricamento caricare i device
+                            // this.loadOwnDevices();  // TODO
+
+                        })
+                        .catch((error: unknown) => {
+                            console.log('errore in loadRooms');
+                            console.log(error);
+                        });
+                }
+                else {
+                    // new-room
+                    console.log('Nuova stanza');
+                    this.loadAvailableDevices()
+
+                }
+
+            }
+            else {
+
+                // arrivato dalla navigazione
+                console.log('Stanza da navigazione');
+
+                this.inWaiting.set(true);
+                this.roomDataLoading.set(true);
+                this.room = {
+                    ...this.room,
+                    ...(this.navigationData!['details'] as ZoneType),
+                    // devices: devices
+                };
+                this.roomForm.controls.roomName.setValue(this.room.name);
+                this.loadOwnedDevices()
+                    .then((devices: DeviceType[]) => {
+
+                        this.roomDataLoading.set(false);
+                        this.inWaiting.set(false);
+                        // arrivato da navigazione interna es.: arrivato dalla pagina rooms
+                        this.isInDetailsMode.update(() => true);
+                        console.log(devices);
+                        console.log(this.availableDevices);
+                        console.log(this.room);
+
+                    })
+                    .catch((error: unknown) => {
+                        console.log('errore in loadRooms');
+                        console.log(error);
+                    });
+
+
+            }
+        // }
+        // else {
+        //
+        // }
+
+
 
     }
 
     ngOnInit(): void {
 
 
-        this.devicesLoading.set(true);
+        // this.devicesLoading.set(true);
 
         if( !this.permissionService.hasPermission(this.routeInfo["accessControl"].permission) ) {
             // per qualche strano motivo questo componente é stato instanziato senza permesso
@@ -89,357 +196,156 @@ export class RoomPage implements OnInit {
         }
 
 
-        console.log('controllo pathVariabile');
-        console.log(!!this.navigationData ? this.navigationData['details'] : 'null');
-
-        if( !this.navigationData || !this.navigationData['details'] ) {
-            // bisogna caricare i dati della stanza
-            // perché non sono arrivati dalla navigazione interna
-
-            console.log('dati della room assenti, parte la chiamata');
-
-            this.roomDataLoading.set(true);
-
-            firstValueFrom(this.roomsApi.searchRooms({id: this.pathVariables['id']}))
-                .then((rooms: ZoneType[]) => {
-
-                    console.log('caricati i dati della room attuale '+ this.pathVariables['id']);
-
-                    this.room.update((room: ZoneType) => ({
-                        ...this.room(),
-                        picture: rooms.reduce(getLastElementOr, {picture: ''}).picture,
-                        name: rooms.reduce(getLastElementOr, {name: 'Nessuna Stanza'}).name
-                    }));
-
-                    this.roomForm.controls.roomName.setValue(this.room().name);
-                    this.roomDataLoading.set(false);
+    }
 
 
-                    // alla fine del caricamento caricare i device
-                    this.loadOwnDevices();
+    /**
+     * Carica i dispositivi posseduti dalla stanza
+     */
+    loadOwnedDevices(): Promise<DeviceType[]> {
+        this.isDeviceWaiting.set(true);
 
+        if( (this.room.devices || [{id: 0} as DeviceType]).every((rd: DeviceType) => !!rd.name) ) {
+            console.log('loadOwnedDevices | tutti i devices hanno il name');
+            return Promise.resolve(this.room.devices as DeviceType[]);
+        }
+        else {
+            console.log(`loadOwnedDevices | caricamento dei devices ${ this.room.device_list.split(',') }`);
+            console.log(this.room);
+            console.log(this.room.device_list);
+            console.log(this.room.device_list.split(','));
+            return (
+                firstValueFrom(this.deviceApi.search({ids: this.room.device_list.split(',')}))
+                    .then((devices: DeviceType[]) => {
+
+                        console.log('device cercati');
+                        console.log(devices);
+
+                        this.room.devices = devices;
+
+                        return devices;
+                    })
+                    .catch((error: unknown) => {
+                        console.log('errore in loadOwnedDevices');
+                        console.log(error);
+
+                        this.isDeviceWaiting.set(false);
+                        return Promise.reject(error);
+                    })
+            )
+        }
+
+
+    }
+
+    /**
+     * Carica i dispositivi disponibili per la stanza
+     */
+    loadAvailableDevices(): Promise<DeviceType[]> {
+        this.isDeviceWaiting.set(true);
+
+        return (
+            firstValueFrom(this.deviceApi.list())
+                .then((devices: DeviceType[]) => {
+
+                    console.log('device tutti');
+                    console.log(devices);
+                    console.log(devices.filter((device: DeviceType) => ((device.where.length === 0) || (!device.where) || (device.where.reduce(getLastElementOr, {id: 0}).id === -1))));
+
+                    this.availableDevices =
+                        devices
+                            .filter((device: DeviceType) => ((device.where.length === 0) || (!device.where) || (device.where.reduce(getLastElementOr, {id: 0}).id === -1)))
+                    ;
+
+                    this.isDeviceWaiting.set(false);
+                    console.log('dispositivi arrivati per la nuova stanza');
+                    console.log( this.availableDevices );
+                    return this.availableDevices;
                 })
                 .catch((error: unknown) => {
-                    console.log('errore in loadRooms');
+                    console.log('errore in loadAvailableDevices del nuovo gruppo');
                     console.log(error);
-                });
+
+                    this.isDeviceWaiting.set(false);
+                    return Promise.reject(error);
+                })
+        );
+    }
+
+
+    // setDevices(availableDevices: DeviceType[]) {
+    //
+    //     let devicesIds: number[] = [
+    //             ...this.room.device_list
+    //                 .split(',')
+    //                 .map((id: string) => parseInt(id)),
+    //             ...availableDevices.map((device: DeviceType) => parseInt(''+ device.id))
+    //         ]
+    //             .map((id: number, index: number, list: number[]) => {
+    //                 if(list.includes(id)) return 0;
+    //                 return id;
+    //             })
+    //             .filter((id: number) => !!id)
+    //             .sort((a: number, b: number) => a - b)
+    //     ;
+    //     let devicesIds_string: string = devicesIds.join(',');
+    //
+    //     this.room = {
+    //         ...data,
+    //         device_list: devicesIds_string
+    //         // availableDevices: devicesIds
+    //     };
+    // }
+
+
+
+    toggleSelctedDevice(toggledDevice: DeviceType, event: boolean) {
+        const devicesInRoom: DeviceType[] = (this.room.devices as DeviceType[]) ?? [];
+        let devices: DeviceType[] = [];
+        if(!!event) {
+
+            if(!!this.isDeviceInRoom(toggledDevice)) {
+                // non dovrebbe accadere MAI
+            }
+            else {
+                // metti la spunta a un dispositivo disponibile
+                this.availableDevices =
+                    this.availableDevices
+                        .filter((available: DeviceType) => available.id !== toggledDevice.id);
+                ;
+                devices = [...devicesInRoom, toggledDevice];
+            }
 
 
         }
         else {
-            this.room.update( () => this.navigationData!['details'] as ZoneType );
-            this.roomForm.controls.roomName.setValue(this.room().name);
-            this.loadOwnDevices();
+            if(!!this.isDeviceInRoom(toggledDevice)) {
+                // togli la spunta da un dispositivo della stannza
+                devices = devicesInRoom.filter((d: DeviceType) => String(d.id) !== String(toggledDevice.id));
+                this.availableDevices = [...this.availableDevices, toggledDevice];
+            }
+            else {
+                // non dovrebbe accadere MAI
+            }
+
         }
 
-    }
 
-    loadOwnDevices() {
-        return (
-            firstValueFrom(this.deviceApi.search({zones: [this.pathVariables['id']]}))
-                .then((devices: DeviceType[]) => {
-
-                    console.log('arrivati i dati dei proppri devices');
-
-                    // this.devices.set( devices );
-                    this.devicesLoading.set(false);
-
-                    this.room.update(() => ({
-                        ...this.room(),
-                        devices: devices,
-                        device_list: devices.map((device: DeviceType) => device.id).join(',')
-                    }));
-
-
-                    console.log('propri devices arrivati');
-                    console.log(devices);
-                    console.log(this.room());
-                })
-                .catch((error: unknown) => {
-                    console.log('errore in loadOwnDevices nella pagina della room');
-                    console.log(error);
-                })
-        )
-    }
-
-
-    loadDevices(): Promise<void> {
-        this.devicesLoading.set(true);
-        this.devicesError.set(null);
-
-        return firstValueFrom(this.deviceApi.list())
-            .then((devices: DeviceType[]) => {
-                console.log('arrivati i dati dei devices');
-                this.devices.set([
-                    ...devices
-                        .filter((device: DeviceType) => (
-                            (device.where.length === 0) || (!device.where))
-                        ),
-                    ...(this.room().devices || [])
-                ]);
-                this.devicesLoading.set(false);
-                console.log('devices arrivati');
-                console.log(devices);
-                console.log('fine log dei devices arrivati');
-            })
-            .catch((error: unknown) => {
-                console.log('errore in loadDevices della nuova stanza');
-                console.log(error);
-
-                const candidate = error as {error?: {error?: string}; message?: string};
-                this.devicesError.set(
-                    candidate.error?.error ?? candidate.message ?? 'Impossibile caricare i dispositivi'
-                );
-                this.devicesLoading.set(false);
-            });
-    }
-
-
-
-    setDevices(devices: DeviceType[]) {
-
-        let devicesIds: number[] = [
-                ...this.room().device_list
-                    .split(',')
-                    .map((id: string) => parseInt(id)),
-                ...devices.map((device: DeviceType) => parseInt(''+ device.id))
-            ]
-                .map((id: number, index: number, list: number[]) => {
-                    if(list.includes(id)) return 0;
-                    return id;
-                })
-                .filter((id: number) => !!id)
-                .sort((a: number, b: number) => a - b)
-        ;
-        let devicesIds_string: string = devicesIds.join(',');
-
-        this.room.update((data: ZoneType) => ({
-            ...data,
-            device_list: devicesIds_string
-            // devices: devicesIds
-        }));
-    }
-
-
-
-    toggleSelctedDevice(device: DeviceType, event: CheckboxChangeEvent) {
-        const current: DeviceType[] = this.room().devices ?? [];
-        const devices: DeviceType[] =
-            event.checked
-                ? (this.isDeviceInRoom(device) ? current : [...current, device])
-                : current.filter((d: DeviceType) => String(d.id) !== String(device.id))
-                ;
-        this.room.update((room: ZoneType) => ({
-            ...room,
+        this.room = {
+            ...this.room,
             devices: devices,
             device_list: devices.map((d: DeviceType) => d.id).join(',')
-            }));
+        };
+
     }
 
 
 
     isDeviceInRoom(device: DeviceType): boolean {
-        return (this.room()?.devices ?? [])
+        return ((this.room?.devices as DeviceType[]) ?? [])
             .some((d: DeviceType) => String(d.id) === String(device.id));
     }
 
-
-    itemEmojIcon(emojIconName: string) {
-        if (!emojIconName) {
-            // TODO
-        }
-        return emoj(emojIconName || '');
-    }
-
-
-
-    getMainChannel(device: DeviceSmallType): string {
-        let d: DeviceType | undefined =
-            (this.room()?.devices || [])
-                .find((dd: DeviceType) => dd.id === device.id)
-        ;
-        let mainChannelText: string = '';
-        console.log('contorllo se il dispostitivo esiste');
-        console.log(d);
-        console.log(device);
-        if(!d) return mainChannelText;
-        console.log('contorllo se il dispostitivo é anche un sensore');
-
-        // d = extractRealDeviceType( d );
-        // let powerChannelIndex: number =
-        //     d.channel
-        //         .map((ch: string, index: number) => (ch === 'power') ? index : -1)
-        //         .filter((chIndex: number) => chIndex !== -1)
-        //         .reduce(getLastElementOr, -1)
-        // ;
-        // if( powerChannelIndex !== -1 ) {
-        //     // mainChannelText += d.channel[powerChannelIndex];
-        //     mainChannelText += d.value[powerChannelIndex];
-        //     mainChannelText += d.unit[powerChannelIndex];
-        //
-        //     // minThreshold: []
-        //     // maxThreshold: []
-        //
-        // }
-        //
-        // /*
-        // MeteredSwitchType
-        //  */
-        //
-        // if( d.channel.reduce(getLastElementOr, null) === 'output' ) return ' ';
-        // return (`${d.channel.reduce(getLastElementOr, null)}: ${d.status.reduce(getLastElementOr, null)}`);
-
-        if (isSensorDevice(d)) {
-            console.log('il dispostitivo é anche un sensore');
-            const powerChannelIndex: number = d.channel.lastIndexOf('power');
-            const power = (powerChannelIndex !== -1) ? d.value[powerChannelIndex] : null;
-            if (power !== null && power !== undefined) {
-                return `${power} ${d.unit?.[powerChannelIndex] ?? ''}`.trim();
-            }
-        }
-
-        return mainChannelText;
-    }
-
-    getMainChannelLastTimeUpdated(device: DeviceSmallType): string {
-        let d: DeviceType | undefined =
-            (this.room()?.devices || [])
-                .find((dd: DeviceType) => dd.id === device.id)
-        ;
-        if(!d) return '';
-        return ''+ moment(d.lastTime.reduce(getLastElementOr, null)).format('DD/MM/YYYY HH:mm');
-    }
-
-
-    /**
-     * valori possibili di ritorno:
-     * -1 sotto la soglia minima
-     * 0 entro le sooglie
-     * +1 sopra la soglia massima
-     * @param device
-     */
-    thresholdIndicator(device: DeviceSmallType){
-        let d: DeviceType | undefined =
-            this.devices()
-                .find((dd: DeviceType) => dd.id === device.id)
-        ;
-        if(!d) return 0;
-
-        if (isSensorDevice(d)) {
-            const powerChannelIndex: number = d.channel.lastIndexOf('power');
-            const power = (powerChannelIndex !== -1) ? (d.value[powerChannelIndex] || 0) : 0;
-            if( !! d.minThreshold[powerChannelIndex] ) {
-                if( power < d.minThreshold[powerChannelIndex] ) return -1;
-            }
-            if( !! d.maxThreshold[powerChannelIndex] ) {
-                if( power > d.maxThreshold[powerChannelIndex] ) return 1;
-            }
-        }
-
-        return 0;
-    }
-
-
-
-    wifiSignalInOpacityRange(device: DeviceSmallType) {
-
-
-        if (!!device.signalStatus) {
-            const wifiSignal: number = device.signalStatus;
-            let wifiSignalPercent: number = Math.max(0, Math.min(100, 2 * (wifiSignal + 100)));
-            if (wifiSignalPercent < 20) {
-                wifiSignalPercent = 20;
-            }
-            if (wifiSignalPercent > 80) {
-                wifiSignalPercent = 80;
-            }
-            return wifiSignalPercent / 100;
-        }
-
-        // RSSI non letto: il Core usa 0, valore impossibile per una misura in
-        // dBm. L'indicatore resta invisibile invece di mostrare un segnale
-        // intermedio mai misurato.
-        return 0;
-    }
-
-
-    loadDevicesStatus(): Promise<void> {
-        const now = Date.now();
-        const devicesToRefresh = this.devices().filter(
-            device => this.needsStatusRefresh(device, now)
-        );
-
-        if (devicesToRefresh.length === 0) {
-            return Promise.resolve();
-        }
-
-        const waitingDeviceIds = new Set(
-            devicesToRefresh.map(device => String(device.id))
-        );
-        this.isDeviceStatusInWaiting.update(waitingStates => (
-            waitingStates.map(waitingState => ({
-                ...waitingState,
-                inWaiting: waitingDeviceIds.has(String(waitingState.id))
-            }))
-        ));
-
-        // Ogni dispositivo ha la sua catena e aggiorna la propria riga appena
-        // arriva la risposta, senza attendere gli altri. Il `Promise.all`
-        // finale serve solo a sapere quando l'ultimo ha finito: le singole
-        // catene gestiscono già errore e attesa, quindi non può mai rigettare.
-        return Promise.all(
-                devicesToRefresh.map(device => (
-                    firstValueFrom(this.deviceApi.loadDeviceStatus(device.id))
-
-                        .then((refreshed: DeviceType) => {
-                            this.devices.update(devices => devices.map(current => (
-                                String(current.id) === String(device.id)
-                                    ? refreshed
-                                    : current
-                            )));
-                        })
-
-                        .catch((error: unknown) => {
-                            console.error(
-                                `Aggiornamento status del dispositivo ${device.id} non riuscito`,
-                                error
-                            );
-                        })
-
-                        // Anche l'attesa si chiude per singolo dispositivo.
-                        .finally(() => {
-                            this.isDeviceStatusInWaiting.update(waitingStates => (
-                                waitingStates.map(waitingState => (
-                                    String(waitingState.id) === String(device.id)
-                                        ? {...waitingState, inWaiting: false}
-                                        : waitingState
-                                ))
-                            ));
-                        })
-                ))
-            )
-            .then(() => undefined);
-    }
-
-    isCurrentDeviceStatusInWaiting(device: DeviceSmallType) {
-
-        let deviceStatusWaiting = this.isDeviceStatusInWaiting().find((d) => d.id === device.id);
-        if (!deviceStatusWaiting) {
-            return false;
-        } else {
-            return deviceStatusWaiting.inWaiting;
-        }
-    }
-
-    deviceChannelStatus(
-        device: DeviceSmallType,
-        channelKey: string
-    ): DeviceType['status'][number] {
-        const channelIndex = device.channel.indexOf(channelKey);
-        return channelIndex === -1
-            ? null
-            : device.status[channelIndex] ?? null;
-    }
 
     hasPermission(permission: string): boolean {
         return this.permissionService.hasPermission(permission);
@@ -447,70 +353,25 @@ export class RoomPage implements OnInit {
 
 
 
-    private needsStatusRefresh(device: DeviceType, now: number): boolean {
-        if (device.channel.length === 0) {
-            return false;
-        }
-
-        // controllo mancanza status
-        let statuses = JSON.parse(JSON.stringify(device.status.reverse()));
-        if (!statuses.reduce(getLastElementOr, null)) {
-            return true;
-        }
-
-        // controllo mancanza wifi
-        if (!device.hardware.status.WiFi) {
-            return true;
-        }
-        if (!device.hardware.status.WiFi.rssi) {
-            return true;
-        }
-
-        // controllo tempo
-        return device.channel.some((_channel, index) => {
-            const lastReadAt = timestampInMilliseconds(device.lastTime[index]);
-            return lastReadAt === null || now - lastReadAt >= DEVICE_STATUS_MAX_AGE_MS;
-        });
-    }
-
-
-
-    isDeviceInWaiting(device: DeviceSmallType) {
-        let waitingStatus: { id: number | string; inWaiting: boolean } | undefined =
-            this.isDeviceStatusInWaiting()
-                .find((waitForStatus: { id: number | string; inWaiting: boolean }) => waitForStatus.id === device.id)
-        ;
-        if (!!waitingStatus) {
-            return waitingStatus.inWaiting;
-        }
-        return false;
-    }
-
-
-    switchAction(device: DeviceSmallType, event: any) {
-        // TODO
-    }
-
 
     editData() {
-        this.isInEdit.update(() => !this.isInEdit());
-        if(!!this.isInEdit()) {
-            this.loadDevices();
-        }
+        this.loadAvailableDevices();
+        this.isInEditMode.update(() => true);
+        this.isInDetailsMode.update(() => false);
     }
 
 
     editRoom() {
         console.log('nuovi dati della stanza');
-        console.log( this.room());
+        console.log( this.room);
         this.inWaiting.update(() => true);
 
 
 
-        firstValueFrom(this.roomsApi.editRoom( this.room() ))
+        firstValueFrom(this.roomsApi.editRoom( this.room ))
             .then((room: ZoneType) => {
 
-                this.room.set(room);
+                this.room = {...this.room, ...room};
 
                 this.router.navigate(['rooms-page'], {
                     queryParams: {},
@@ -562,10 +423,10 @@ export class RoomPage implements OnInit {
         const reader = new FileReader();
         reader.onload = () => {
 
-            this.room.update((data: ZoneType) => ({
-                ...data,
+            this.room = {
+                ...this.room,
                 picture: reader.result as string
-            }));
+            };
             // console.log( this.previewUrl );
             this.cdr.detectChanges();
 
@@ -584,4 +445,50 @@ export class RoomPage implements OnInit {
     }
 
 
+    goToMatterPage() {
+        this.router.navigate(['matter-bridge'], {
+            queryParams: { from: 'devices-page' },
+            state: {}
+        });
+    }
+
+
+    protected confirmDeleteRoom() {
+        this.isInDeleteRoomInWaiting.update(() => true);
+        firstValueFrom(this.roomsApi.deleteRooms([this.room]))
+            .then(() => {
+                this.isInDeleteRoomInWaiting.update(() => false);
+                this.router.navigate(['/rooms-page']);
+                // window.location.reload();
+            })
+            .catch((e) => {
+                console.log(e);
+            })
+        ;
+    }
+
+    addNewRoom() {
+        console.log(`name: ${ this.room.name }`);
+        console.log(this.room);
+
+        return firstValueFrom(this.roomsApi.newRoom(this.room))
+            .then((newId: number) => {
+                this.router.navigate(
+                    ['/rooms-page'],
+                    {
+                        state: {
+                            from: 'newRoomPage',
+                            newId: newId
+                        }
+                    }
+                );
+            })
+            .catch((error: unknown) => {
+                console.log('errore in addNewRoom');
+                console.log(error);
+            });
+
+    }
+
+    isOwned = (device: DeviceType) => !!this.room.devices?.find((od: DeviceType) => od.id === device.id);
 }

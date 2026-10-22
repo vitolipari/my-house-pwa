@@ -114,7 +114,7 @@
 
 
                     @for(group of deviceGroups(); track group.room.id) {
-                        <div>{{ group.room.name }}</div>
+                        <div>{{ (group.room.name === 'Nessuna Stanza') ? '' : group.room.name }}</div>
 
 
                         @for (device of group.devices; track device.id) {

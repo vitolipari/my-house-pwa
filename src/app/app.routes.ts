@@ -149,11 +149,12 @@ export const routes: Routes = [
         canActivate: [routeAccessGuard],
         data: {
             accessControl: {
-                permission: ['READ_ROOMS', 'READ_ROOM', 'CREATE_ROOM']
+                permission: ['READ_ROOMS', 'READ_ROOM', 'CREATE_ROOMS']
             }
         },
         loadComponent: () =>
-            import('./pages/new-room/new-room.page').then(m => m.NewRoomPage)
+            // import('./pages/new-room/new-room.page').then(m => m.NewRoomPage)
+            import('./pages/room/room.page').then(m => m.RoomPage)
     },
 
     {

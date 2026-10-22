@@ -262,6 +262,7 @@ export type ZoneType = {
     device_list: string; // as id list
     // devices?: number[] | DeviceType[];
     devices?: DeviceType[];
+    isOwned?: boolean
 }
 
 // Gruppo di dispositivi dal Core: come per le stanze, device_list è la lista
@@ -532,7 +533,7 @@ export let VOID_DEVICE_CATEGORY: DeviceCategory = {
 
 export let VOID_ZONE: ZoneType = {
     id: 0,
-    name: '',
+    name: 'Nuova Stanza',
     picture: '',
     device_list: ''
 }

@@ -89,9 +89,9 @@ export class NewTimerPage {
 
     readonly isInDetailsMode = signal<boolean>(false);
     readonly isInEditMode = signal<boolean>(false);
-    readonly isInDeleteTimerInWaiting = signal<boolean>(false);
     readonly inWaiting = signal<boolean>(false);
     isDeviceWaiting = signal<boolean>(false);
+    readonly isInDeleteTimerInWaiting = signal<boolean>(false);
     readonly isInLinkTimerInWaiting = signal<boolean | null>(false);
 
 
@@ -293,7 +293,7 @@ export class NewTimerPage {
         }
         else {
             // siamo in nuovo timer
-            this.loadDevices();
+            // this.loadDevices();
         }
 
     }

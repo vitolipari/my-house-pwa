@@ -72,98 +72,31 @@
     </div>
 
     @if (devicesLoading()) {
-        <p>Caricamento dispositivi…</p>
+        <div>
+            <svg class="svg-icon inside-button" style="position: static; top: 1rem; left: 1.5rem;">
+                <use href="#orologio-1-1"></use>
+            </svg>
+            <div class="heartbeat-flash">scanning...</div>
+        </div>
     } @else if (devicesError()) {
         <p class="devices-error">{{ devicesError() }}</p>
-    } @else if (devices().length === 0) {
-        <p>Nessun dispositivo registrato.</p>
+    } @else if (devices.length === 0) {
+        <p>Nessun dispositivo disponibile.</p>
     } @else {
 
-        <!--
-            <p-listbox
-                [options]="devices()"
-                [ngModelOptions]="{standalone: true}"
-                [(ngModel)]="selectedIpDevices"
-                (ngModelChange)="setDevices($event)"
-                optionLabel="ip"
-                [filter]="true"
-                [filterFields]="['ip', 'mac', 'producName']"
-                class="w-full md:w-56"
-                [checkmark]="true"
-                [highlightOnSelect]="true"
-                [multiple]="true"
-            >
-                <ng-template #item let-device>
-                    <device-ip-block
-                        [ipDevice]="device"
-                    />
-                </ng-template>
-            </p-listbox>
-        -->
+        @for( device of devices; track device.id ) {
 
+            <device-block-component
+                [device]="device"
+                [noDetails]="false"
+                [noNavigateToDetails]="true"
+                [noDeviceStatus]="true"
+                [isCheckable]="true"
+                [checked]="device.isOwned"
+                (deviceToggle)="toggleSelctedDevice(device, $event)"
+            ></device-block-component>
 
-        <div>Dispositivi</div>
-
-        <div class="device-list-container">
-            @for (device of devices(); track device.id) {
-
-
-                <div class="device-row">
-
-                    <div>
-                        <p-checkbox
-                            (onChange)="toggleSelctedDevice(device, $event)"
-                            [binary]="true"
-                            inputId="size_small"
-                            name="size"
-                            value="Small"
-                            size="small"
-                            style="margin: 1rem;"
-                        />
-                    </div>
-
-                    @if( !!device.imgIcon ) {
-                        <img class="device-row-img" [src]="device.imgIcon">
-                    }
-                    @else {
-                        @if( !!device.emoj ) {
-                            <div class="device-row-emoj">{{ itemEmojIcon( device.emoj ) }}</div>
-                        }
-                        @else {
-                            <svg
-                                class="device-row-svg"
-                            >
-                                <use
-                                    [attr.href]="'#' + (device.svgIcon ?? 'icon-602')"
-                                    [attr.xlink:href]="'#' + (device.svgIcon ?? 'icon-602')">
-                                    >
-                                </use>
-                            </svg>
-                        }
-
-                    }
-                    <div class="device-row-info">
-                        <div>
-                            <strong>{{ device.name }}</strong>
-                            <!--                                    <div>STANZA</div>-->
-                        </div>
-
-                        <div class="device-row-data">
-                            <div class="device-row-ip">{{ device.ip }}</div>
-                            <div class="device-row-status">
-    <!--                            <div>-->
-    <!--                                <span [style]="'opacity: '+ wifiSignalInOpacityRange(device) +';'">WiFi</span>-->
-    <!--                                <div class="wifi-signal-line" [style]="'width: '+ (wifiSignalInOpacityRange(device) * 100) +'%;'"></div>-->
-    <!--                            </div>-->
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-            }
-        </div>
-
+        }
 
     }
 
@@ -189,3 +122,4 @@
 
 
 </div>
+
