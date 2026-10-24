@@ -145,6 +145,15 @@
                                 </div>
                             </div>
                         }
+                        <!-- fotovoltaico: produzione e batteria; consumo e rete (positiva in prelievo) -->
+                        @case ('SOLAR_SYSTEM_MONITOR') {
+                            <div class="ht-status">
+                                <div>PV {{ sensorChannelText(device, 'pv_power') }}</div>
+                                <div>SOC {{ sensorChannelText(device, 'battery_soc') }}</div>
+                                <div>Casa {{ sensorChannelText(device, 'load_power') }}</div>
+                                <div>Rete {{ sensorChannelText(device, 'grid_power') }}</div>
+                            </div>
+                        }
                     }
 
                 }
