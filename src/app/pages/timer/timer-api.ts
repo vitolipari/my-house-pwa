@@ -94,8 +94,25 @@ export class TimerApiService {
     }
 
 
-    linkDevicesToTimer(timerID: number, devicesID: number[]): Observable<void> {
+    // curtainsID: tapparelle tramite relè da aprire o chiudere all'inizio (In) o alla fine (Out) dello slot
+    linkDevicesToTimer(
+        timerID: number,
+        devicesID: number[],
+        curtainsID: {openIn?: number[]; closeIn?: number[]; openOut?: number[]; closeOut?: number[]} = {}
+    ): Observable<void> {
         let url = `${this.baseUrl}/timer/${ timerID }/devices?ids=${ devicesID.join(',') }`;
+        if( !!curtainsID.openIn && curtainsID.openIn.length > 0 ) {
+            url += `&openIn=${ curtainsID.openIn.join(',') }`;
+        }
+        if( !!curtainsID.closeIn && curtainsID.closeIn.length > 0 ) {
+            url += `&closeIn=${ curtainsID.closeIn.join(',') }`;
+        }
+        if( !!curtainsID.openOut && curtainsID.openOut.length > 0 ) {
+            url += `&openOut=${ curtainsID.openOut.join(',') }`;
+        }
+        if( !!curtainsID.closeOut && curtainsID.closeOut.length > 0 ) {
+            url += `&closeOut=${ curtainsID.closeOut.join(',') }`;
+        }
         return this.http.put<void>(url, {});
     }
 
