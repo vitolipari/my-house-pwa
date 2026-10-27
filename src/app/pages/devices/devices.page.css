@@ -99,7 +99,7 @@ p-tab > DIV > SPAN, B {
     width: 100%;
     max-width: 95vw;
     padding: 0.6rem;
-    height: 4rem;
+    height: 5.5rem;
 
     font-size: var(--main-font-size);
     color: var(--color-text-2);
@@ -109,14 +109,14 @@ p-tab > DIV > SPAN, B {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    flex: 1;
+    flex: 1.5;
 }
 
 .device-row-info > DIV {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    max-width: 90%;
+    max-width: 100%;
 }
 
 .device-row-emoj {
@@ -124,7 +124,10 @@ p-tab > DIV > SPAN, B {
     margin-right: 1.2rem;
 }
 
-.device-row-svg {}
+.device-row-svg {
+    margin-right: 0.5rem;
+    margin-left: 0.2rem;
+}
 
 .device-row-img {}
 
@@ -141,6 +144,18 @@ p-tab > DIV > SPAN, B {
 .device-mac {
     font-size: var(--micro-font-size) !important;
 }
+
+.description {
+    font-family: var(--page-font);
+    /*font-size: var(--micro-font-size) !important;*/   /* ereditato */
+    color: var(--color-text-2);
+    width: 100%;
+    white-space: wrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 3.3rem;
+}
+
 
 .device-row-ip {
     display: flex;
@@ -232,4 +247,41 @@ p-tab > DIV > SPAN, B {
 .ht-status > DIV > svg
 {
     margin-right: 0rem;
+}
+
+
+.group-state {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    /*flex-wrap: wrap-reverse;*/
+    flex-wrap: wrap;
+    /*flex: 1;*/
+    height: 100%;
+    margin-left: 0.5rem;
+    margin-right: 0.75rem;
+}
+
+.group-state > DIV {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    /*align-items: flex-end;*/
+    align-items: center;
+}
+
+.group-state > DIV > SGV,
+.group-state > DIV > svg
+{
+    height: 1rem;
+}
+
+
+.group-action {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    /*justify-content: space-around;*/
+    justify-content: center;
+    margin-top: -0.75rem;
 }

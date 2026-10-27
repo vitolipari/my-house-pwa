@@ -13,6 +13,7 @@ import {FormsModule} from '@angular/forms';
 import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
 import moment from 'moment';
 import {DeviceBlockComponent} from '../../components/device-block/device-block.component/device-block.component';
+import { TextareaModule } from 'primeng/textarea';
 
 @Component({
   selector: 'app-group.page',
@@ -22,7 +23,8 @@ import {DeviceBlockComponent} from '../../components/device-block/device-block.c
         InputText,
         FormsModule,
         Checkbox,
-        DeviceBlockComponent
+        DeviceBlockComponent,
+        TextareaModule
     ],
   templateUrl: './group.page.html',
   styleUrl: './group.page.css',

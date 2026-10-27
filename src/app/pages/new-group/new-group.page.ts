@@ -11,6 +11,7 @@ import {GroupsApiService} from '../groups/groups-api';
 import {Router} from '@angular/router';
 import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
 import {DeviceBlockComponent} from '../../components/device-block/device-block.component/device-block.component';
+import { TextareaModule } from 'primeng/textarea';
 
 
 @Component({
@@ -21,7 +22,8 @@ import {DeviceBlockComponent} from '../../components/device-block/device-block.c
         InputText,
         Button,
         Checkbox,
-        DeviceBlockComponent
+        DeviceBlockComponent,
+        TextareaModule
     ],
   templateUrl: './new-group.page.html',
   styleUrl: './new-group.page.css',

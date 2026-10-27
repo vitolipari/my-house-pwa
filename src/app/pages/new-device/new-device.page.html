@@ -145,6 +145,20 @@
                     <div>Matter</div>
                 </div>
                 <div
+                    id="newSolis"
+                    class="card"
+                    (click)="deviceVendorTypeSelected('solis')"
+                >
+                    <svg>
+                        <use
+                            [attr.href]="'#AffordableAndCleanEnergySolid'"
+                            [attr.xlink:href]="'#AffordableAndCleanEnergySolid'">
+                            >
+                        </use>
+                    </svg>
+                    <div>Solis</div>
+                </div>
+                <div
                     id="newOther"
                     class="card"
                     (click)="deviceVendorTypeSelected('other')"
@@ -234,7 +248,7 @@
                 } @else {
 
                     <div id="device-taxonomy-container">
-                        @for (item of catalog(); track item.id) {
+                        @for (item of selectableCatalog(); track item.id) {
                             <div
                                 class="small-card"
                                 id="catalog-{{ item.id }}"
@@ -404,7 +418,7 @@
                         <div class="base-text-style">
                             <p-button
                                 class="content-single-button-at-right"
-                                [label]="inWaiting() ? 'associazione…' : 'associa'"
+                                [label]="inWaiting() ? 'associazione… '+ matterElapsedSeconds() +' s' : 'associa'"
                                 type="button"
                                 [rounded]="true"
                                 [size]="'small'"
@@ -490,6 +504,31 @@
                                         [size]="'small'"
                                         [style]="{padding: '0px 20px 0px '+ ( !inWaiting() ? '20px' : '32px' ), marginTop: '2rem'}"
                                         (click)="setTuyaDeviceData();"
+                                    ></p-button>
+                                </div>
+                            }
+                            <!-- inverter Solis: basta l'indirizzo, il Core legge modello e numero di serie via Modbus -->
+                            @case ('solis' ) {
+                                <div class="base-text-style row-field">
+                                    <label for="deviceSolisIp">IP</label>
+                                    <input
+                                        #deviceSolisIp
+                                        pInputText
+                                        id="deviceSolisIp"
+                                        aria-describedby="deviceSolisIp-help"
+                                        placeholder="Indirizzo IP del dongle dell'inverter"
+                                        class="fixed-value-input"
+                                    />
+                                </div>
+                                <div class="base-text-style">
+                                    <p-button
+                                        class="content-single-button-at-right"
+                                        label="continua"
+                                        type="button"
+                                        [rounded]="true"
+                                        [size]="'small'"
+                                        [style]="{padding: '0px 20px 0px '+ ( !inWaiting() ? '20px' : '32px' ), marginTop: '2rem'}"
+                                        (click)="setSolisDeviceData();"
                                     ></p-button>
                                 </div>
                             }

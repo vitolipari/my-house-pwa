@@ -1,5 +1,6 @@
 <div
     class="switch-component-container {{ !!isReadOnly ? 'locked': 'alive' }}"
+    [style]="style"
     (click)="onCheck($event)"
 >
     @if(!!inWait) {

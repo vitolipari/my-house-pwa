@@ -52,15 +52,17 @@ export const DEVICE_STATUS_MAX_AGE_MS = 60_000;
         // , SwitcherComponent
         , LongPressDirective
         , Checkbox
-        , Button
+        , Button, SwitcherComponent
     ],
     templateUrl: './devices.page.html',
     styleUrls: ['../../../page.css', './devices.page.css']
 })
 export class DevicesPage implements OnInit {
 
+
     isInWaiting = signal(true);
     isInScanning = signal(true);
+    isGroupActionInWaiting = signal<{grid: number; isOn: boolean}[]>([]);
     deviceDataTreePanelOpen = signal<DeviceType | null>(null);
     isCopied = signal<boolean>(false);
     ipDevices: NetworkIdentity[] = [];
@@ -74,6 +76,7 @@ export class DevicesPage implements OnInit {
     // }]);
 
     value: string | number = "device";
+
 
     // gruppi
     selectedGroups: GroupType[] = [];
@@ -103,7 +106,7 @@ export class DevicesPage implements OnInit {
      * Non vanno quindi scritti a mano, altrimenti la lista mostrata resta
      * indietro rispetto ai dati.
      */
-    readonly deviceGroups = computed<{ room: ZoneType, devices: DeviceType[] }[]>(() => {
+    readonly deviceZones = computed<{ room: ZoneType, devices: DeviceType[] }[]>(() => {
         const groups: { room: ZoneType, devices: DeviceType[] }[] = [{
             room: {
                 id: 0,
@@ -149,6 +152,7 @@ export class DevicesPage implements OnInit {
         return groups;
     });
 
+
     private toSmallDevice(device: DeviceType): DeviceSmallType {
         return {
             id: device.id,
@@ -191,17 +195,15 @@ export class DevicesPage implements OnInit {
                 console.log('devices arrivati');
                 console.log(devices);
 
-                // `deviceGroups` è derivato da `devices`: non va costruito qui.
+                // `deviceZones` è derivato da `devices`: non va costruito qui.
                 this.devices.set(devices);
 
-                // this.isDeviceStatusInWaiting.set(
-                //     devices
-                //         .map((device: DeviceType) => ({id: device.id, inWaiting: false}))
-                // )
-                // ;
+
+
+
                 this.devicesLoading.set(false);
 
-                // return this.loadDevicesStatus();
+
             })
             .catch((error: unknown) => {
                 console.log('errore in loadOwnDevices');
@@ -214,6 +216,7 @@ export class DevicesPage implements OnInit {
                 this.devicesLoading.set(false);
             });
     }
+
 
 
 
@@ -303,6 +306,68 @@ export class DevicesPage implements OnInit {
             .then((groups: GroupType[]) => {
                 console.log('gruppi arrivati');
                 console.log(groups);
+
+
+
+                // cicle per gruppo
+                groups
+                    .map((gr: GroupType) => [gr, gr.device_list.split(',')] as [GroupType, string[]])
+                    .map(([gr, d]) => [gr, d.map((did: string) => parseInt(did))] as [GroupType, number[]])
+                    .map(([gr, did]) => {
+
+                        let groupStatusList: {channel: string, values: number[]}[] = [];
+                        did
+                            .map((dd: number) => this.devices().find((d: DeviceType) => parseInt('' + d.id) === dd))
+                            .filter((x: DeviceType | null | undefined) => !!x)
+                            .forEach((dev: DeviceType) => {
+
+                                // tutti i dispositivi del gruppo corrente
+                                // raccogliere la lista dei tipi di status
+                                // in base a channel[], status[], type.id
+                                const channels = ['power', 'temperature', 'humidity', 'output'];
+
+                                dev.channel
+                                    .filter((devCh: string)=> channels.includes(devCh))
+                                    .forEach((devCh: string) => {
+                                        let currentStatus = groupStatusList.find((status: {channel: string, values: number[]}) => status.channel === devCh);
+                                        let currentValue =
+                                            (!!dev.status[dev.channel.lastIndexOf( devCh )] && !isNaN(parseFloat(''+ dev.status[dev.channel.lastIndexOf( devCh )])))
+                                                ? parseFloat(''+ dev.status[dev.channel.lastIndexOf( devCh )])
+                                                : 0
+                                        ;
+                                        if( !!currentStatus ) {
+                                            currentStatus.values = [...currentStatus.values, currentValue];
+                                        }
+                                        else {
+                                            groupStatusList.push({channel: devCh, values: [currentValue]});
+                                        }
+                                    })
+                                ;
+
+                                // return groupStatusList;
+
+                            })
+                        ;
+                        gr.statusList =
+                            groupStatusList
+                                .map((currentStatus: {channel: string, values: number[]}) => {
+                                    let average = currentStatus.values.reduce((average, value) => average + value, 0) / currentStatus.values.length;
+                                    return {channel: currentStatus.channel, averageValue: average}
+                                })
+                        ;
+
+                        // console.log('groupStatusList');
+                        // console.log(gr);
+                    })
+
+
+
+
+
+
+
+
+
                 this.groups.set(
                     groups.map((group: GroupType) => ({
                         ...group,
@@ -429,5 +494,40 @@ export class DevicesPage implements OnInit {
             queryParams: { from: 'devices-page' },
             state: {}
         });
+    }
+
+    groupOutputStatus(group: GroupType) {
+        let outputStatus = (group.statusList || []).find((status: any) => status.channel === 'output');
+        return !!outputStatus?.averageValue;
+    }
+
+
+    isGroupOutputStatusInWaiting(group: GroupType) {
+        return false; // TODO da gestire
+    }
+
+
+    switchGroupAction(group: GroupType, isToCheck: boolean) {
+
+        this.isGroupActionInWaiting().find((item: {grid: number; isOn: boolean}) => item.grid === group.id)
+
+        Promise.allSettled(
+            group.device_list
+                .split(',')
+                .filter((deviceId: string) => !!deviceId)
+                .map((deviceId: string) => parseInt(deviceId))
+                .map((deviceId: number) => firstValueFrom(this.deviceApi.deviceAction(deviceId, 'output', isToCheck ? 'POWER:ON' : 'POWER:OFF')) )
+        )
+            .then((resultList: PromiseSettledResult<any>[]) => {
+                resultList.forEach((result: PromiseSettledResult<any>) => {
+                    if (result.status === 'fulfilled') {
+                        console.log('Device action successful');
+                    } else {
+                        console.error('Device action failed');
+                    }
+                });
+            })
+
+
     }
 }

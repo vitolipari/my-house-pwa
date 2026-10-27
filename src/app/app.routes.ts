@@ -2,7 +2,7 @@ import {Routes} from '@angular/router';
 import {routeAccessGuard} from './guards/route-access.guard';
 import {guestGuard} from './guards/guest.guard';
 import {NewDevicePage} from './pages/new-device/new-device.page';
-import {NewRoomPage} from './pages/new-room/new-room.page';
+
 
 
 export const routes: Routes = [

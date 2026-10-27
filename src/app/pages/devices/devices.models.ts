@@ -273,6 +273,7 @@ export type GroupType = {
     description: string;
     device_list: string; // as id list
     devices?: DeviceType[];
+    statusList?: {channel: string, averageValue: number}[];
 }
 
 export type DeviceType = {
@@ -344,6 +345,9 @@ export type TVType = ActuatorType & {
 export type MeteredSwitchType = SensorActuatorType & {}
 export type MeteredDimmerType = SensorActuatorType & {}
 export type MeteredCurtainType = SensorActuatorType & CurtainType & {}
+// tapparella comandata a impulsi attraverso il relè del motore: senza posizione
+export type RelayCurtainType = ActuatorType & {}
+export type MeteredRelayCurtainType = SensorActuatorType & {}
 
 export type TermostateType = SensorActuatorType & {
     mode: string;
@@ -2283,6 +2287,11 @@ export const extractRealDeviceType = (device: DeviceType) => {
                 // curtain.movement, curtain.targetPosition
                 return curtain;
 
+            case 'RELAY_CURTAIN':
+                const relayCurtain = device as RelayCurtainType;
+                // canali open e close a impulso, nessuna posizione
+                return relayCurtain;
+
             case 'AIR_CONDITIONER':
                 const clima = device as ClimaType;
                 // clima.mode, clima.temperature, clima.fan
@@ -2320,6 +2329,11 @@ export const extractRealDeviceType = (device: DeviceType) => {
                 const meteredCurtain = device as MeteredCurtainType;
                 // ...
                 return meteredCurtain;
+
+            case 'METERED_RELAY_CURTAIN':
+                const meteredRelayCurtain = device as MeteredRelayCurtainType;
+                // ...
+                return meteredRelayCurtain;
 
             case 'POWER_METER':
                 const powerMeter = device as PowerMeterType;

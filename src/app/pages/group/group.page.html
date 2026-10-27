@@ -28,6 +28,7 @@
         </div>
         <div class="base-text-style row-field">
             <label for="groupDescription">Descrizione</label>
+            <!--
             <input
                 pInputText
                 id="groupDescription"
@@ -38,6 +39,20 @@
                 [ngModel]="group().description"
                 (ngModelChange)="setDescription($event)"
             />
+            -->
+            <textarea
+                rows="5"
+                cols="30"
+                pTextarea
+                id="description"
+                aria-describedby="description-help"
+                placeholder="Descrizione"
+                class="fixed-value-input"
+                [readonly]="!isInEdit()"
+                [disabled]="!isInEdit()"
+                [ngModel]="group().description"
+                (ngModelChange)="setDescription($event)"
+            ></textarea>
         </div>
     </div>
 

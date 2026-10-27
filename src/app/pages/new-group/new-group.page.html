@@ -28,15 +28,17 @@
     <div class="card flex justify-center signup-field">
         <div class="flex flex-col gap-2 field" style="margin-bottom: 0px !important;">
             <label for="description">Descrizione</label>
-            <input
-                pInputText
+            <textarea
+                rows="5"
+                cols="30"
+                pTextarea
                 id="description"
                 aria-describedby="description-help"
                 placeholder="Descrizione"
                 class="fixed-value-input"
                 [ngModel]="data().description"
                 (ngModelChange)="setDescription($event)"
-            />
+            ></textarea>
         </div>
         <small id="description-help">A cosa serve il gruppo (facoltativa).</small>
     </div>
@@ -54,8 +56,6 @@
         <div class="device-list-container">
             @for (device of devices(); track device.id) {
 
-
-
                 <device-block-component
                     [device]="device"
                     [noDetails]="false"
@@ -65,46 +65,6 @@
                     (deviceToggle)="toggleSelctedDevice(device, $event)"
                 ></device-block-component>
 
-
-                <!--
-                <div class="device-row">
-
-                    <div>
-                        <p-checkbox
-                            (onChange)="toggleSelctedDevice(device, $event)"
-                            [binary]="true"
-                            size="small"
-                            style="margin: 1rem;"
-                        />
-                    </div>
-
-                    @if( !!device.imgIcon ) {
-                        <img class="device-row-img" [src]="device.imgIcon">
-                    }
-                    @else {
-                        @if( !!device.emoj ) {
-                            <div class="device-row-emoj">{{ itemEmojIcon( device.emoj ) }}</div>
-                        }
-                        @else {
-                            <svg class="device-row-svg">
-                                <use
-                                    [attr.href]="'#' + (device.svgIcon ?? 'icon-602')"
-                                    [attr.xlink:href]="'#' + (device.svgIcon ?? 'icon-602')">
-                                </use>
-                            </svg>
-                        }
-                    }
-                    <div class="device-row-info">
-                        <div>
-                            <strong>{{ device.name }}</strong>
-                        </div>
-                        <div class="device-row-data">
-                            <div class="device-row-ip">{{ device.ip }}</div>
-                        </div>
-                    </div>
-
-                </div>
-                -->
             }
         </div>
     }

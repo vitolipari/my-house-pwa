@@ -113,11 +113,11 @@
                     </div>
 
 
-                    @for(group of deviceGroups(); track group.room.id) {
-                        <div>{{ (group.room.name === 'Nessuna Stanza') ? '' : group.room.name }}</div>
+                    @for(zone of deviceZones(); track zone.room.id) {
+                        <div>{{ (zone.room.name === 'Nessuna Stanza') ? '' : zone.room.name }}</div>
 
 
-                        @for (device of group.devices; track device.id) {
+                        @for (device of zone.devices; track device.id) {
 
                             <device-block-component
                                 [device]="device"
@@ -208,12 +208,82 @@
                             >
                                 <div>
                                     <strong>{{ group.name }}</strong>
-                                    <span class="device-mac">{{ groupDeviceCount(group) }} dispositivi</span>
                                 </div>
                                 <div class="device-row-data">
-                                    <div class="device-mac">{{ group.description }}</div>
+                                    <div class="device-mac description">{{ group.description }}</div>
                                 </div>
                             </div>
+
+                            <div class="group-state">
+                                @for(status of group.statusList; track $index) {
+
+                                    @if( status.channel !== 'output' ) {
+                                        <div>
+                                            @if (status.channel === 'temperature') {
+                                                <svg #temperatureIcon>
+                                                    <use
+                                                        [attr.href]="'#TemperatureFill'"
+                                                        [attr.xlink:href]="'#TemperatureFill'">
+                                                        >
+                                                    </use>
+                                                </svg>
+                                            }
+                                            @if (status.channel === 'humidity') {
+                                                <svg #humidityIcon>
+                                                    <use
+                                                        [attr.href]="'#temperature_01'"
+                                                        [attr.xlink:href]="'#temperature_01'">
+                                                        >
+                                                    </use>
+                                                </svg>
+                                            }
+                                            @if (status.channel === 'power') {
+                                                <!-- 243 -->
+                                                <svg #powerIcon>
+                                                    <use
+                                                        [attr.href]="'#icon-243'"
+                                                        [attr.xlink:href]="'#icon-243'"
+                                                    >
+                                                    </use>
+                                                </svg>
+                                            }
+                                            @if (status.channel === 'energy') {
+                                                <svg #energyIcon>
+                                                    <use
+                                                        [attr.href]="'#icon-272'"
+                                                        [attr.xlink:href]="'#icon-272'"
+                                                    >
+                                                    </use>
+                                                </svg>
+                                            }
+                                            @if (status.channel === 'liquidLevel') {}
+                                            @if (status.channel === 'lightLevel') {}
+                                            @if (status.channel === 'windLevel') {}
+                                            <div>{{ status.averageValue }}</div>
+                                        </div>
+                                    }
+
+                                }
+                            </div>
+
+
+                            <div
+                                class="group-action"
+                            >
+                                <div class="device-mac" style="margin-bottom: 0.75rem;">{{ groupDeviceCount(group) }} dispositivi</div>
+
+                                <switcher-component
+                                    [isReadOnly]="false"
+                                    [style]="'transform: rotate(270deg);'"
+                                    [check]="!!groupOutputStatus(group)"
+                                    [inWait]="isGroupOutputStatusInWaiting(group)"
+                                    (toggle)="switchGroupAction(group, $event)"
+                                ></switcher-component>
+
+                            </div>
+
+
+
                         </div>
                     }
                 </div>

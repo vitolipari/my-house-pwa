@@ -13,6 +13,7 @@ export class SwitcherComponent {
     @Input() check: boolean;
     @Input() inWait: boolean = false;
     @Input() inError: boolean = false;
+    @Input() style: string = '';
     @Output() toggle = new EventEmitter<boolean>();
 
     constructor() {

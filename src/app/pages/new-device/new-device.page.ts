@@ -785,6 +785,18 @@ taxonomy =
 
 
 
+// tipi che il Core sa registrare come nodi Matter (MATTER_TYPE_CHANNELS in matter.channels.ts del Core):
+// gli altri, tapparelle comprese, verrebbero rifiutati solo dopo il commissioning
+const MATTER_SUPPORTED_TYPES: string[] = [
+    'SWITCH',
+    'METERED_SWITCH',
+    'DIMMER',
+    'METERED_DIMMER',
+    'TEMPERATURE_HUMIDITY_SENSOR'
+];
+
+// letture del job di commissioning, una al secondo: il Core attende il nodo fino a 120 s
+const MATTER_COMMISSIONING_ATTEMPTS: number = 150;
 
 
 @Component({
@@ -882,10 +894,13 @@ export class NewDevicePage implements OnInit {
     @ViewChild("deviceTuyaMac", {static: false, read: ElementRef}) deviceTuyaMac!: ElementRef<HTMLInputElement>;
     @ViewChild("deviceTuyaVirtualID", {static: false, read: ElementRef}) deviceTuyaVirtualID!: ElementRef<HTMLInputElement>;
     @ViewChild("matterPairingCode", {static: false, read: ElementRef}) matterPairingCode!: ElementRef<HTMLInputElement>;
+    @ViewChild("deviceSolisIp", {static: false, read: ElementRef}) deviceSolisIp!: ElementRef<HTMLInputElement>;
 
     // commissioning Matter: errore da mostrare e tipo proposto dal Core in base ai cluster del nodo
     readonly matterError = signal<string | null>(null);
     readonly matterDetectedType = signal<string | null>(null);
+    // secondi trascorsi dall'avvio del commissioning, mostrati nel pulsante durante l'attesa
+    readonly matterElapsedSeconds = signal<number>(0);
 
     ngOnInit() {
 
@@ -1152,6 +1167,15 @@ export class NewDevicePage implements OnInit {
                 this.newDevice.set({
                     ...this.newDevice(),
                     hardware: VOID_TUYA_FAMILY,
+                });
+
+                break;
+
+            // l'id dell'hardware sarà il numero di serie letto dal Core via Modbus
+            case 'solis':
+                this.newDevice.set({
+                    ...this.newDevice(),
+                    hardware: {...VOID_DEVICE_FAMILY, id: ''},
                 });
 
                 break;
@@ -1504,8 +1528,30 @@ export class NewDevicePage implements OnInit {
     compatibleTypeDefinitions(): DeviceTypeDefinition[] {
         const compatibleTypes = this.selectedCatalogItem()?.compatibleTypes ?? [];
         return compatibleTypes
+            .filter((id: string) => this.isTypeAvailableForIntegration(id))
             .map(id => this.taxonomy().types.find(type => type.id === id))
             .filter((type): type is DeviceTypeDefinition => type !== undefined);
+    }
+
+    // voci del catalogo con almeno un tipo registrabile per la famiglia scelta (con Matter, per esempio,
+    // la Tapparella non compare)
+    selectableCatalog(): DeviceCatalogItem[] {
+        return this.catalog()
+            .filter((item: DeviceCatalogItem) => (
+                item.compatibleTypes
+                    .some((id: string) => this.isTypeAvailableForIntegration(id))
+            ))
+        ;
+    }
+
+    // con Matter solo i tipi che il Core sa registrare; le altre famiglie non hanno limiti qui
+    private isTypeAvailableForIntegration(typeID: string): boolean {
+
+        if( this.integration !== 'matter' ) {
+            return true;
+        }
+
+        return MATTER_SUPPORTED_TYPES.includes(typeID);
     }
 
 
@@ -1698,10 +1744,16 @@ export class NewDevicePage implements OnInit {
 
 
     setDeviceData() {
-        this.newDevice.update(() => ({
-            ...this.newDevice(),
-            name: this.deviceName.nativeElement.value
-        }));
+        this.newDevice.update(() => {
+
+            console.log('setDeviceData');
+            console.log(this.newDevice());
+
+            return ({
+                ...this.newDevice(),
+                name: this.deviceName.nativeElement.value
+            });
+        });
     }
 
     protected setTuyaDeviceData() {
@@ -1731,6 +1783,23 @@ export class NewDevicePage implements OnInit {
     }
 
 
+    // inverter Solis: la PWA manda solo l'indirizzo, identità e canali li ricava il Core
+    protected setSolisDeviceData() {
+
+        let ip: string = this.deviceSolisIp.nativeElement.value.trim();
+
+        if( !!ip ) {
+            this.newDevice.update(() => ({
+                ...this.newDevice(),
+                ip
+            }));
+
+            this.navigateToNextStepFrom(this.sections.commissioning);
+        }
+
+    }
+
+
     // Porta il dispositivo nella fabric LipariOS con il codice manuale o il testo del QR (MT:...):
     // a job completato il node ID diventa hardware.id e si passa al passo successivo
     protected startMatterCommissioning() {
@@ -1743,9 +1812,10 @@ export class NewDevicePage implements OnInit {
         this.inWaiting.set(true);
         this.matterError.set(null);
         this.matterDetectedType.set(null);
+        this.matterElapsedSeconds.set(0);
 
         firstValueFrom(this.deviceApi.commissionMatter({pairingCode}))
-            .then((job: CommissioningJob) => this.waitMatterCommissioningJob(job.id, 150))
+            .then((job: CommissioningJob) => this.waitMatterCommissioningJob(job.id, MATTER_COMMISSIONING_ATTEMPTS))
             .then((job: CommissioningJob) => {
                 this.inWaiting.set(false);
                 if (job.status !== 'COMPLETED' || !job.device?.matterNodeId) {
@@ -1771,7 +1841,10 @@ export class NewDevicePage implements OnInit {
     // controlla il job una volta al secondo finché finisce o finiscono i tentativi
     private waitMatterCommissioningJob(jobId: string, attempts: number): Promise<CommissioningJob> {
         return new Promise<void>(resolve => setTimeout(resolve, 1000))
-            .then(() => firstValueFrom(this.deviceApi.commissioningJob(jobId)))
+            .then(() => {
+                this.matterElapsedSeconds.set(MATTER_COMMISSIONING_ATTEMPTS - attempts + 1);
+                return firstValueFrom(this.deviceApi.commissioningJob(jobId));
+            })
             .then((job: CommissioningJob) => (
                 (job.status === 'COMPLETED' || job.status === 'FAILED' || attempts <= 1)
                     ? job

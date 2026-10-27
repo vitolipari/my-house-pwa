@@ -273,32 +273,6 @@ export class RoomPage implements OnInit {
     }
 
 
-    // setDevices(availableDevices: DeviceType[]) {
-    //
-    //     let devicesIds: number[] = [
-    //             ...this.room.device_list
-    //                 .split(',')
-    //                 .map((id: string) => parseInt(id)),
-    //             ...availableDevices.map((device: DeviceType) => parseInt(''+ device.id))
-    //         ]
-    //             .map((id: number, index: number, list: number[]) => {
-    //                 if(list.includes(id)) return 0;
-    //                 return id;
-    //             })
-    //             .filter((id: number) => !!id)
-    //             .sort((a: number, b: number) => a - b)
-    //     ;
-    //     let devicesIds_string: string = devicesIds.join(',');
-    //
-    //     this.room = {
-    //         ...data,
-    //         device_list: devicesIds_string
-    //         // availableDevices: devicesIds
-    //     };
-    // }
-
-
-
     toggleSelctedDevice(toggledDevice: DeviceType, event: boolean) {
         const devicesInRoom: DeviceType[] = (this.room.devices as DeviceType[]) ?? [];
         let devices: DeviceType[] = [];

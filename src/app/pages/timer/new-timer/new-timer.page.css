@@ -152,3 +152,139 @@ SPAN.p-slider-handle,
     color: var(--color-text-2);
     align-self: flex-start;
 }
+
+
+.device-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    max-width: 100%;
+    width: 100%;
+    background: var(--color-background-3);
+    border-radius: 0.4rem;
+    margin-bottom: 0.2rem;
+    padding: 0.4rem 1rem;
+}
+
+.checkable-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.device-row-emoj {
+    font-size: 2.5rem;
+    margin: 0rem 1rem 0rem 0rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 3rem;
+    height: 3.5rem;
+    align-items: center;
+}
+
+
+.data-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    flex: 1;
+    /*margin-top: 0.5rem;*/
+}
+
+
+.device-data-column
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    width: 100%;
+    align-items: flex-start;
+    flex: 2;
+}
+
+
+.device-comand-column
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    width: 100%;
+    align-items: center;
+    flex: 1;
+}
+
+.device-room-name {
+    font-size: var(--tiny-font-size) !important;
+}
+
+
+.device-comand-column > DIV > SVG,
+.device-comand-column > DIV > svg
+{
+    width: 1.5rem;
+    height: 1.5rem;
+    background: var(--color-background-2);
+    border-radius: 100rem;
+    padding: 0.25rem;
+}
+
+
+
+.device-comand-column > DIV > SVG.active,
+.device-comand-column > DIV > svg.active
+{
+    background: var(--color-evident-2);
+    color: var(--theme-color-for-gradient-70);  /* forse al contrario */
+}
+
+
+.slot-commands {
+    min-width: 4rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+/*
+.device-data-row,
+.device-comand-row
+{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    align-items: flex-start;
+}
+
+.device-data-row > DIV,
+.device-comand-row > DIV
+{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.device-row-img {}
+
+
+.device-row-svg {}
+
+.device-comand-row {}
+
+
+
+.device-data-row > DIV,
+.device-comand-row > DIV,
+.device-data-row > DIV > DIV,
+.device-comand-row > DIV > DIV
+{
+    font-family: var(--page-font);
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+}
+
+
+*/

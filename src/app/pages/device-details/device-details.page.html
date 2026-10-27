@@ -1,12 +1,99 @@
-<p>device-details.page works!</p>
+<page-title
+    [iconID]="'icon-532'"
+    [title]="'Dispositivo'"
+    [hasPlusButton]="false"
+    [hasMenuButton]="true"
+    [menu]="deviceMenu"
+></page-title>
 
-<!--
-catalogItemId: LAMP
-type.id: METERED_SWITCH
-category.id: SENSOR_ACTUATOR
--->
 
+<ng-template #deviceMenu let-popover>
+    <div class="page-menu">
+        <div (click)="null; popover.hide()">
+            <svg class="svg-icon" style="position: static;">
+                <use href="#icon-209"></use>
+            </svg>
+            <div>voce 1</div>
+        </div>
+        <div (click)="null; popover.hide()">
+            <svg class="svg-icon" style="position: static;">
+                <use href="#icon-209"></use>
+            </svg>
+            <div>voce 2</div>
+        </div>
+        <div (click)="null; popover.hide()">
+            <svg class="svg-icon" style="position: static;">
+                <use href="#icon-209"></use>
+            </svg>
+            <div>voce 3</div>
+        </div>
+        <div (click)="null; popover.hide()">
+            <svg class="svg-icon" style="position: static;">
+                <use href="#icon-209"></use>
+            </svg>
+            <div>voce 4</div>
+        </div>
+    </div>
+</ng-template>
+<p-drawer
+    [(visible)]="openConfirmDeletion"
+    position="bottom"
+    [modal]="true"
+    [dismissible]="true"
+    [showCloseIcon]="false"
+    [style]="{
+        height: '55vh',
+        borderTopLeftRadius: '24px',
+        borderTopRightRadius: '24px'
+      }"
+>
+    <div
+        style="
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+        "
+    >
+        <div
+            style="
+                font-family: var(--page-font);
+                font-size: var(--main-font-size);
+                color: var(--color-text-2);
+            "
+        >confermi eliminazione?</div>
+        <div
+            style="margin: 2rem 0rem 5rem 0rem; height: 4rem;"
+        >
+            @if(!!isInDeleteDeviceInWaiting()) {
+                <svg
+                    class="svg-icon"
+                    style="width: 3rem;"
+                >
+                    <use href="#orologio-1-1"></use>
+                </svg>
+            }
+            @else {
+                <img
+                    src="/assets/images/trash.png"
+                    style="height: 100%"
+                >
+            }
+        </div>
+        <div>
+            <div
+                style="
+                      cursor: pointer;
+                      font-family: var(--page-font);
+                      font-size: var(--main-font-size);
+                      color: var(--theme-color);
+                      background: var(--color-red-outer-glow);
+                      border-radius: 100px;
+                      padding: 0.1rem 1rem;
+                "
+                (click)="!isInDeleteDeviceInWaiting() ? confirmDeleteDevice() : null"
+            >conferma</div>
+        </div>
+    </div>
+</p-drawer>
 
-<div>
-    <pre>{{ device | json }}</pre>
-</div>

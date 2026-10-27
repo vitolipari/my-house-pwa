@@ -17,13 +17,17 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {TimerApiService} from '../timer-api';
 import {firstValueFrom} from 'rxjs';
 import {PermissionService} from '../../../services/permission.service';
-import {DeviceType, ZoneType} from '../../devices/devices.models';
+import {DeviceType, GroupType, ZoneType} from '../../devices/devices.models';
 import {getLastElementOr} from '../../../utils/array-util';
 import {Drawer} from 'primeng/drawer';
 import {AnelloGiornata} from '../../../components/anello-giornata/anello-giornata';
 import {DatePipe, SlicePipe} from '@angular/common';
 import {DeviceBlockComponent} from '../../../components/device-block/device-block.component/device-block.component';
 import {DeviceApiService} from '../../devices/device-api';
+import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
+import {GroupsApiService} from '../../groups/groups-api';
+import {RadioButton} from 'primeng/radiobutton';
+import {emoj} from '../../../utils/string-utils';
 
 
 @Component({
@@ -44,7 +48,9 @@ import {DeviceApiService} from '../../devices/device-api';
         AnelloGiornata,
         // DatePipe,
         SlicePipe,
-        DeviceBlockComponent
+        DeviceBlockComponent,
+        Checkbox,
+        RadioButton
     ],
   templateUrl: './new-timer.page.html',
   styleUrl: './new-timer.page.css',
@@ -85,7 +91,8 @@ export class NewTimerPage {
     openConfirmDeletion: boolean = false;
 
     isDevicePanel: boolean = false;
-    devices: (DeviceType & {isOwned: boolean})[] = [];
+    devices: (DeviceType & {isOwned: boolean; slotStart?: boolean; slotEnd?: boolean;})[] = [];
+
 
     readonly isInDetailsMode = signal<boolean>(false);
     readonly isInEditMode = signal<boolean>(false);
@@ -93,6 +100,7 @@ export class NewTimerPage {
     isDeviceWaiting = signal<boolean>(false);
     readonly isInDeleteTimerInWaiting = signal<boolean>(false);
     readonly isInLinkTimerInWaiting = signal<boolean | null>(false);
+    readonly isConfirmable = signal<boolean>(true);
 
 
     private readonly timerApi = inject(TimerApiService);
@@ -100,6 +108,7 @@ export class NewTimerPage {
     private readonly route = inject(ActivatedRoute);
     private readonly permissionService = inject(PermissionService);
     private readonly deviceApi = inject(DeviceApiService);
+    private readonly groupsApi = inject(GroupsApiService);
 
 
     readonly routeInfo = this.route.snapshot.data; // oggetto data della rotta = accessControl.permission
@@ -107,6 +116,8 @@ export class NewTimerPage {
     readonly routeParamater = this.route.snapshot.queryParams; // oggetto con la query string
     readonly navigationData = this.router.currentNavigation()?.extras.state;    // passato dalla navigazione
     selectedDevices: number[] = [];
+    groups: GroupType[] = [];
+    slotActionPanel: number = 0;
 
 
     @Input()
@@ -131,6 +142,17 @@ export class NewTimerPage {
             // siamo nella pagina di sola lettura
 
             this.isInDetailsMode.update(() => true);
+
+
+
+            firstValueFrom(this.groupsApi.searchGroups())
+                .then((groups: GroupType[]) => {
+                    this.groups = groups;
+                })
+                .catch((e: any) => {
+                    console.log('errore');
+                })
+
 
 
             // const sole = this.albaTramontoService.calcolaAlbaTramonto(new Date(), 41.9028, 12.4964);
@@ -214,6 +236,8 @@ export class NewTimerPage {
                         this.timer = timer;
 
                         this.inWaiting.update(() => false);
+                        console.log('dati del timer assenti, chiamata terminata');
+                        console.log(this.detailsTimer);
 
 
                     })
@@ -562,10 +586,20 @@ export class NewTimerPage {
 
     }
 
-    protected toggleSelctedDevice(device: DeviceType, event: boolean) {
-        if(!!event) {
+    protected toggleSelctedDevice(device: DeviceType, event: CheckboxChangeEvent) {
+
+
+
+        if(!!event.checked) {
             if( !this.selectedDevices.includes(parseInt(''+ device.id)) ) {
+
+                // controllo tapparelle
+                if( (''+ device.type.id).trim().toLowerCase().indexOf('curtain') !== -1 ) {
+                    // device.slotStart = true;
+                    // device.slotEnd = true;
+                }
                 this.selectedDevices.push(parseInt(''+ device.id))
+
             }
         }
         else {
@@ -586,21 +620,94 @@ export class NewTimerPage {
 
         this.isInLinkTimerInWaiting.update(() => true);
 
-        firstValueFrom(this.timerApi.linkDevicesToTimer(this.detailsTimer.id, this.selectedDevices))
-            .then(() => {
+        let slotActionOptions: {openIn: number[], closeOut: number[]} = {
+            openIn: [],
+            closeOut: []
+        };
 
-                this.isInLinkTimerInWaiting.update(() => true);
-                this.isDevicePanel = false;
+        let errorMessages: string[] = [];
 
-                // this.router.navigate(['/timers-page']);
-                window.location.reload();
+        this.selectedDevices
+            .forEach((d: number) => {
+                let targetDevice = this.devices.find((device: (DeviceType & {isOwned: boolean; slotStart?: boolean; slotEnd?: boolean;})) => d === parseInt(''+ device.id));
+                if(!!targetDevice ) {
+                    slotActionOptions.openIn = [...slotActionOptions.openIn, !!targetDevice.slotStart ? d : 0].filter((x: any) => !!x);
+                    slotActionOptions.closeOut = [...slotActionOptions.closeOut, !!targetDevice.slotEnd ? d : 0].filter((x: any) => !!x);
+
+
+                    console.log('controllo prima del conferma');
+                    console.log(targetDevice);
+                    console.log(slotActionOptions);
+                    debugger;
+
+                    if( (''+ targetDevice?.type?.id).trim().toLowerCase().indexOf('curtain') !== -1 ) {
+                        if(
+                            !slotActionOptions.openIn.find((op: number) => op === d)
+                            && !slotActionOptions.closeOut.find((cl: number) => cl === d)
+                        ) {
+                            // attenzione tapparella non ppuò essere aggiunta al timer
+                            errorMessages.push(`attenzione ${ targetDevice.name } non ppuò essere aggiunta al timer, perché non é statoo selezionata nessuna azione per lo slot`);
+                        }
+                    }
+                }
 
             })
-            .catch((e) => {
-                console.log(e);
-            })
+        ;
+
+        //
+
+        if( errorMessages.length > 0 ) {
+            alert(errorMessages.join('\n'));
+        }
+        else {
+
+            firstValueFrom(
+                this.timerApi.linkDevicesToTimer(
+                    this.detailsTimer.id,
+                    this.selectedDevices,
+                    slotActionOptions
+                )
+            )
+                .then(() => {
+
+                    this.isInLinkTimerInWaiting.update(() => true);
+                    this.isDevicePanel = false;
+
+                    // this.router.navigate(['/timers-page']);
+                    window.location.reload();
+
+                })
+                .catch((e) => {
+                    console.log(e);
+                })
+
+        }
 
 
-        return null;
+
+        // return null;
+    }
+
+    protected selectSlotAction(did: number | string, slotActionType: number) {
+
+        let targetDevice = this.devices.find((d: (DeviceType & {isOwned: boolean; slotStart?: boolean; slotEnd?: boolean;})) => d.id === parseInt(''+ did));
+
+
+        if(!!targetDevice && !!this.selectedDevices.includes(parseInt(''+ targetDevice.id))) {
+            targetDevice.slotStart = slotActionType === 1;
+            targetDevice.slotEnd = slotActionType === 2;
+        }
+
+        console.log('azione slot scelta');
+        console.log(targetDevice);
+        console.log(this.selectedDevices);
+        console.log('slotActionType');
+        console.log(slotActionType);
+
+
+    }
+
+    protected itemEmojIcon(emojIconName: string) {
+        return emoj(emojIconName || '');
     }
 }

@@ -78,12 +78,32 @@ export class DeviceBlockComponent implements OnInit {
     }
 
     // testo «valore unità» di un canale del sensore: la riga della lista è un DeviceSmallType, senza value e unit
-    sensorChannelText(device: DeviceSmallType, channelKey: string): string {
+    sensorChannelText(
+        device: DeviceSmallType,
+        channelKey: string,
+        options?: {
+            showUnit?: boolean;
+            showValue?: boolean;
+            forceKW?: boolean;
+        }
+    ): string {
         const d = this.device;
         if (!d || !isSensorDevice(d)) return '';
         const index = d.channel.indexOf(channelKey);
         if (index === -1 || d.value?.[index] === null || d.value?.[index] === undefined) return '';
-        return `${d.value[index]} ${d.unit?.[index] ?? ''}`.trim();
+
+        let value: number | string | boolean | null = d.value[index];
+
+        // controllo options: kW solo per la visualizzazione, d.value resta in W
+        // (scriverlo in d.value lo divideva di nuovo per 1000 a ogni change detection, fino a 0)
+        if( (d.unit?.[index] ?? '').trim().toLowerCase() === 'w' ) {
+            if( !!options?.forceKW ) {
+                value = Math.trunc(parseInt(''+ value) / 10) / 100;
+            }
+        }
+
+        return `${ value } ${ !!options?.forceKW ? 'K': '' }${d.unit?.[index] ?? ''}`.trim();
+
     }
 
     getMainChannelLastTimeUpdated(device: DeviceSmallType): string {
@@ -211,6 +231,9 @@ export class DeviceBlockComponent implements OnInit {
     }
 
     getMainChannel(device: DeviceSmallType): string {
+
+        console.log('main channel per '+ device.name);
+
         let d: DeviceType = this.device
         ;
         let mainChannelText: string = '';
@@ -218,11 +241,16 @@ export class DeviceBlockComponent implements OnInit {
 
 
         if (isSensorDevice(d)) {
+
+            console.log('in dispositivo é un sensore');
+
             const powerChannelIndex: number = d.channel.lastIndexOf('power');
             const power = (powerChannelIndex !== -1) ? d.value?.[powerChannelIndex] : null;
             if (power !== null && power !== undefined) {
                 return `${power} ${d.unit?.[powerChannelIndex] ?? ''}`.trim();
             }
+
+            // in caso di batteria
             const batteryChannelIndex: number = d.channel.lastIndexOf('battery');
             const battery = (batteryChannelIndex !== -1) ? d.value?.[batteryChannelIndex] : null;
             if (battery !== null && battery !== undefined) {
@@ -236,11 +264,125 @@ export class DeviceBlockComponent implements OnInit {
                 </svg>`;
                 return ` ${battery} ${d.unit?.[batteryChannelIndex] ?? ''}`.trim();
             }
+
+            // EM a 2 pinze
+            const powerChannelIndexes: number[] = [d.channel.lastIndexOf('power_0'), d.channel.lastIndexOf('power_1')];
+            if(powerChannelIndexes[0] !== -1) {
+                const powers =
+                    [
+                        (powerChannelIndexes[0] !== -1) ? d.value?.[powerChannelIndexes[0]] : 0,
+                        (powerChannelIndexes[1] !== -1) ? d.value?.[powerChannelIndexes[1]] : 0
+                    ] as number[];
+                ;
+                powers[0] = Math.floor(powers[0] / 10) / 100;
+                powers[1] = Math.floor(powers[1] / 10) / 100;
+                return `${ powers[0] }K${ d.unit?.[powerChannelIndexes[0]] ?? '' } | ${ powers[1] }K${ d.unit?.[powerChannelIndexes[1]] ?? '' }`;
+            }
+
+            // clima ------------------------------------------------------------------------------------------------------
+            if(
+                !!d.hardware
+                && !!d.hardware.config
+                && !!d.hardware.config.up_down_sweep
+            ) {
+
+                let allModes = d.hardware.config.mode.range;                        // ["cold","hot","wet","wind","auto"],
+                let allWindSpeed = d.hardware.config.windspeed.range;               // ["strong","high","mid_high","mid","mid_low","low","mute","auto"],
+                let allUpDwonSpeed = d.hardware.config.up_down_sweep.range;         //  ["0","1","2","3"],
+                let allLeftRightSpeed = d.hardware.config.left_right_sweep.range;   //  ["0","1","2","3","4","5","6","7"]
+                let allAirQuality = d.hardware.config.airquality.range;             //  ["great","good","middle","bad","verybad","veryverybad"],
+                let humidity = d.hardware.status.humidity_current.value;
+
+                let allModeIconId = ['icon-424', 'manopola-regolazione', 'goccia-stella-rotante', 'icon-488', 'marker-1']; // l'icona icon-488 si può sostituire con Air
+                let allSpeedIcon = ['mute', 'low', 'mid_low', 'mid', 'mid_high', 'high', 'strong', 'auto'];
+
+                const climaChannelIndexes: number[] = [
+                    d.channel.lastIndexOf('output'),
+                    d.channel.lastIndexOf('mode'),
+                    d.channel.lastIndexOf('target_temperature'),
+                    d.channel.lastIndexOf('fan'),
+                    d.channel.lastIndexOf('air_flow_vertical'),
+                    d.channel.lastIndexOf('air_flow_vertical_position'),
+                    d.channel.lastIndexOf('air_flow_horizontal'),
+                    d.channel.lastIndexOf('air_flow_horizontal_position'),
+                    d.channel.lastIndexOf('temperature')
+                ];
+                if((climaChannelIndexes[4] !== -1) && (climaChannelIndexes[6] !== -1) /*&& (climaChannelIndexes[7] !== -1)*/) {
+
+                    let mode = allModeIconId[d.hardware.config.mode.range.lastIndexOf( d.status[d.channel.lastIndexOf('mode')] )];
+                    let targetTemperature = d.status[d.channel.lastIndexOf('target_temperature')];
+                    let currentTemperature = d.status[d.channel.lastIndexOf('temperature')];
+                    let fanSpeed = d.hardware.config.windspeed.range[ d.hardware.config.windspeed.range.lastIndexOf( d.status[d.channel.lastIndexOf('fan')] ) ];
+
+                    let airFlowVertical = d.hardware.config.up_down_sweep.range[ d.hardware.config.up_down_sweep.range.lastIndexOf( d.status[d.channel.lastIndexOf('air_flow_vertical')] ) ]
+                    let airFlowOrizontal = d.hardware.config.left_right_sweep.range[ d.hardware.config.left_right_sweep.range.lastIndexOf( d.status[d.channel.lastIndexOf('air_flow_horizontal')] ) ]
+
+                    let airFlowVerticalPosition = d.status[1 + d.channel.lastIndexOf('air_flow_vertical_position')];
+                    let airFlowOrizontalPosition = d.status[1 + d.channel.lastIndexOf('air_flow_horizontal_position')];
+
+
+                    console.log('main channel per clima');
+                    console.log(`${ mode },${ targetTemperature },${ currentTemperature },fan_04-${ fanSpeed },flow_vertical-${ airFlowVertical },flow_orizontal-${ airFlowOrizontal }`);
+
+                    return `${ mode },${ targetTemperature },${ currentTemperature },fan_04-${ fanSpeed },flow_vertical-${ airFlowVertical },flow_orizontal-${ airFlowOrizontal }`;
+                }
+
+            }
+
         }
 
         return mainChannelText;
     }
 
+
+    greenOrRedGlow(device: DeviceSmallType) {
+
+        const redGlow: string = 'text-shadow: var(--color-red-outer-glow) 0px 0px 16px; color: var(--color-red-outer-glow);';
+        // const redGlow: string = 'text-shadow: var(--medium-red-color) 0px 0px 16px; color: var(--medium-red-color);';
+
+        const greenGlow: string = 'text-shadow: var(--color-outer-glow) 0px 0px 16px; color: var(--color-text-2);';
+
+        let d: DeviceType = this.device;
+        let toReturn = '';
+        let power: number | null | undefined;
+        if(!d) return toReturn;
+
+        if (isSensorDevice(d)) {
+
+
+            power =
+
+                // channels
+                [
+                    'power_0',
+                    'grid_power'
+                ]
+                    .map((ch: string) => {
+                        const powerChannelIndex: number = d.channel.lastIndexOf(ch);
+                        if(powerChannelIndex !== -1) {
+                            return ((powerChannelIndex !== -1) ? d.value?.[powerChannelIndex] : 0) as number;
+                        }
+                        return null;
+                    })
+                    .filter((x: any) => (x !== null) && (x !== undefined))
+                    .reduce(getLastElementOr, null)
+            ;
+
+            if((power !== null) && (power !== undefined)) {
+                if( power <= 0 ) {
+                    toReturn = greenGlow
+                }
+                else if( power > 0 ) {
+                    toReturn = redGlow;
+                }
+            }
+
+            console.log(`channel di ${ d.name }: ${ power }`);
+
+        }
+
+        return toReturn;
+    }
 
     loadDevicesStatus() {
 
@@ -298,5 +440,62 @@ export class DeviceBlockComponent implements OnInit {
 
     protected toggleSelctedDevice(event: CheckboxChangeEvent) {
         this.deviceToggle.emit( !!event.checked );
+    }
+
+    protected openCurtain(device: DeviceType, event: PointerEvent) {
+        event.stopImmediatePropagation();
+        this.isDeviceStatusInWaiting.set(true);
+
+        const channelIndex: number = this.device.channel.indexOf('open');
+        if (channelIndex === -1) {
+            console.log(`switchAction: il dispositivo ${this.device.id} non ha il canale open`);
+            return;
+        }
+        const previousStatus: DeviceType['status'][number] = this.device.status[channelIndex] ?? null;
+
+
+        firstValueFrom(this.deviceApi.deviceAction(this.device.id, 'open', 'POWER:ON'))
+            .then((result: unknown) => {
+                this.isDeviceStatusInWaiting.set(false);
+                return result;
+            })
+            .catch((error: unknown) => {
+                console.log(`errore in open: azione sul dispositivo ${this.device.id}`);
+                console.log(error);
+                this.device = this.withChannelStatus(this.device, channelIndex, previousStatus);
+                this.isSwitchInError.set(true);
+                this.isDeviceStatusInWaiting.set(false);
+                return null;
+            });
+
+
+    }
+
+    protected closeCurtain(device: DeviceType, event: PointerEvent) {
+        event.stopImmediatePropagation();
+        this.isDeviceStatusInWaiting.set(true);
+
+        const channelIndex: number = this.device.channel.indexOf('close');
+        if (channelIndex === -1) {
+            console.log(`switchAction: il dispositivo ${this.device.id} non ha il canale close`);
+            return;
+        }
+        const previousStatus: DeviceType['status'][number] = this.device.status[channelIndex] ?? null;
+
+
+        firstValueFrom(this.deviceApi.deviceAction(this.device.id, 'close', 'POWER:ON'))
+            .then((result: unknown) => {
+                this.isDeviceStatusInWaiting.set(false);
+                return result;
+            })
+            .catch((error: unknown) => {
+                console.log(`errore in close: azione sul dispositivo ${this.device.id}`);
+                console.log(error);
+                this.device = this.withChannelStatus(this.device, channelIndex, previousStatus);
+                this.isSwitchInError.set(true);
+                this.isDeviceStatusInWaiting.set(false);
+                return null;
+            });
+
     }
 }

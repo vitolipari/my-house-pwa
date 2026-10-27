@@ -194,3 +194,214 @@
 {
     margin-right: 0rem;
 }
+
+.pv-status {
+    /*display: flex;*/
+    /*flex-direction: column;*/
+    /*justify-content: flex-start;*/
+    /*align-items: flex-end;*/
+
+    display: grid;
+    grid-template-columns: 5rem 6.5rem;
+    column-gap: 0rem;
+    row-gap: 0rem;
+}
+
+.pv-status > DIV {
+
+    display: contents;
+
+    /*display: flex;*/
+    /*flex-direction: row;*/
+    /*justify-content: flex-start;*/
+    /*align-items: flex-end;*/
+    margin-bottom: 0.1rem;
+}
+
+.pv-status > DIV > DIV {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    font-size: var(--tiny-font-size);
+    min-width: 7.5rem;
+}
+
+.pv-status > DIV > DIV > SVG,
+.pv-status > DIV > DIV > svg
+{
+    height: 1.25rem;
+}
+
+/* ingressi digitali: led grigio tratteggiato senza stato, grigio pieno se spento, verde se acceso */
+.binary-status {
+    display: grid;
+    grid-template-columns: repeat(4, 1.6rem);
+    column-gap: 0.3rem;
+    align-items: center;
+}
+
+.binary-input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: var(--tiny-font-size);
+    color: var(--medium-gray);
+}
+
+.binary-input-led {
+    width: 0.7rem;
+    height: 0.7rem;
+    margin-bottom: 0.15rem;
+    border-radius: 50%;
+    border: 1px dashed var(--medium-gray);
+}
+
+.binary-input-off .binary-input-led {
+    border-style: solid;
+    background-color: var(--medium-gray);
+}
+
+.binary-input-on {
+    color: var(--color-outer-glow);
+}
+
+.binary-input-on .binary-input-led {
+    border: 1px solid var(--color-outer-glow);
+    background-color: var(--color-outer-glow);
+    box-shadow: var(--color-outer-glow) 0px 0px 8px;
+}
+
+
+.icon-text-in-riga {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    width: 100%;
+    height: calc( var(--micro-font-size) + 6px);
+    max-width: 5.5rem;
+    font-size: var(--tiny-font-size);
+    /*height: 1rem;*/
+    margin-bottom: 0.2rem;
+}
+
+.two-input-state {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    /*width: 100%;*/
+}
+
+.air-conditioner-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.air-conditioner-container > DIV {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 1rem;
+}
+
+.air-conditioner-container > DIV > SVG,
+.air-conditioner-container > DIV > svg {
+    height: 1rem;
+}
+
+.fan_04-strong {
+    animation: spin 0.5s linear infinite;
+}
+
+.fan_04-high {
+    animation: spin 0.75s linear infinite;
+}
+
+.fan_04-mid_high {
+    animation: spin 1s linear infinite;
+}
+
+.fan_04-mid {
+    animation: spin 1.25s linear infinite;
+}
+
+.fan_04-mid_low {
+    animation: spin 1.5s linear infinite;
+}
+
+.fan_04-low {
+    animation: spin 1.75s linear infinite;
+}
+
+.fan_04-mute {
+    animation: spin 2s linear infinite;
+}
+
+.fan_04-auto {
+    animation: spin 1s linear infinite;
+}
+
+.flow_orizontal-0
+{
+
+}
+
+.flow_orizontal-1,
+.flow_orizontal-2,
+.flow_orizontal-3,
+.flow_orizontal-4,
+.flow_orizontal-5,
+.flow_orizontal-6,
+.flow_orizontal-7
+{
+
+    --alpha: -30deg;
+    --beta: 30deg;
+    --duration: 0.7s;
+
+    transform-origin: 0% 50%;   /* perno: centro del lato superiore, come un'aletta */
+    animation: oscillate var(--duration) ease-in-out infinite alternate;
+
+}
+
+
+
+.flow_vertical-0
+{
+
+}
+
+.flow_vertical-1,
+.flow_verticall-2,
+.flow_vertical-3
+{
+    --alpha: -30deg;
+    --beta: 30deg;
+    --duration: 0.7s;
+
+    transform-origin: 50% 0%;   /* perno: centro del lato superiore, come un'aletta */
+    animation: oscillate var(--duration) ease-in-out infinite alternate;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+@keyframes oscillate {
+    from {
+        transform: rotate(var(--alpha));
+    }
+    to {
+        transform: rotate(var(--beta));
+    }
+}
+

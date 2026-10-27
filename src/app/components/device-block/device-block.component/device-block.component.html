@@ -57,38 +57,176 @@
                 </div>
                 <div class="device-row-ip">
 
-                    @if (device.type.id === 'TEMPERATURE_HUMIDITY_SENSOR') {
-                        <svg style="height: calc( var(--micro-font-size) + 4px); margin-right: 0.2rem;">
-                            <use
-                                [attr.href]="'#battery-' + (sensorChannelText(device, 'battery') || 'empty')"
-                                [attr.xlink:href]="'#battery-' + (sensorChannelText(device, 'battery') || 'empty')"
+                    @switch (device.type.id) {
+                        @case ('TEMPERATURE_HUMIDITY_SENSOR') {
+                            <svg style="height: calc( var(--micro-font-size) + 4px); margin-right: 0.2rem;">
+                                <use
+                                    [attr.href]="'#battery-' + (sensorChannelText(device, 'battery') || 'empty')"
+                                    [attr.xlink:href]="'#battery-' + (sensorChannelText(device, 'battery') || 'empty')"
+                                >
+                                </use>
+                            </svg>
+                            <div
+                                class="device-mac to-right"
+                                style="display: flex; flex-direction: row; justify-content: space-evenly; width: 100%; height: calc( var(--micro-font-size) + 4px); max-width: 5.5rem;"
                             >
-                            </use>
-                        </svg>
-                    }
-                    @else {
-                        <div class="device-mac to-right" style="color: {{ (thresholdIndicator(device) !== 0) ? '#ff0000' : '' }}">{{ getMainChannel(device) }}</div>
-                    }
-                    <div
-                        class="device-mac to-right"
-                        style="display: flex; flex-direction: row; justify-content: space-evenly; width: 100%; height: calc( var(--micro-font-size) + 4px); max-width: 5.5rem;"
-                    >
-                        <svg style="height: inherit; margin-right: 0.2rem;">
-                            <use
-                                [attr.href]="'#icon-198'"
-                                [attr.xlink:href]="'#icon-198'"
+                                <svg style="height: inherit; margin-right: 0.2rem;">
+                                    <use
+                                        [attr.href]="'#icon-198'"
+                                        [attr.xlink:href]="'#icon-198'"
+                                    >
+                                    </use>
+                                </svg>
+                                {{ getMainChannelLastTimeUpdated(device) }}
+                            </div>
+                        }
+                        @case ('SOLAR_SYSTEM_MONITOR') {
+
+                        }
+                        @case ('SENSING_AIR_CONDITIONER') {
+                            <div class="air-conditioner-container">
+                                <div>
+                                    <svg
+                                        style="margin-right: 0.2rem;"
+                                    >
+                                        <use
+                                            [attr.href]="'#'+ getMainChannel(device).split(',')[0]"
+                                            [attr.xlink:href]="'#'+ getMainChannel(device).split(',')[0]"
+                                        >
+                                        </use>
+                                    </svg>
+                                    <div>{{ getMainChannel(device).split(',')[1] }}</div>
+                                    <div>{{ getMainChannel(device).split(',')[2] }}</div>
+                                </div>
+                                <div>
+                                    <svg
+                                        style="margin-right: 0.2rem;"
+                                        [class]="(!!deviceChannelStatus(device, 'output')) ? getMainChannel(device).split(',')[3] : ''"
+                                    >
+                                        <use
+                                            [attr.href]="'#fan_04'"
+                                            [attr.xlink:href]="'#fan_04'"
+                                        >
+                                        </use>
+                                    </svg>
+                                    <svg
+                                        style="margin-right: 0.2rem;"
+                                        [class]="(!!deviceChannelStatus(device, 'output')) ? getMainChannel(device).split(',')[4]: ''"
+                                    >
+                                        <use
+                                            [attr.href]="'#icon-143'"
+                                            [attr.xlink:href]="'#icon-143'"
+                                        >
+                                        </use>
+                                    </svg>
+                                    <svg
+                                        style="margin-right: 0.2rem;"
+                                        [class]="(!!deviceChannelStatus(device, 'output')) ? getMainChannel(device).split(',')[5] : ''"
+                                    >
+                                        <use
+                                            [attr.href]="'#icon-11'"
+                                            [attr.xlink:href]="'#icon-11'"
+                                        >
+                                        </use>
+                                    </svg>
+                                </div>
+                            </div>
+                        }
+                        @case ('POWER_METER') {
+                            <div
+                                class="device-mac to-right"
+                                style="position: relative; top: -1.3rem; width: 6rem; height: 1rem;"
                             >
-                            </use>
-                        </svg>
-                        {{ getMainChannelLastTimeUpdated(device) }}
-                    </div>
+
+                                <div class="icon-text-in-riga">
+                                    <svg style="height: inherit; margin-right: 0.2rem;">
+                                        <use
+                                            [attr.href]="'#scenario_icon_1'"
+                                            [attr.xlink:href]="'#scenario_icon_1'"
+                                        >
+                                        </use>
+                                    </svg>
+                                    {{ getMainChannel(device).split(' | ')[1] }}
+                                </div>
+
+                                <div class="icon-text-in-riga">
+                                    <svg style="height: inherit; margin-right: 0.2rem;">
+                                        <use
+                                            [attr.href]="'#icon-590'"
+                                            [attr.xlink:href]="'#icon-590'"
+                                        >
+                                        </use>
+                                    </svg>
+                                    <span style="{{ greenOrRedGlow(device) }}">{{ getMainChannel(device).split(' | ')[0] }}</span>
+                                </div>
+                            </div>
+
+
+
+                            <div
+                                class="device-mac icon-text-in-riga"
+                                style="width: 100%; height: calc( var(--micro-font-size) + 4px); max-width: 5.5rem;"
+                            >
+                                <svg style="height: inherit; margin-right: 0.2rem;">
+                                    <use
+                                        [attr.href]="'#icon-198'"
+                                        [attr.xlink:href]="'#icon-198'"
+                                    >
+                                    </use>
+                                </svg>
+                                {{ getMainChannelLastTimeUpdated(device) }}
+                            </div>
+                        }
+
+                        @case ('METERED_RELAY_CURTAIN') {
+
+                        }
+
+
+                        @default {
+                            <div class="device-mac to-right" style="color: {{ (thresholdIndicator(device) !== 0) ? '#ff0000' : '' }}">
+                                {{ getMainChannel(device) }}
+                            </div>
+
+                            <div
+                                class="device-mac to-right"
+                                style="display: flex; flex-direction: row; justify-content: space-evenly; width: 100%; height: calc( var(--micro-font-size) + 4px); max-width: 5.5rem;"
+                            >
+                                <svg style="height: inherit; margin-right: 0.2rem;">
+                                    <use
+                                        [attr.href]="'#icon-198'"
+                                        [attr.xlink:href]="'#icon-198'"
+                                    >
+                                    </use>
+                                </svg>
+                                {{ getMainChannelLastTimeUpdated(device) }}
+                            </div>
+                        }
+                    }
+
                 </div>
                 <div class="device-row-status">
-                    <div>
-                        <span [style]="'opacity: '+ wifiSignalInOpacityRange(device) +';'">WiFi</span>
-                        <div class="wifi-signal-line-container" [style]="'width: 100%; opacity: '+ ((wifiSignalInOpacityRange(device) > 0.1) ? '1;': '0;')">
-                            <div class="wifi-signal-line" [style]="'width: '+ (wifiSignalInOpacityRange(device) * 100) +'%;'"></div>
-                        </div>
+                    <div style="width: 1.25rem; ">
+                        @if( wifiSignalInOpacityRange(device) < 0.3 ) {
+                            <svg
+                                class="svg-icon inside-device-list-status"
+                                style="height: 1.25rem; width: 1.25rem; opacity: 0.1;"
+                            >
+                                <use href="#icon-519"></use>
+                            </svg>
+                        }
+                        @else {
+                            <svg
+                                class="svg-icon inside-device-list-status"
+                                [style]="'opacity: '+ wifiSignalInOpacityRange(device) +';'"
+                                style="height: 1.25rem; width: 1.25rem;"
+                            >
+                                <use href="#signal"></use>
+                            </svg>
+                            <div class="wifi-signal-line-container" [style]="'width: 100%; opacity: '+ ((wifiSignalInOpacityRange(device) > 0.1) ? '1;': '0;')">
+                                <div class="wifi-signal-line" [style]="'width: '+ (wifiSignalInOpacityRange(device) * 100) +'%;'"></div>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -108,7 +246,10 @@
             </svg>
         }
         @else {
-            @if(( ''+ device.category.id).trim().toLowerCase().indexOf('actuator') !== -1 ) {
+            @if(
+                (( ''+ device.category.id).trim().toLowerCase().indexOf('actuator') !== -1 )
+                && (device.type.id !== 'METERED_RELAY_CURTAIN')
+            ) {
                 <switcher-component
                     [isReadOnly]="false"
                     [check]="!!deviceChannelStatus(device, 'output')"
@@ -134,7 +275,7 @@
                                     {{ sensorChannelText(device, 'temperature') }}
                                 </div>
                                 <div>
-                                    <svg #humidityIcon>
+                            <svg #humidityIcon>
                                         <use
                                             [attr.href]="'#temperature_01'"
                                             [attr.xlink:href]="'#temperature_01'">
@@ -147,12 +288,967 @@
                         }
                         <!-- fotovoltaico: produzione e batteria; consumo e rete (positiva in prelievo) -->
                         @case ('SOLAR_SYSTEM_MONITOR') {
-                            <div class="ht-status">
-                                <div>PV {{ sensorChannelText(device, 'pv_power') }}</div>
-                                <div>SOC {{ sensorChannelText(device, 'battery_soc') }}</div>
-                                <div>Casa {{ sensorChannelText(device, 'load_power') }}</div>
-                                <div>Rete {{ sensorChannelText(device, 'grid_power') }}</div>
+                            <div class="pv-status">
+                                <div>
+                                    <div>
+                                        <svg #pvIcon>
+                                            <use
+                                                [attr.href]="'#icon-506'"
+                                                [attr.xlink:href]="'#icon-506'">
+                                                >
+                                            </use>
+                                        </svg>
+                                        {{ sensorChannelText(device, 'pv_power', {forceKW: true}) }}
+                                    </div>
+                                    <div>
+                                        <svg #pvBatteryIcon>
+                                            <use
+                                                [attr.href]="'#full-battery'"
+                                                [attr.xlink:href]="'#full-battery'">
+                                                >
+                                            </use>
+                                        </svg>
+                                        {{ sensorChannelText(device, 'battery_power', {forceKW: true}) }}
+                                        ({{ sensorChannelText(device, 'battery_soc') }})
+                                    </div>
+                                </div>
+                                <div>
+                                    <div>
+                                        <svg #houseIcon>
+                                            <use
+                                                [attr.href]="'#icon-298'"
+                                                [attr.xlink:href]="'#icon-298'">
+                                                >
+                                            </use>
+                                        </svg>
+                                        {{ sensorChannelText(device, 'load_power', {forceKW: true}) }}
+                                    </div>
+                                    <div>
+                                        <svg #gridIcon>
+                                            <use
+                                                [attr.href]="'#icon-530'"
+                                                [attr.xlink:href]="'#icon-530'">
+                                                >
+                                            </use>                                        </svg>
+                                        <span style="{{ greenOrRedGlow(device) }}">{{ sensorChannelText(device, 'grid_power', {forceKW: true}) }}</span>
+                                    </div>
+                                </div>
+                                <div
+                                    class="device-mac to-right"
+                                    style="display: flex; flex-direction: row; justify-content: space-evenly; width: 6rem; height: calc( var(--micro-font-size) + 4px); margin-top: 0.3rem;"
+                                >
+                                    <svg style="height: inherit; margin-right: 0.2rem;">
+                                        <use
+                                            [attr.href]="'#icon-198'"
+                                            [attr.xlink:href]="'#icon-198'"
+                                        >
+                                        </use>
+                                    </svg>
+                                    {{ getMainChannelLastTimeUpdated(device) }}
+                                </div>
+
                             </div>
+                        }
+                        <!-- ingressi digitali (Shelly i4): acceso, spento, oppure senza stato (ingresso in modalità pulsante) -->
+                        @case ('BINARY_STATE_SENSOR') {
+                            <div class="binary-status">
+                                @for (inputIndex of [0, 1, 2, 3]; track inputIndex) {
+                                    <div
+                                        class="binary-input"
+                                        [class.binary-input-on]="deviceChannelStatus(device, 'input_'+ inputIndex) === true"
+                                        [class.binary-input-off]="deviceChannelStatus(device, 'input_'+ inputIndex) === false"
+                                    >
+                                        <span class="binary-input-led"></span>
+                                        {{ inputIndex + 1 }}
+                                    </div>
+                                }
+                            </div>
+                        }
+                        @case ('METERED_RELAY_CURTAIN') {
+                            <div class="two-input-state">
+                                @if( !!isDeviceStatusInWaiting() ) {
+                                    <svg class="svg-icon inside-device-list-status" style="position: static; top: 1.1rem; left: 3.8rem;">
+                                        <use href="#orologio-1-1"></use>
+                                    </svg>
+                                }
+                                @else {
+
+                                    <!-- APRE -->
+                                    <svg
+                                        style="margin-right: 0.2rem; height: 2rem;"
+                                        (click)="openCurtain(device, $event)"
+                                    >
+                                        <use
+                                            [attr.href]="'#icon-136'"
+                                            [attr.xlink:href]="'#icon-136'"
+                                        >
+                                        </use>
+                                    </svg>
+
+                                    <!-- CHIUDE -->
+                                    <svg
+                                        style="margin-right: 0.2rem; height: 2rem; transform: rotate(180deg); "
+                                        (click)="closeCurtain(device, $event)"
+                                    >
+                                        <use
+                                            [attr.href]="'#icon-136'"
+                                            [attr.xlink:href]="'#icon-136'"
+                                        >
+                                        </use>
+                                    </svg>
+
+                                }
+                            </div>
+                        }
+                        @case ('SENSING_AIR_CONDITIONER') {
+
+
+
+                            <!--
+                            {
+                              "id": 11,
+                              "family": "tuya",
+                              "hardware": {
+                                "id": "bf5efb8346f5a1a1aajrf5",
+                                "name": "Climatizzatore",
+                                "config": {
+                                  mode.range: ["cold","hot","wet","wind","auto"],
+                                  windspeed.range: ["strong","high","mid_high","mid","mid_low","low","mute","auto"],
+                                  up_down_sweep.range: ["0","1","2","3"],
+                                  left_right_sweep.range: ["0","1","2","3","4","5","6","7"]
+                                  airquality.range: ["great","good","middle","bad","verybad","veryverybad"],
+                                },
+                                "status": {
+                                  Power.value: false,
+                                  temp_set.value: 260,
+                                  temp_current.value: 27,
+                                  mode.value: "cold",
+                                  windspeed.value: "auto",
+                                  humidity_current.value: 0,
+                                  up_down_sweep.value: "0",
+                                  left_right_sweep.value: "0",
+                                  wind.value: "0",
+                                }
+                              },
+                              "name": "Climatizzatore",
+                              "mac": "B8:06:0D:7E:F1:17",
+                              "where": [],
+                              type.id: "AIR_CONDITIONER",
+                              categoryid: "ACTUATOR",
+                              "svgIcon": "icon-119",
+                              "emoj": "wind_face",
+                              "imgIcon": "",
+                              "channel": [
+                                "output",
+                                "mode",
+                                "target_temperature",
+                                "fan",
+                                "air_flow_vertical",
+                                "air_flow_horizontal",
+                                "temperature",
+                                "air_flow_vertical_position",
+                                "air_flow_horizontal_position"
+                              ],
+                              "status": [
+                                false,
+                                "cold",
+                                26,
+                                "auto",
+                                "0",
+                                "0",
+                                27,
+                                "0",
+                                "0"
+                              ],
+                              "lastTime": [
+                                1792905143667,
+                                1792905143667,
+                                1792905143667,
+                                1792905143667,
+                                1792905143667,
+                                1792905143667,
+                                1793022781406,
+                                1792905143667,
+                                1792905143667
+                              ]
+                            }
+                            -->
+
+                            <!--
+                            {
+                              "id": 11,
+                              "family": "tuya",
+                              "hardware": {
+                                "id": "bf5efb8346f5a1a1aajrf5",
+                                "name": "Climatizzatore",
+                                "gen": "",
+                                "config": {
+                                  "Power": {
+                                    "dpId": 1,
+                                    "type": "bool",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": null,
+                                    "writable": true
+                                  },
+                                  "temp_set": {
+                                    "dpId": 2,
+                                    "type": "value",
+                                    "scale": 1,
+                                    "unit": "℃",
+                                    "min": 160,
+                                    "max": 310,
+                                    "range": null,
+                                    "writable": true
+                                  },
+                                  "temp_current": {
+                                    "dpId": 3,
+                                    "type": "value",
+                                    "scale": 0,
+                                    "unit": "℃",
+                                    "min": -20,
+                                    "max": 100,
+                                    "range": null,
+                                    "writable": false
+                                  },
+                                  "mode": {
+                                    "dpId": 4,
+                                    "type": "enum",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": [
+                                      "cold",
+                                      "hot",
+                                      "wet",
+                                      "wind",
+                                      "auto"
+                                    ],
+                                    "writable": true
+                                  },
+                                  "windspeed": {
+                                    "dpId": 5,
+                                    "type": "enum",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": [
+                                      "strong",
+                                      "high",
+                                      "mid_high",
+                                      "mid",
+                                      "mid_low",
+                                      "low",
+                                      "mute",
+                                      "auto"
+                                    ],
+                                    "writable": true
+                                  },
+                                  "humidity_current": {
+                                    "dpId": 18,
+                                    "type": "value",
+                                    "scale": 0,
+                                    "unit": "%",
+                                    "min": 0,
+                                    "max": 100,
+                                    "range": null,
+                                    "writable": true
+                                  },
+                                  "temp_unit_convert": {
+                                    "dpId": 19,
+                                    "type": "enum",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": [
+                                      "c",
+                                      "f"
+                                    ],
+                                    "writable": true
+                                  },
+                                  "Fault": {
+                                    "dpId": 20,
+                                    "type": "bitmap",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": null,
+                                    "writable": false
+                                  },
+                                  "temp_current_f": {
+                                    "dpId": 23,
+                                    "type": "value",
+                                    "scale": 0,
+                                    "unit": "℉",
+                                    "min": -20,
+                                    "max": 100,
+                                    "range": null,
+                                    "writable": false
+                                  },
+                                  "temp_set_f": {
+                                    "dpId": 24,
+                                    "type": "value",
+                                    "scale": 1,
+                                    "unit": "℉",
+                                    "min": 610,
+                                    "max": 880,
+                                    "range": null,
+                                    "writable": true
+                                  },
+                                  "pm25": {
+                                    "dpId": 101,
+                                    "type": "value",
+                                    "scale": 0,
+                                    "unit": "",
+                                    "min": 0,
+                                    "max": 3000,
+                                    "range": null,
+                                    "writable": false
+                                  },
+                                  "fresh_air": {
+                                    "dpId": 102,
+                                    "type": "enum",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": [
+                                      "auto",
+                                      "low",
+                                      "mid",
+                                      "strong",
+                                      "off"
+                                    ],
+                                    "writable": true
+                                  },
+                                  "freshair_filter": {
+                                    "dpId": 103,
+                                    "type": "bool",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": null,
+                                    "writable": false
+                                  },
+                                  "SN_SW_ver": {
+                                    "dpId": 104,
+                                    "type": "raw",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": null,
+                                    "writable": false
+                                  },
+                                  "sleep": {
+                                    "dpId": 105,
+                                    "type": "enum",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": [
+                                      "off",
+                                      "normal",
+                                      "old",
+                                      "child"
+                                    ],
+                                    "writable": true
+                                  },
+                                  "markbit": {
+                                    "dpId": 110,
+                                    "type": "bitmap",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": null,
+                                    "writable": false
+                                  },
+                                  "up_down_sweep": {
+                                    "dpId": 113,
+                                    "type": "enum",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": [
+                                      "0",
+                                      "1",
+                                      "2",
+                                      "3"
+                                    ],
+                                    "writable": true
+                                  },
+                                  "left_right_sweep": {
+                                    "dpId": 114,
+                                    "type": "enum",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": [
+                                      "0",
+                                      "1",
+                                      "2",
+                                      "3",
+                                      "4",
+                                      "5",
+                                      "6",
+                                      "7"
+                                    ],
+                                    "writable": true
+                                  },
+                                  "totalN": {
+                                    "dpId": 115,
+                                    "type": "value",
+                                    "scale": 0,
+                                    "unit": "",
+                                    "min": 0,
+                                    "max": 1000000,
+                                    "range": null,
+                                    "writable": false
+                                  },
+                                  "totalP": {
+                                    "dpId": 116,
+                                    "type": "value",
+                                    "scale": 0,
+                                    "unit": "",
+                                    "min": 0,
+                                    "max": 1000000,
+                                    "range": null,
+                                    "writable": false
+                                  },
+                                  "money": {
+                                    "dpId": 119,
+                                    "type": "enum",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": [
+                                      "0",
+                                      "1",
+                                      "2",
+                                      "3"
+                                    ],
+                                    "writable": true
+                                  },
+                                  "energy": {
+                                    "dpId": 120,
+                                    "type": "enum",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": [
+                                      "off",
+                                      "L1",
+                                      "L2",
+                                      "L3"
+                                    ],
+                                    "writable": true
+                                  },
+                                  "fault2": {
+                                    "dpId": 122,
+                                    "type": "bitmap",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": null,
+                                    "writable": false
+                                  },
+                                  "boolCode": {
+                                    "dpId": 123,
+                                    "type": "string",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": null,
+                                    "writable": true
+                                  },
+                                  "airquality": {
+                                    "dpId": 125,
+                                    "type": "enum",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": [
+                                      "great",
+                                      "good",
+                                      "middle",
+                                      "bad",
+                                      "verybad",
+                                      "veryverybad"
+                                    ],
+                                    "writable": false
+                                  },
+                                  "up_down_freeze": {
+                                    "dpId": 126,
+                                    "type": "enum",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": [
+                                      "0",
+                                      "1",
+                                      "2",
+                                      "3",
+                                      "4",
+                                      "5"
+                                    ],
+                                    "writable": true
+                                  },
+                                  "left_right_freeze": {
+                                    "dpId": 127,
+                                    "type": "enum",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": [
+                                      "0",
+                                      "1",
+                                      "2",
+                                      "3",
+                                      "4",
+                                      "5",
+                                      "8",
+                                      "6",
+                                      "7"
+                                    ],
+                                    "writable": true
+                                  },
+                                  "style": {
+                                    "dpId": 128,
+                                    "type": "enum",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": [
+                                      "0",
+                                      "1"
+                                    ],
+                                    "writable": false
+                                  },
+                                  "kwh": {
+                                    "dpId": 129,
+                                    "type": "enum",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": [
+                                      "1",
+                                      "2",
+                                      "3",
+                                      "4",
+                                      "5"
+                                    ],
+                                    "writable": true
+                                  },
+                                  "savemoney_temp": {
+                                    "dpId": 130,
+                                    "type": "value",
+                                    "scale": 0,
+                                    "unit": "℃",
+                                    "min": 26,
+                                    "max": 31,
+                                    "range": null,
+                                    "writable": true
+                                  },
+                                  "dirty_filter": {
+                                    "dpId": 131,
+                                    "type": "bool",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": null,
+                                    "writable": false
+                                  },
+                                  "hot_cold_wind": {
+                                    "dpId": 132,
+                                    "type": "bool",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": null,
+                                    "writable": true
+                                  },
+                                  "wind": {
+                                    "dpId": 133,
+                                    "type": "enum",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": [
+                                      "0",
+                                      "1",
+                                      "2",
+                                      "3"
+                                    ],
+                                    "writable": true
+                                  },
+                                  "work_time": {
+                                    "dpId": 134,
+                                    "type": "string",
+                                    "scale": 0,
+                                    "unit": null,
+                                    "min": null,
+                                    "max": null,
+                                    "range": null,
+                                    "writable": false
+                                  },
+                                  "run_time": {
+                                    "dpId": 135,
+                                    "type": "value",
+                                    "scale": 0,
+                                    "unit": "次",
+                                    "min": 0,
+                                    "max": 65525,
+                                    "range": null,
+                                    "writable": false
+                                  }
+                                },
+                                "status": {
+                                  "Power": {
+                                    "dpId": 1,
+                                    "type": "bool",
+                                    "value": false,
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "temp_set": {
+                                    "dpId": 2,
+                                    "type": "value",
+                                    "value": 260,
+                                    "scale": 1,
+                                    "time": 1792905143667
+                                  },
+                                  "temp_current": {
+                                    "dpId": 3,
+                                    "type": "value",
+                                    "value": 27,
+                                    "scale": 0,
+                                    "time": 1793022781406
+                                  },
+                                  "mode": {
+                                    "dpId": 4,
+                                    "type": "enum",
+                                    "value": "cold",
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "windspeed": {
+                                    "dpId": 5,
+                                    "type": "enum",
+                                    "value": "auto",
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "humidity_current": {
+                                    "dpId": 18,
+                                    "type": "value",
+                                    "value": 0,
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "temp_unit_convert": {
+                                    "dpId": 19,
+                                    "type": "enum",
+                                    "value": "c",
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "Fault": {
+                                    "dpId": 20,
+                                    "type": "bitmap",
+                                    "value": 0,
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "temp_current_f": {
+                                    "dpId": 23,
+                                    "type": "value",
+                                    "value": 81,
+                                    "scale": 0,
+                                    "time": 1792934748123
+                                  },
+                                  "temp_set_f": {
+                                    "dpId": 24,
+                                    "type": "value",
+                                    "value": 790,
+                                    "scale": 1,
+                                    "time": 1792905143667
+                                  },
+                                  "pm25": {
+                                    "dpId": 101,
+                                    "type": "value",
+                                    "value": 0,
+                                    "scale": 0,
+                                    "time": 1792905144046
+                                  },
+                                  "fresh_air": {
+                                    "dpId": 102,
+                                    "type": "enum",
+                                    "value": "off",
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "freshair_filter": {
+                                    "dpId": 103,
+                                    "type": "bool",
+                                    "value": false,
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "SN_SW_ver": {
+                                    "dpId": 104,
+                                    "type": "raw",
+                                    "scale": 0,
+                                    "time": 1792832961845
+                                  },
+                                  "sleep": {
+                                    "dpId": 105,
+                                    "type": "enum",
+                                    "value": "off",
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "markbit": {
+                                    "dpId": 110,
+                                    "type": "bitmap",
+                                    "value": 4330047,
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "up_down_sweep": {
+                                    "dpId": 113,
+                                    "type": "enum",
+                                    "value": "0",
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "left_right_sweep": {
+                                    "dpId": 114,
+                                    "type": "enum",
+                                    "value": "0",
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "totalN": {
+                                    "dpId": 115,
+                                    "type": "value",
+                                    "value": 9,
+                                    "scale": 0,
+                                    "time": 1784394815712
+                                  },
+                                  "totalP": {
+                                    "dpId": 116,
+                                    "type": "value",
+                                    "value": 6133,
+                                    "scale": 0,
+                                    "time": 1792878659191
+                                  },
+                                  "money": {
+                                    "dpId": 119,
+                                    "type": "enum",
+                                    "value": "0",
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "energy": {
+                                    "dpId": 120,
+                                    "type": "enum",
+                                    "value": "off",
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "fault2": {
+                                    "dpId": 122,
+                                    "type": "bitmap",
+                                    "value": 0,
+                                    "scale": 0,
+                                    "time": 1784309267736
+                                  },
+                                  "boolCode": {
+                                    "dpId": 123,
+                                    "type": "string",
+                                    "value": "0018",
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "airquality": {
+                                    "dpId": 125,
+                                    "type": "enum",
+                                    "value": "great",
+                                    "scale": 0,
+                                    "time": 1792905144046
+                                  },
+                                  "up_down_freeze": {
+                                    "dpId": 126,
+                                    "type": "enum",
+                                    "value": "0",
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "left_right_freeze": {
+                                    "dpId": 127,
+                                    "type": "enum",
+                                    "value": "0",
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "style": {
+                                    "dpId": 128,
+                                    "type": "enum",
+                                    "value": "0",
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "kwh": {
+                                    "dpId": 129,
+                                    "type": "enum",
+                                    "value": "1",
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "savemoney_temp": {
+                                    "dpId": 130,
+                                    "type": "value",
+                                    "value": 26,
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "dirty_filter": {
+                                    "dpId": 131,
+                                    "type": "bool",
+                                    "value": false,
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "hot_cold_wind": {
+                                    "dpId": 132,
+                                    "type": "bool",
+                                    "value": false,
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "wind": {
+                                    "dpId": 133,
+                                    "type": "enum",
+                                    "value": "0",
+                                    "scale": 0,
+                                    "time": 1792905143667
+                                  },
+                                  "work_time": {
+                                    "dpId": 134,
+                                    "type": "string",
+                                    "value": "{\\\"t\\\":1793022813,\\\"s\\\":false,\\\"clr\\\":false}",
+                                    "scale": 0,
+                                    "time": 1793022814389
+                                  },
+                                  "run_time": {
+                                    "dpId": 135,
+                                    "type": "value",
+                                    "value": 1,
+                                    "scale": 0,
+                                    "time": 1793022795187
+                                  }
+                                }
+                              },
+                              "model": "",
+                              "matter": {
+                                "id": 11,
+                                "mode": "BRIDGED",
+                                "nodeID": "",
+                                "fabricID": "",
+                                "endpiontIDs": [],
+                                "bridgeEndpiontIDs": [
+                                  27,
+                                  28,
+                                  29
+                                ]
+                              },
+                              "name": "Climatizzatore",
+                              "ip": "",
+                              "mac": "B8:06:0D:7E:F1:17",
+                              "where": [],
+                              "onMap": "",
+                              "description": "",
+                              "signalStatus": 0,
+                              "cloud": "",
+                              "firmware": "",
+                              "updateAvailability": {},
+                              "productName": "",
+                              "hostName": "",
+                              "availability": "",
+                              "catalogItemId": "AIR_CONDITIONER",
+                              "type": {
+                                "id": "AIR_CONDITIONER",
+                                "name": "Climatizzatore",
+                                "description": "Controllo di modalita, setpoint, ventola e flussi"
+                              },
+                              "category": {
+                                "id": "ACTUATOR",
+                                "name": "Attuatore",
+                                "description": "Riceve comandi e modifica lo stato del dispositivo o dell ambiente"
+                              },
+                              "svgIcon": "icon-119",
+                              "emoj": "wind_face",
+                              "imgIcon": "",
+                              "picture": "",
+                              "channel": [
+                                "output",
+                                "mode",
+                                "target_temperature",
+                                "fan",
+                                "air_flow_vertical",
+                                "air_flow_horizontal",
+                                "temperature",
+                                "air_flow_vertical_position",
+                                "air_flow_horizontal_position"
+                              ],
+                              "status": [
+                                false,
+                                "cold",
+                                26,
+                                "auto",
+                                "0",
+                                "0",
+                                27,
+                                "0",
+                                "0"
+                              ],
+                              "lastTime": [
+                                1792905143667,
+                                1792905143667,
+                                1792905143667,
+                                1792905143667,
+                                1792905143667,
+                                1792905143667,
+                                1793022781406,
+                                1792905143667,
+                                1792905143667
+                              ],
+                              "battery": null
+                            }
+                            -->
                         }
                     }
 
