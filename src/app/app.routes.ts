@@ -223,6 +223,45 @@ export const routes: Routes = [
 
 
     {
+        path: 'scenarios-page',
+        canActivate: [routeAccessGuard],
+        data: {
+            accessControl: {
+                permission: ['READ_SCENARIOS']
+            }
+        },
+        loadComponent: () =>
+            import('./pages/scenario/scenarios/scenarios.page').then(m => m.ScenariosPage)
+    },
+
+    {
+        path: 'scenario-page/:id',
+        canActivate: [routeAccessGuard],
+        data: {
+            accessControl: {
+                permission: ['READ_SCENARIOS', 'READ_SCENARIO']
+            }
+        },
+        loadComponent: () =>
+            import('./pages/scenario/scenario/scenario.page').then(m => m.ScenarioPage)
+    },
+
+    {
+        path: 'new-scenario',
+        canActivate: [routeAccessGuard],
+        data: {
+            accessControl: {
+                permission: ['READ_SCENARIOS', 'READ_SCENARIO', 'CREATE_SCENARIO']
+            }
+        },
+        loadComponent: () =>
+            import('./pages/scenario/scenario/scenario.page').then(m => m.ScenarioPage)
+    },
+
+
+
+
+    {
         path: 'waste-collection',
         canActivate: [routeAccessGuard],
         loadComponent: () =>

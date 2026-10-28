@@ -312,7 +312,7 @@ export class NewTimerPage {
                 ;
 
                 // this.detailsTimer = this.navigationData['details'];
-                this.timer = this.navigationData['details'];
+                this.timer = this.navigationData['details']; // ridonndante
             }
         }
         else {
