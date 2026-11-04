@@ -1,0 +1,749 @@
+<page-title
+    [title]="
+        ( currentMode === Mode.DETAILS )
+            ? (scenario.name)
+            : (
+                ( currentMode === Mode.NEW )
+                    ? 'Nuovo Scenario'
+                    : 'Modifica Scenario'
+            )
+    "
+    [hasPlusButton]="false"
+    [hasMenuButton]="( currentMode === Mode.DETAILS )"
+    [menu]="scenarioMenu"
+></page-title>
+
+
+<ng-template #scenarioMenu let-popover>
+    <div class="page-menu">
+        <div (click)="editData(); popover.hide()">
+            <svg class="svg-icon" style="position: static;">
+                <use href="#icon-407"></use>
+            </svg>
+            <div>Modifica</div>
+        </div>
+        <div (click)="duplicate(); popover.hide()">
+            <svg class="svg-icon" style="position: static;">
+                <use href="#icon-529"></use>
+            </svg>
+            <div>Duplica</div>
+        </div>
+        <div (click)="deleteScenario(); popover.hide()">
+            <svg class="svg-icon" style="">
+                <use href="#icon-102-red-trash"></use>
+            </svg>
+            <div>Elimina</div>
+        </div>
+    </div>
+</ng-template>
+<p-drawer
+    [(visible)]="openConfirmDeletion"
+    position="bottom"
+    [modal]="true"
+    [dismissible]="true"
+    [showCloseIcon]="false"
+    [style]="{
+        height: '55vh',
+        borderTopLeftRadius: '24px',
+        borderTopRightRadius: '24px'
+      }"
+>
+    <div
+        style="
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+        "
+    >
+        <div
+            style="
+                font-family: var(--page-font);
+                font-size: var(--main-font-size);
+                color: var(--color-text-2);
+            "
+        >confermi eliminazione?</div>
+        <div
+            style="margin: 2rem 0rem 5rem 0rem; height: 4rem;"
+        >
+            @if(!!isInDeleteScenarioInWaiting()) {
+                <svg
+                    class="svg-icon"
+                    style="width: 3rem;"
+                >
+                    <use href="#orologio-1-1"></use>
+                </svg>
+            }
+            @else {
+                <img
+                    src="/assets/images/trash.png"
+                    style="height: 100%"
+                >
+            }
+        </div>
+        <div>
+            <div
+                style="
+                      cursor: pointer;
+                      font-family: var(--page-font);
+                      font-size: var(--main-font-size);
+                      color: var(--theme-color);
+                      background: var(--color-red-outer-glow);
+                      border-radius: 100px;
+                      padding: 0.1rem 1rem;
+                "
+                (click)="!isInDeleteScenarioInWaiting() ? confirmDeleteScenario() : null"
+            >conferma</div>
+        </div>
+    </div>
+</p-drawer>
+
+<div style="padding: 1rem;">
+
+
+
+    @if( currentMode === Mode.DETAILS ) {
+        <div style="padding-top: 1rem;">
+
+            <div class="base-text-style row-field">
+
+                <div class="description">{{ scenario.description }}</div>
+
+            </div>
+
+            @if( !scenario.isImmediate ) {
+
+                <div class="base-text-style" style="margin-top: 2rem; font-weight: bold;">Eventi</div>
+
+
+                @for(trigger of scenario.triggers; track trigger.id) {
+
+
+                    <div class="base-text-style row-field">
+                        <div class="device-row-emoj">{{ itemEmojIcon( trigger ) }}</div>
+                        <div class="scenario trigger">
+                            <div class="scenario small-text">{{ getRoom( trigger ) }}</div>
+                            <div class="scenario name">{{ getDeviceName( trigger ) }}</div>
+                            <div class="scenario channel">{{ trigger.channel }}</div>
+                        </div>
+                        @if(( !!trigger.channelUnit )) {
+                            <div class="trigger-comand">
+                                <div>
+                                    <div class="scenario small-text">da</div>
+                                    <div class="scenario small-text">a</div>
+                                </div>
+                                <div>
+                                    <div>{{ trigger.valueBy }}</div>
+                                    <div class="scenario small-text" style="margin-left: 0px !important;">{{ trigger.channelUnit }}</div>
+                                    <div>{{ trigger.valueUpTo }}</div>
+                                    <div class="scenario small-text" style="margin-left: 0px !important;">{{ trigger.channelUnit }}</div>
+                                </div>
+                            </div>
+                        }
+                        @else {
+                            <div class="trigger-comand">
+                                @switch (trigger.channel) {
+                                    @case( CHANNEL_MAPPING.output ) {
+                                        <!-- TODO -->
+                                        <div>{{ trigger.valueAt }}</div>
+                                    }
+                                    @case( CHANNEL_MAPPING.open )
+                                    @case( CHANNEL_MAPPING.close )
+                                    {
+                                        <!-- TODO -->
+                                        <div>{{ trigger.valueAt }}</div>
+                                    }
+
+                                    @case( CHANNEL_MAPPING.mode ) {
+                                        <!-- TODO -->
+                                        <div>{{ trigger.valueAt }}</div>
+                                    }
+
+                                    @case( CHANNEL_MAPPING.fan ) {
+                                        <!-- TODO -->
+                                        <div>{{ trigger.valueAt }}</div>
+                                    }
+
+                                    @case( CHANNEL_MAPPING.battery ) {
+                                        <!-- TODO -->
+                                        <div>{{ trigger.valueAt }}</div>
+                                    }
+
+                                    @case( 'input' )
+                                    @case( 'input_0' )
+                                    @case( 'input_1' )
+                                    @case( 'input_2' )
+                                    @case( 'input_3' )
+                                    {
+                                        <div>
+                                            <switcher-component
+                                                [isReadOnly]="true"
+                                                [check]="trigger.valueAt === '1'"
+                                            ></switcher-component>
+                                        </div>
+                                    }
+
+
+                                    @case( CHANNEL_MAPPING.air_flow_vertical )
+                                    {
+                                        <!-- TODO -->
+                                        <div>{{ trigger.valueAt }}</div>
+                                    }
+
+                                    @case( CHANNEL_MAPPING.air_flow_horizontal ) {
+                                        <!-- TODO -->
+                                        <div>{{ trigger.valueAt }}</div>
+                                    }
+
+                                    @case( CHANNEL_MAPPING.air_flow_vertical_position ) {
+                                        <!-- TODO -->
+                                        <div>{{ trigger.valueAt }}</div>
+                                    }
+
+                                    @case( CHANNEL_MAPPING.air_flow_horizontal_position ) {
+                                        <!-- TODO -->
+                                        <div>{{ trigger.valueAt }}</div>
+                                    }
+
+
+                                    @case( 'airquality' ) {
+                                        <!-- TODO -->
+                                        <div>{{ trigger.valueAt }}</div>
+                                    }
+
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            }
+
+
+        </div>
+
+
+        <div>
+
+            <div class="base-text-style" style="margin-top: 2rem; font-weight: bold;">Azioni</div>
+
+
+            @for(deviceAction of scenario.actions; track deviceAction.id) {
+
+
+                <div class="base-text-style row-field">
+                    <div class="device-row-emoj">{{ itemEmojIcon( deviceAction ) }}</div>
+                    <div class="scenario trigger">
+                        <div class="scenario small-text">{{ getRoom( deviceAction ) }}</div>
+                        <div class="scenario name">{{ getDeviceName( deviceAction ) }}</div>
+                        <div class="scenario channel">{{ deviceAction.channel }}</div>
+                    </div>
+
+
+                    <div>
+                        @switch ( getAction(deviceAction) ) {
+                            @case('POWER') {
+                                <div>
+                                    <switcher-component
+                                        [isReadOnly]="true"
+                                        [check]="getActionValue( deviceAction )"
+                                    ></switcher-component>
+                                </div>
+                            }
+                            @case('SET') {
+                                <!-- TODO -->
+                                <div>{{ getActionValue( deviceAction ) }}</div>
+                            }
+                            @case('') {
+                                <!-- TODO -->
+                                <div>{{ getActionValue( deviceAction ) }}</div>
+                            }
+                        }
+                    </div>
+
+
+
+                </div>
+            }
+
+        </div>
+
+    }
+    @if(( currentMode === Mode.NEW ) || ( currentMode === Mode.EDIT )) {
+
+
+
+
+        <div style="padding-top: 1rem;">
+            <div class="base-text-style row-field">
+                <label for="scenarioName">Nome</label>
+                <input
+                    pInputText
+                    id="scenarioName"
+                    placeholder="scenario"
+                    class="fixed-value-input"
+                    [(ngModel)]="scenario.name"
+                    (ngModelChange)="setName($event)"
+                />
+            </div>
+            <div class="base-text-style row-field">
+
+                <label for="scenarioDescription">Descrizione</label>
+                <textarea
+                    rows="5"
+                    cols="30"
+                    pTextarea
+                    id="description"
+                    aria-describedby="description-help"
+                    placeholder="Descrizione"
+                    class="fixed-value-input"
+                    [(ngModel)]="scenario.description"
+                    (ngModelChange)="setDescription($event)"
+                ></textarea>
+
+
+            </div>
+        </div>
+
+        <div>
+            <div class="base-text-style row-field">
+                <div>Eventi</div>
+                <div>
+                    <switcher-component
+                        [isReadOnly]="false"
+                        [check]="!!isScenarioEvent(scenario)"
+                        (toggle)="switchScenarioEvent(scenario, $event)"
+                    ></switcher-component>
+                </div>
+            </div>
+            @if(!!isScenarioEvent(scenario)){
+
+                <div id="top-bar">
+                    <div>
+                        <input
+                            pInputText
+                            id="name"
+                            aria-describedby="name-help"
+                            placeholder="cerca"
+                            class="fixed-value-input"
+                            style="max-width: 100%"
+                            [(ngModel)]="searchTrigger"
+                            (ngModelChange)="searchTriggerText$.next($event)"
+                        />
+                    </div>
+                    <div>
+                        <p-button
+                            label="cerca"
+                            type="submit"
+                            [rounded]="true"
+                            [size]="'small'"
+                            [style]="{padding: '0px 20px 0px 20px'}"
+                            (click)="searchTriggers()"
+                        ></p-button>
+                    </div>
+                </div>
+
+
+                <div class="event-block">
+
+
+                    @if(!!isDeviceLoading()) {
+                        <div class="orologio-attesa">
+                            <svg style="width: 2rem; height: 2rem">
+                                <use href="#orologio-1-1"></use>
+                            </svg>
+                            <div class="heartbeat-flash">Caricamento dati</div>
+                        </div>
+                    }
+                    @else {
+                        @for(device of visibleTriggers(); track device.id) {
+
+
+                            <div class="base-text-style row-field">
+                                <div>
+                                    <p-checkbox
+                                        (onChange)="toggleOwnedDevice(device, $event)"
+                                        (click)="$event.stopPropagation();"
+                                        [binary]="true"
+                                        inputId="size_small"
+                                        name="size"
+                                        value="Small"
+                                        size="small"
+                                        style="margin: 0rem 0.75rem 0rem 0rem;"
+                                    />
+                                </div>
+                                <div class="device-row-emoj">{{ itemEmojIcon( device ) }}</div>
+                                <div class="scenario trigger">
+                                    <div class="scenario small-text">{{ device.room }}</div>
+                                    <div class="scenario name">{{ device.name }}</div>
+                                    <div class="scenario channel">{{ device.channel }}</div>
+                                </div>
+                                @if( device.channelUnit !== '' ) {
+                                    <div class="trigger-comand">
+                                        <div>
+                                                <div class="scenario small-text">da</div>
+                                                <div class="scenario small-text">a</div>
+                                        </div>
+                                        <div>
+                                            <div>
+                                                <input
+                                                    pInputText
+                                                    id="name"
+                                                    aria-describedby="name-help"
+                                                    placeholder="cerca"
+                                                    class="fixed-value-input"
+                                                    style="max-width: 15rem; padding: 0.5rem;"
+                                                    [(ngModel)]="device.valueBy"
+                                                />
+                                            </div>
+                                            <div class="scenario small-text" style="margin-left: 0px !important;">{{ device.channelUnit }}</div>
+                                            <div>
+                                                <input
+                                                    pInputText
+                                                    id="name"
+                                                    aria-describedby="name-help"
+                                                    placeholder="cerca"
+                                                    class="fixed-value-input"
+                                                    style="max-width: 15rem; padding: 0.5rem;"
+                                                    [(ngModel)]="device.valueUpTo"
+                                                />
+                                            </div>
+                                            <div class="scenario small-text" style="margin-left: 0px !important;">{{ device.channelUnit }}</div>
+                                        </div>
+                                    </div>
+                                }
+                                @else {
+                                    <div class="trigger-comand">
+                                        @switch (device.channel) {
+                                            @case( CHANNEL_MAPPING.output ) {
+                                                <p-select
+                                                    [options]="[{name: 'accensione', code: true}, {name: 'spegnimento', code: false}]"
+                                                    [(ngModel)]="device.valueAt"
+                                                    (ngModelChange)="selectedOutputEvent(device)"
+                                                    optionLabel="name"
+                                                    placeholder="seleziona evento"
+                                                    class="w-full md:w-56"
+                                                />
+                                            }
+                                            @case( CHANNEL_MAPPING.open )
+                                            @case( CHANNEL_MAPPING.close )
+                                            {
+                                                <p-select
+                                                    [options]="[{name: 'avvio', code: true}, {name: 'termine', code: false}]"
+                                                    [(ngModel)]="device.valueAt"
+                                                    (ngModelChange)="selectedOutputEvent(device)"
+                                                    optionLabel="name"
+                                                    placeholder="seleziona evento"
+                                                    class="w-full md:w-56"
+                                                />
+                                            }
+
+                                            @case( CHANNEL_MAPPING.mode ) {
+                                                <p-select
+                                                    [options]="[
+                                                        {name: 'cold', code: 'cold'},
+                                                        {name: 'hot', code: 'hot'},
+                                                        {name: 'wet', code: 'wet'},
+                                                        {name: 'wind', code: 'wind'},
+                                                        {name: 'auto', code: 'auto'}
+                                                    ]"
+                                                    [(ngModel)]="device.valueAt"
+                                                    (ngModelChange)="selectedOutputEvent(device)"
+                                                    optionLabel="name"
+                                                    placeholder="seleziona evento"
+                                                    class="w-full md:w-56"
+                                                />
+                                            }
+
+                                            @case( CHANNEL_MAPPING.fan ) {
+                                                <p-select
+                                                    [options]="[
+                                                        {name: 'strong', code: 'strong'},
+                                                        {name: 'high', code: 'high'},
+                                                        {name: 'mid_high', code: 'mid_high'},
+                                                        {name: 'mid', code: 'mid'},
+                                                        {name: 'mid_low', code: 'mid_low'},
+                                                        {name: 'low', code: 'low'},
+                                                        {name: 'mute', code: 'mute'},
+                                                        {name: 'auto', code: 'auto'}
+                                                    ]"
+                                                    [(ngModel)]="device.valueAt"
+                                                    (ngModelChange)="selectedOutputEvent(device)"
+                                                    optionLabel="name"
+                                                    placeholder="seleziona evento"
+                                                    class="w-full md:w-56"
+                                                />
+                                            }
+
+                                            @case( CHANNEL_MAPPING.battery ) {
+                                                <p-select
+                                                    [options]="[
+                                                        {name: 'scarica', code: 'low'},
+                                                        {name: 'media', code: 'middle'},
+                                                        {name: 'carica', code: 'high'}
+                                                    ]"
+                                                    [(ngModel)]="device.valueAt"
+                                                    (ngModelChange)="selectedOutputEvent(device)"
+                                                    optionLabel="name"
+                                                    placeholder="seleziona evento"
+                                                    class="w-full md:w-56"
+                                                />
+                                            }
+
+                                            @case( 'input' )
+                                            @case( 'input_0' )
+                                            @case( 'input_1' )
+                                            @case( 'input_2' )
+                                            @case( 'input_3' )
+                                            {
+                                                <p-select
+                                                    [options]="[
+                                                        {name: 'attivo', code: true},
+                                                        {name: 'disattivo', code: false}
+                                                    ]"
+                                                    [(ngModel)]="device.valueAt"
+                                                    (ngModelChange)="selectedOutputEvent(device)"
+                                                    optionLabel="name"
+                                                    placeholder="seleziona evento"
+                                                    class="w-full md:w-56"
+                                                />
+                                            }
+
+
+                                            @case( CHANNEL_MAPPING.air_flow_vertical )
+                                            {
+                                                <p-select
+                                                    [options]="[
+                                                        {name: 'alto - basso', code: '1'},
+                                                        {name: 'alto', code: '2'},
+                                                        {name: 'basso', code: '3'}
+                                                    ]"
+                                                    [(ngModel)]="device.valueAt"
+                                                    (ngModelChange)="selectedOutputEvent(device)"
+                                                    optionLabel="name"
+                                                    placeholder="seleziona evento"
+                                                    class="w-full md:w-56"
+                                                />
+                                            }
+
+                                            @case( CHANNEL_MAPPING.air_flow_horizontal ) {
+                                                <p-select
+                                                    [options]="[
+                                                        {name: 'sinistra - destra', code: '1'},
+                                                        {name: 'sinistra', code: '2'},
+                                                        {name: 'centro', code: '3'},
+                                                        {name: 'destra', code: '4'}
+                                                    ]"
+                                                    [(ngModel)]="device.valueAt"
+                                                    (ngModelChange)="selectedOutputEvent(device)"
+                                                    optionLabel="name"
+                                                    placeholder="seleziona evento"
+                                                    class="w-full md:w-56"
+                                                />
+                                            }
+
+                                            @case( CHANNEL_MAPPING.air_flow_vertical_position ) {
+                                                <p-select
+                                                    [options]="[
+                                                        {name: 'alto', code: '1'},
+                                                        {name: 'centro - alto', code: '2'},
+                                                        {name: 'centrale', code: '3'},
+                                                        {name: 'centro - basso', code: '4'},
+                                                        {name: 'basso', code: '5'}
+                                                    ]"
+                                                    [(ngModel)]="device.valueAt"
+                                                    (ngModelChange)="selectedOutputEvent(device)"
+                                                    optionLabel="name"
+                                                    placeholder="seleziona evento"
+                                                    class="w-full md:w-56"
+                                                />
+                                            }
+
+                                            @case( CHANNEL_MAPPING.air_flow_horizontal_position ) {
+                                                <p-select
+                                                    [options]="[
+                                                        {name: 'sinistra', code: '1'},
+                                                        {name: 'centro - sinistra', code: '2'},
+                                                        {name: 'centrale', code: '3'},
+                                                        {name: 'centro - destra', code: '4'},
+                                                        {name: 'destra', code: '5'}
+                                                    ]"
+                                                    [(ngModel)]="device.valueAt"
+                                                    (ngModelChange)="selectedOutputEvent(device)"
+                                                    optionLabel="name"
+                                                    placeholder="seleziona evento"
+                                                    class="w-full md:w-56"
+                                                />
+                                            }
+
+
+                                            @case( 'airquality' ) {
+                                                <p-select
+                                                    [options]="[
+                                                        {name: 'great', code: 'great'},
+                                                        {name: 'good', code: 'good'},
+                                                        {name: 'middle', code: 'middle'},
+                                                        {name: 'bad', code: 'bad'},
+                                                        {name: 'verybad', code: 'verybad'},
+                                                        {name: 'veryverybad', code: 'veryverybad'}
+                                                    ]"
+                                                    [(ngModel)]="device.valueAt"
+                                                    (ngModelChange)="selectedOutputEvent(device)"
+                                                    optionLabel="name"
+                                                    placeholder="seleziona evento"
+                                                    class="w-full md:w-56"
+                                                />
+                                            }
+
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+
+                </div>
+
+            }
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <div class="base-text-style row-field">
+                <div>Azioni</div>
+            </div>
+            <div id="top-bar">
+                <div>
+                    <input
+                        pInputText
+                        id="name"
+                        aria-describedby="name-help"
+                        placeholder="cerca"
+                        class="fixed-value-input"
+                        style="max-width: 100%"
+                        [(ngModel)]="searchAction"
+                        (ngModelChange)="searchActionText$.next($event)"
+                    />
+                </div>
+                <div>
+                    <p-button
+                        label="cerca"
+                        type="submit"
+                        [rounded]="true"
+                        [size]="'small'"
+                        [style]="{padding: '0px 20px 0px 20px'}"
+                        (click)="searchActions()"
+                    ></p-button>
+                </div>
+            </div>
+
+
+            <div class="event-block">
+
+
+                @if(!!isDeviceLoading()) {
+                    <div class="orologio-attesa">
+                        <svg style="width: 2rem; height: 2rem">
+                            <use href="#orologio-1-1"></use>
+                        </svg>
+                        <div class="heartbeat-flash">Caricamento dati</div>
+                    </div>
+                }
+                @else {
+                    @for(device of visibleActions(); track device.id) {
+
+
+                        <div class="base-text-style row-field">
+                            <div>
+                                <p-checkbox
+                                    (onChange)="toggleOwnedActionDevice(device, $event)"
+                                    (click)="$event.stopPropagation();"
+                                    [binary]="true"
+                                    inputId="size_small"
+                                    name="size"
+                                    value="Small"
+                                    size="small"
+                                    style="margin: 0rem 0.75rem 0rem 0rem;"
+                                />
+                            </div>
+                            <div class="device-row-emoj">{{ itemEmojIcon( device ) }}</div>
+                            <div class="scenario trigger">
+                                <div class="scenario small-text">{{ device.room }}</div>
+                                <div class="scenario name">{{ device.name }}</div>
+                                <div class="scenario channel">{{ device.channel }}</div>
+                            </div>
+
+
+                            <div>
+                                @switch (device.channelType) {
+                                    @case('boolean') {
+                                        <div>
+                                            <switcher-component
+                                                [isReadOnly]="false"
+                                                [check]="!!device.value"
+                                                (toggle)="device.value = !!$event"
+                                            ></switcher-component>
+                                        </div>
+                                    }
+                                    @case('number') {
+                                        <div>
+                                            <input
+                                                pInputText
+                                                id="number-value-{{ device.id }}"
+                                                aria-describedby="name-help"
+                                                placeholder="valore"
+                                                class="fixed-value-input"
+                                                style="max-width: 15rem; padding: 0.5rem;"
+                                                [(ngModel)]="device.value"
+                                                [type]="'number'"
+                                            />
+                                        </div>
+                                    }
+                                    @case('string') {
+                                        <div>
+                                            <input
+                                                pInputText
+                                                id="text-value-{{ device.id }}"
+                                                aria-describedby="name-help"
+                                                placeholder="valore"
+                                                class="fixed-value-input"
+                                                style="max-width: 15rem; padding: 0.5rem;"
+                                                [(ngModel)]="device.value"
+                                            />
+                                        </div>
+                                    }
+                                }
+                            </div>
+
+
+
+                        </div>
+                    }
+                }
+
+            </div>
+        </div>
+
+
+
+        <div id="edit-button">
+            @if (!!inWaiting()) {
+                <svg class="svg-icon inside-button" style="position: static; top: 1rem; left: 1.5rem;">
+                    <use href="#orologio-1-1"></use>
+                </svg>
+            }
+            <p-button
+                label="{{ !!inWaiting() ? 'in attesa' : 'conferma' }}"
+                type="submit"
+                [disabled]="!!inWaiting()"
+                [rounded]="true"
+                [size]="'small'"
+                [style]="{padding: '0px 20px 0px '+ ( !inWaiting() ? '20px' : '32px' ), marginTop: '2rem'}"
+                (click)="saveScenario()"
+            ></p-button>
+        </div>
+
+    }
+
+
+
+</div>
+

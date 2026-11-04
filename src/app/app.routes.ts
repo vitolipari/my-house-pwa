@@ -42,6 +42,9 @@ export const routes: Routes = [
         ]
     },
 
+
+
+
     {
         path: 'dashboard',
         canActivate: [routeAccessGuard],
@@ -56,6 +59,10 @@ export const routes: Routes = [
         loadComponent: () =>
             import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage)
     },
+
+
+
+
 
     {
         path: 'users-page',
@@ -72,6 +79,10 @@ export const routes: Routes = [
             import('./pages/users-page/users.page').then(m => m.UsersPage)
     },
 
+
+
+
+    // ------------------------------------------------------------------------
     {
         path: 'devices-page',
         canActivate: [routeAccessGuard],
@@ -97,18 +108,6 @@ export const routes: Routes = [
     },
 
     {
-        path: 'matter-bridge',
-        canActivate: [routeAccessGuard],
-        data: {
-            accessControl: {
-                permission: 'ADD_HOUSE_DEVICES'
-            }
-        },
-        loadComponent: () =>
-            import('./pages/matter-bridge/matter-bridge.page').then(m => m.MatterBridgePage)
-    },
-
-    {
         path: 'device-details/:id',
         canActivate: [routeAccessGuard],
         data: {
@@ -120,6 +119,25 @@ export const routes: Routes = [
             import('./pages/device-details/device-details.page').then(m => m.DeviceDetailsPage)
     },
 
+
+
+
+
+    // ------------------------------------------------------------------------
+    {
+        path: 'matter-bridge',
+        canActivate: [routeAccessGuard],
+        data: {
+            accessControl: {
+                permission: 'ADD_HOUSE_DEVICES'
+            }
+        },
+        loadComponent: () =>
+            import('./pages/matter-bridge/matter-bridge.page').then(m => m.MatterBridgePage)
+    },
+
+
+    // ------------------------------------------------------------------------
     {
         path: 'rooms-page',
         canActivate: [routeAccessGuard],
@@ -157,6 +175,12 @@ export const routes: Routes = [
             import('./pages/room/room.page').then(m => m.RoomPage)
     },
 
+
+
+
+
+
+    // ------------------------------------------------------------------------
     {
         path: 'group-page/:id',
         canActivate: [routeAccessGuard],
@@ -182,6 +206,12 @@ export const routes: Routes = [
     },
 
 
+
+
+
+
+
+    // ------------------------------------------------------------------------
     {
         path: 'timers-page',
         canActivate: [routeAccessGuard],
@@ -222,6 +252,10 @@ export const routes: Routes = [
 
 
 
+
+
+
+    // ------------------------------------------------------------------------
     {
         path: 'scenarios-page',
         canActivate: [routeAccessGuard],
@@ -239,7 +273,8 @@ export const routes: Routes = [
         canActivate: [routeAccessGuard],
         data: {
             accessControl: {
-                permission: ['READ_SCENARIOS', 'READ_SCENARIO']
+                permission: ['READ_SCENARIOS', 'READ_SCENARIO'],
+                isReadOnly: true
             }
         },
         loadComponent: () =>
@@ -261,6 +296,8 @@ export const routes: Routes = [
 
 
 
+
+    // ------------------------------------------------------------------------
     {
         path: 'waste-collection',
         canActivate: [routeAccessGuard],
@@ -268,6 +305,9 @@ export const routes: Routes = [
             import('./pages/waste-collection/waste-collection.page').then(m => m.WasteCollectionPage)
     },
 
+
+
+    // ------------------------------------------------------------------------
     {
         path: 'admin',
         canActivate: [routeAccessGuard],
@@ -301,6 +341,11 @@ export const routes: Routes = [
         ]
     },
 
+
+
+
+
+    // ------------------------------------------------------------------------
     {
         path: 'unauthorized',
         loadComponent: () =>

@@ -1,0 +1,128 @@
+<page-title
+    [title]="'Scenari'"
+    [hasPlusButton]="true"
+    [iconID]="'icon-540'"
+    (plusButtonClick)="addNewScenario()"
+></page-title>
+
+
+
+
+<div>
+
+    @if(!!isInWaiting()) {
+        <div>caricamento...</div>
+    }
+    @else {
+
+        <div id="top-bar">
+            @if(!!isInSelection()) {
+                <div id="delete-button">
+                    @if (!!isInDeleteMultiScenariosInWaiting()) {
+                        <svg
+                            class="svg-icon inside-button"
+                            style="position: static; top: 0.3rem; left: 1.5rem;"
+                        >
+                            <use href="#orologio-1-1"></use>
+                        </svg>
+                    }
+                    @else {
+                        <svg
+                            class="svg-icon inside-button"
+                            style="position: static; top: 0.4rem; left: 1.8rem;"
+                        >
+                            <use href="#icon-102"></use>
+                        </svg>
+                    }
+                    <p-button
+                        label="{{ !!isInDeleteMultiScenariosInWaiting() ? 'in attesa' : 'elimina' }}"
+                        type="submit"
+                        [disabled]="!!isInDeleteMultiScenariosInWaiting()"
+                        [rounded]="true"
+                        [size]="'small'"
+                        [style]="{
+                            padding: '0px 20px 0px '+ ( !isInDeleteMultiScenariosInWaiting() ? '20px' : '32px' ),
+                            background: 'var(--dark-red-color)',
+                            border: 'none',
+                            paddingLeft: '2rem',
+                            minWidth: '6rem'
+                        }"
+                        (click)="deleteMultiScenarios()"
+                    ></p-button>
+                </div>
+            }
+            @else {
+                <div>
+                    <input
+                        pInputText
+                        id="name"
+                        aria-describedby="name-help"
+                        placeholder="cerca"
+                        class="fixed-value-input"
+                        [(ngModel)]="searchName"
+                    />
+                </div>
+                <div>
+                    <p-button
+                        label="{{ !!isInSearchWaiting() ? 'in attesa' : 'cerca' }}"
+                        type="submit"
+                        [disabled]="!!isInSearchWaiting()"
+                        [rounded]="true"
+                        [size]="'small'"
+                        [style]="{padding: '0px 20px 0px '+ ( !isInSearchWaiting() ? '20px' : '32px' )}"
+                        (click)="searchScenarios()"
+                    ></p-button>
+                </div>
+            }
+        </div>
+
+        @for (scenario of scenarios(); track scenario.id) {
+
+            <div
+                class="scenario-block"
+                (longPress)="onLongPress(scenarios)"
+                (click)="gotoScenarioPage(scenario)"
+            >
+                @if(!!isInSelection()) {
+                    <div class="scenario-block-section selection">
+                            <p-checkbox
+                                (onChange)="toggleSelctedScenarios(scenario, $event)"
+                                (click)="stopPropagation($event)"
+                                [binary]="true"
+                                inputId="size_small"
+                                name="size"
+                                value="Small"
+                                size="small"
+                                style="margin: 0rem 0.75rem 0rem 0rem;"
+                            />
+                    </div>
+                }
+                <div class="scenario-block-section first">
+                    <div class="scenario-name">{{ scenario.name }}</div>
+                    <div class="scenario-description">{{ scenario.description }}</div>
+                </div>
+
+
+                <div class="scenario-block-section action">
+                    @if( !!isScenarioInWaiting( scenario ) ) {
+                        <svg class="svg-icon inside-device-list-status" style="position: static; top: 1.1rem; left: 3.8rem;">
+                            <use href="#orologio-1-1"></use>
+                        </svg>
+                    }
+                    @else {
+                        <switcher-component
+                            [check]="!!scenario.enabled"
+                            [isReadOnly]="false"
+                            [style]="'transform: rotate(270deg);'"
+                            [inWait]="!!isScenarioInWaiting( scenario )"
+                            (toggle)="toggleEnableScenario(scenario, $event)"
+                        ></switcher-component>
+                    }
+                </div>
+            </div>
+        }
+    }
+
+
+
+</div>

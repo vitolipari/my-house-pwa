@@ -1,20 +1,3 @@
-export type ScenarioTriggerType = {
-    id: number;
-    channel: {id: number; name: string; device?: number; };
-    eventValueFrom: string | null;
-    eventValueUpTo: string | null;
-    eventValueAt: string | null;
-
-
-}
-
-// azione di uno scenario: comando (POWER:ON, SET:50, ...) sul canale del dispositivo; la PWA indica il canale con name
-// (chiave del canale nel DeviceType), il Core ne ricava l'id di device_channels
-export type ScenarioDeviceAction = {
-    device: number;
-    channel: {id: number; name: string; };
-    action: string;
-}
 
 export type ScenarioType = {
     id: number;
@@ -22,8 +5,8 @@ export type ScenarioType = {
     description: string;
     enabled: boolean;
     isImmediate: boolean;
-    triggers: ScenarioTriggerType[];
-    actions: ScenarioDeviceAction[];
+    triggers: EventTriggerChannelDeviceType[];
+    actions: ActionChannelDeviceType[];
 }
 
 
@@ -43,3 +26,58 @@ export type ScenarioSearchParamsType = {
     device_action?: number;
     is_immediate?: number;
 }
+
+
+export type EventTriggerChannelDeviceType = {
+    id: number;
+    device: number;
+    name: string;
+    isOwned: boolean;
+    channel: string;
+    deviceEmojIcon: string;
+    channelSvgIcon: string;
+    channelUnit: string;
+    channelType: string;
+    room: string;
+    valueBy?: number | string | null
+    valueUpTo?: number | string | null
+    valueAt?: number | string | null
+};
+
+export type ActionChannelDeviceType = {
+    id: number;
+    device: number;
+    name: string;
+    isOwned: boolean;
+    deviceEmojIcon: string;
+    channelSvgIcon: string;
+    channelUnit: string;
+    channelType: string;
+    room: string;
+    channel: string;
+    value: number | string | boolean;
+}
+
+
+export type ScenarioDTOType = {
+    "id": number;
+    "name": string;
+    "description": string;
+    "enabled": boolean;
+    "isImmediate": boolean;
+    "triggers":
+        {
+            "device": number;
+            "valueAt": number | string | boolean | null;
+            "valueBy": number | string | boolean | null;
+            "valueUpTo": number | string | boolean | null;
+            "channel": string;
+        }[];
+    "actions":
+        {
+            "device": number;
+            "value": number | string | boolean | null;
+            "channel": string;
+        }[]
+};
+

@@ -1,0 +1,76 @@
+::ng-deep.switch-component-container {
+    margin-right: 0rem !important;
+}
+
+#top-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    /*align-items: center;*/
+    align-items: first baseline;
+    width: 100%;
+    min-width: 100%;
+    margin-bottom: 1rem;
+    padding: 0rem 1rem;
+}
+
+
+#delete-button {
+    align-items: inherit;
+    justify-content: flex-end;
+    display: flex;
+    flex: 1;
+}
+
+
+
+
+.scenario-block {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    align-items: center;
+    background: var(--color-background-3);
+    border-radius: 6px;
+    margin: 0.5rem auto;
+    min-width: 90vw;
+    width: 100%;
+    max-width: 95vw;
+    padding: 0.6rem;
+
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+}
+
+.scenario-block-section {
+
+}
+
+.scenario-block-section.first {
+
+}
+
+.scenario-name {
+    font-weight: bold;
+}
+
+.scenario-description {
+    font-size: var(--tiny-font-size);
+    font-family: var(--page-font);
+    color: var(--color-text-2);
+    width: 100%;
+    white-space: wrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 1rem;
+}
+
+.scenario-block-section {
+
+}
+
+.scenario-block-section.action {
+
+}
+

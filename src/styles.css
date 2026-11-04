@@ -380,6 +380,13 @@ A > DIV {
 }
 
 
+.description {
+    font-family: var(--reading-font);
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+}
+
+
 
 .heartbeat-flash {
     /*background: #1677ff;*/

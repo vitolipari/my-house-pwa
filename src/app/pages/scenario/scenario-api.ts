@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {HttpClient, HttpParams} from '@angular/common/http';
-import {ScenarioSearchParamsType, ScenarioType} from './scenario.models';
+import {ScenarioDTOType, ScenarioSearchParamsType, ScenarioType} from './scenario.models';
 
 
 @Injectable({providedIn: 'root'})
@@ -55,6 +55,19 @@ export class ScenarioApiService {
         }
         return this.http.get<ScenarioType[]>(`${this.baseUrl}/scenarios`, { params });
 
+    }
+
+    createNewScenario(scenario: ScenarioDTOType): Observable<any> {
+        return this.http.post<any>(`${this.baseUrl}/scenario`, scenario);
+    }
+
+    enableScenarios( scenario: ScenarioType ): Observable<any> {
+        return this.http.put<any>(`${this.baseUrl}/scenario/${ scenario.id }`, scenario);
+    }
+
+    deleteScenarios(ids: number[]): Observable<number[]> {
+        let url = `${this.baseUrl}/scenarios?ids=${ ids.join(',') }`;
+        return this.http.delete<number[]>(url);
     }
 
 
