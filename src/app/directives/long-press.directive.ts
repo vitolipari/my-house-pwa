@@ -3,7 +3,7 @@ import {Directive, ElementRef, EventEmitter, HostListener, inject, Input, OnDest
 /**
  * Pressione prolungata su un elemento (immagini delle stanze, righe dei gruppi): emette `longPress` dopo `longPressDuration` ms
  * e vibra (Android con Vibration API, iOS con il feedback aptico dello switch di Safari).
- * Il click che segue il rilascio viene bloccato, così il contenitore non lo riceve.
+ * Il click che segue il rilascio viene bloccato, così non lo ricevono né il contenitore né i (click) dello stesso elemento.
  */
 @Directive({
     selector: '[longPress]',
@@ -36,6 +36,8 @@ export class LongPressDirective implements OnDestroy {
         img.style.setProperty('-webkit-user-drag', 'none');
         img.style.setProperty('user-select', 'none');
         img.style.setProperty('-webkit-user-select', 'none');
+        // in cattura: il click si ferma prima dei (click) dello stesso elemento, che stopPropagation non blocca
+        img.addEventListener('click', this.onClick, { capture: true });
     }
 
     @HostListener('pointerdown', ['$event'])
@@ -71,12 +73,12 @@ export class LongPressDirective implements OnDestroy {
         this.clearTimer();
     }
 
-    // Dopo un long press il click del rilascio non deve arrivare al contenitore (es. navigazione)
-    @HostListener('click', ['$event'])
-    onClick(event: MouseEvent) {
+    // Dopo un long press il click del rilascio non deve arrivare né al contenitore né ai (click) dello stesso elemento (es. navigazione).
+    // Su touch di solito il click non arriva: fired si azzera al pointerdown successivo.
+    private onClick = (event: MouseEvent) => {
         if (this.fired) {
             event.preventDefault();
-            event.stopPropagation();
+            event.stopImmediatePropagation();
             this.fired = false;
         }
     }
@@ -89,6 +91,7 @@ export class LongPressDirective implements OnDestroy {
 
     ngOnDestroy(): void {
         this.clearTimer();
+        this.host.nativeElement.removeEventListener('click', this.onClick, { capture: true });
     }
 
     private clearTimer() {
