@@ -9,8 +9,10 @@ import {
     DeviceType,
     DeviceTaxonomy,
     DiscoveryResult,
-    MatterBridgeStatus
+    MatterBridgeStatus, GroupType, ZoneType
 } from './devices.models';
+import {FullTimerType} from '../timer/timer.models';
+import {ScenarioType} from '../scenario/scenario.models';
 
 @Injectable({providedIn: 'root'})
 export class DeviceApiService {
@@ -93,5 +95,25 @@ export class DeviceApiService {
     // azione TIPO:VALORE su un canale dell'attuatore; il canale è la chiave del DeviceType (es. output)
     deviceAction(deviceId: number | string, channel: string, action: string): Observable<unknown> {
         return this.http.put<unknown>(`${this.baseUrl}/device/${deviceId}/action`, {channel, action});
+    }
+
+    deleteDevices(param: (number | string)[]): Observable<any> {
+        return this.http.delete<any>(`${this.baseUrl}/devices?ids=${ param.join(',') }`);
+    }
+
+    getAllTimersByDeviceId(deviceId: number): Observable<FullTimerType[]> {
+        return this.http.get<FullTimerType[]>(`${this.baseUrl}/device/timers/${deviceId}`);
+    }
+
+    getAllScenarioByDeviceId(deviceId: number): Observable<ScenarioType[]> {
+        return this.http.get<ScenarioType[]>(`${this.baseUrl}/device/scenarios/${deviceId}`);
+    }
+
+    getAllGroupByDeviceId(deviceId: number): Observable<GroupType[]> {
+        return this.http.get<GroupType[]>(`${this.baseUrl}/device/groups/${deviceId}`);
+    }
+
+    getRoomDeviceId(deviceId: number): Observable<ZoneType> {
+        return this.http.get<ZoneType>(`${this.baseUrl}/device/rooms/${deviceId}`);
     }
 }

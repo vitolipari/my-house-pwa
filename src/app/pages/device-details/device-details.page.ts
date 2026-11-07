@@ -1,34 +1,73 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {AccessControlData} from '../../models/access-control.models';
-import {DeviceType} from '../devices/devices.models';
-import {JsonPipe} from '@angular/common';
+import {DeviceType, GroupType, ZoneType} from '../devices/devices.models';
+import {DecimalPipe, JsonPipe} from '@angular/common';
 import {Drawer} from 'primeng/drawer';
 import {PageTitleComponent} from '../../components/page-title.component/page-title.component';
+import {DeleteConfirmComponent} from '../../components/delete-confirm-component/delete-confirm-component';
+import {PageMenu} from '../../components/page-menu/page-menu';
+import {DeviceApiService} from '../devices/device-api';
+import {emoj} from '../../utils/string-utils';
+import {Slider} from 'primeng/slider';
+import {FormsModule} from '@angular/forms';
+import {EventTimerType, FullTimerType} from '../timer/timer.models';
+import {Checkbox} from 'primeng/checkbox';
+import {SwitcherComponent} from '../../components/switcher/switcher.component';
+import {italianHolidays} from '../../utils/time-utils';
+import moment from 'moment/moment';
+import {firstValueFrom} from 'rxjs';
+import {ScenarioApiService} from '../scenario/scenario-api';
+import {ScenarioType} from '../scenario/scenario.models';
 
 @Component({
     selector: 'app-device-details.page',
     imports: [
-        JsonPipe,
         Drawer,
-        PageTitleComponent
+        PageTitleComponent,
+        DeleteConfirmComponent,
+        PageMenu,
+        Slider,
+        FormsModule,
+        Checkbox,
+        DecimalPipe,
+        SwitcherComponent,
+        // Checkbox,
+        // SwitcherComponent
     ],
     templateUrl: './device-details.page.html',
     styleUrl: './device-details.page.css',
     standalone: true
 })
-export class DeviceDetailsPage {
+export class DeviceDetailsPage implements OnInit {
 
 
+    timers: (FullTimerType & { sectors: number[][]; arcs: string[]; })[] = [];
+    circle = {
+        x: 50,
+        y: 50,
+        // 45 e non 50: con stroke-width 10 metà del tratto uscirebbe dal viewBox 0 0 100 100
+        r: 40,
+        width: 15
+    };
+    protected scenarios: (ScenarioType & { running: boolean; })[] = [];
+    protected groups: GroupType[] = [];
+    protected room: ZoneType = null as unknown as ZoneType;
 
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
+    private readonly deviceApi = inject(DeviceApiService);
+    readonly scenarioApi: ScenarioApiService = inject(ScenarioApiService);
 
     readonly data = this.router.currentNavigation()?.extras.state as { from: string; device?: DeviceType; } | undefined;
-    readonly device = this.data?.device;
+    readonly device: DeviceType = this.data?.device as unknown as DeviceType;
     readonly deviceId = this.route.snapshot.paramMap.get('id');
     protected openConfirmDeletion: boolean = false;
     protected readonly isInDeleteDeviceInWaiting = signal<boolean>(false);
+    protected readonly timersWaiting = signal<boolean>(true);
+    protected readonly scenariosWaiting = signal<boolean>(true);
+    protected readonly groupWaiting = signal<boolean>(true);
+    protected readonly roomWaiting = signal<boolean>(true);
+
 
     constructor() {
         // controllo se device é stato passato oppure si proviene da url
@@ -39,10 +78,216 @@ export class DeviceDetailsPage {
 
     }
 
+    ngOnInit() {
+
+
+        if(!!this.device) {
+            // device presente
+        }
+        else {
+            if ( !!this.router.currentNavigation()?.extras.state?.['device'] ) {
+                // device passato da navigazione
+            }
+            else {
+                // device non passato da navigazione
+
+                if( !!this.route.snapshot.params['id'] ) {
+
+                }
+                else {
+                    // anomalia
+                }
+
+            }
+        }
+
+        firstValueFrom(this.deviceApi.getAllGroupByDeviceId(parseInt(''+ this.deviceId)))
+            .then((groups: GroupType[]) => {
+                this.groups = groups;
+                this.groupWaiting.set(false);
+            })
+
+        firstValueFrom(this.deviceApi.getRoomDeviceId(parseInt(''+ this.deviceId)))
+            .then((room: ZoneType) => {
+                this.room = room;
+                this.roomWaiting.set(false);
+            })
+
+
+        firstValueFrom(this.deviceApi.getAllScenarioByDeviceId(parseInt(''+ this.deviceId)))
+            .then((scenarios: ScenarioType[]) => {
+
+                // this.scenarios = scenarios as (ScenarioType & { running: boolean; })[];
+
+                firstValueFrom(this.scenarioApi.getRunningScenarios())
+                    .then((runningScenariosIDs: number[]) => {
+
+                        this.scenarios =
+                            scenarios
+                                .map((sc: ScenarioType) => {
+                                    if( runningScenariosIDs.includes( sc.id ) ) {
+                                        (sc as (ScenarioType & { running: boolean; })).running = true;
+                                    }
+                                    return sc as (ScenarioType & { running: boolean; });
+                                })
+                        ;
+
+                        console.log(this.scenarios);
+                        this.scenariosWaiting.set(false);
+
+
+                    })
+                    .catch((error) => {
+                        console.log('errore in getRunningScenarios');
+                        console.error(error);
+                        return null;
+                    })
+                ;
+
+            })
+        ;
+
+        this.deviceApi.getAllTimersByDeviceId(parseInt(''+ this.deviceId))
+            .subscribe((timers: FullTimerType[]) => {
+
+
+
+
+
+                const list = timers as (FullTimerType & { sectors: number[][]; arcs: string[]; })[];
+                this.timers =
+                list
+                    .map((fullDataTimer: (FullTimerType & { sectors: number[][]; arcs: string[]; })) => {
+
+                        // il Core non manda arcs: senza inizializzarlo la push fallisce
+                        fullDataTimer.arcs = [];
+
+                        fullDataTimer.sectors =
+                            fullDataTimer.slots
+                                .map((slot: EventTimerType) => {
+
+                                    let isHolidayToday: boolean = italianHolidays(moment().year()).includes(moment().format('YYYY-MM-DD'));
+                                    if(
+                                        moment(slot.trigger_time, 'HHmm') <= moment()
+                                        && moment(slot.slot_until, 'HHmm') >= moment()
+                                        && !!fullDataTimer.weekDays[moment().isoWeekday() -1]
+                                        && ( !!isHolidayToday ? !!fullDataTimer.isHolidays : true )
+                                        && !!fullDataTimer.enabled
+                                    ) {
+                                        fullDataTimer.isRunning = true
+                                    }
+
+                                    // console.log('controllo fullDataTimer '+ fullDataTimer.id +' '+ fullDataTimer.name );
+                                    // console.log('dopo il trigger '+ slot.trigger_time +' '+ moment().format('HHmm') +' '+ (moment(slot.trigger_time, 'HHmm') <= moment()));
+                                    // console.log( 'entro la fine '+ (moment(slot.slot_until, 'HHmm') >= moment()));
+                                    // console.log( 'questo giorno '+ !!fullDataTimer.weekDays[moment().isoWeekday() -1]);
+                                    // console.log( 'in festa se festa '+ ( !!isHolidayToday ? !!fullDataTimer.isHolidays : true ));
+                                    // console.log( 'acceso '+!!fullDataTimer.enabled);
+
+
+
+                                    return slot;
+                                })
+                                .map((slot: EventTimerType) => {
+
+                                    let startH = parseInt((''+ slot.trigger_time).split('')[0] + (''+ slot.trigger_time).split('')[1]);
+                                    let startM  = parseInt((''+ slot.trigger_time).split('')[2] + (''+ slot.trigger_time).split('')[3]);
+                                    let startMinuteIndex = (startH * 60) + startM;
+
+                                    let stopH = parseInt((''+ slot.slot_until).split('')[0] + (''+ slot.slot_until).split('')[1]);
+                                    let stopM  = parseInt((''+ slot.slot_until).split('')[2] + (''+ slot.slot_until).split('')[3]);
+                                    let stopMinuteIndex = (stopH * 60) + stopM;
+
+                                    // gli indici sono in minuti: un giro sono 24 * 60 minuti
+                                    let startAngle = 2 * startMinuteIndex * Math.PI / (60 * 24);
+                                    let stopAngle = 2 * stopMinuteIndex * Math.PI / (60 * 24);
+
+                                    return [startAngle, stopAngle];
+
+                                })
+                                .map(([startAngle, stopAngle]) => {
+
+                                    if( !isNaN(startAngle) && !isNaN(stopAngle) ) {
+
+                                        // coordinate svg
+                                        // console.log([startAngle, stopAngle]);
+                                        const ampiezza = stopAngle - startAngle;
+
+                                        // Questa funzione gestisce archi maggiori di 0 e minori di un giro.
+                                        if (!(ampiezza > 0 && ampiezza < 2 * Math.PI)) {
+                                            console.log("L'ampiezza deve essere compresa tra 0 e 2π, esclusi");
+                                        }
+
+                                        const x1 = this.circle.x + this.circle.r * Math.cos(startAngle);
+                                        const y1 = this.circle.y + this.circle.r * Math.sin(startAngle);
+
+                                        const x2 = this.circle.x + this.circle.r * Math.cos(stopAngle);
+                                        const y2 = this.circle.y + this.circle.r * Math.sin(stopAngle);
+
+                                        const arcoGrande = ampiezza > Math.PI ? 1 : 0;
+
+                                        fullDataTimer.arcs.push( `
+                                                    M ${x1} ${y1}
+                                                    A ${this.circle.r} ${this.circle.r} 0 ${arcoGrande} 1 ${x2} ${y2}
+                                                `);
+                                    }
+
+
+                                    return [startAngle, stopAngle];
+                                })
+                        ;
+
+                        // timer.weekDays
+
+                        return fullDataTimer;
+
+
+                    })
+                ;
+
+                console.log( timers );
+                this.timersWaiting.set(false);
+
+
+            });
+
+
+    }
+
+
+    itemEmojIcon(emojIconName: string) {
+        return emoj(emojIconName || '');
+    }
+
+
 
     protected confirmDeleteDevice() {
         return null;
     }
 
 
+    protected editData() {
+
+    }
+
+    protected duplicate() {
+
+    }
+
+    protected delete() {
+        this.openConfirmDeletion = true;
+    }
+    // per <delete-confirm-component>: arrow function, così il componente le chiama senza perdere il this
+    protected readonly deleteDeviceByIDs = (ids: number[]) => this.deviceApi.deleteDevices([this.device.id]);
+    protected readonly exit = () => this.router.navigate(['/devices-page']);
+    protected setValue: number = 0;
+
+
+    protected onSlideValue() {
+
+    }
+
+    protected onSlideValueEnd() {
+
+    }
 }

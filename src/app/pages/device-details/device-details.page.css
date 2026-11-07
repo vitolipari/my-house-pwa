@@ -1,0 +1,465 @@
+DIV
+, LABEL
+, SPAN
+, H4
+{
+    font-family: var(--page-font);
+    /*font-size: var(--main-font-size);*/
+    color: var(--color-text-3);
+    /*color: var(--middle-opacity-theme-color);*/
+    /*color: var(--big-opacity-theme-color);*/
+    /*text-shadow: var(--color-ambient-1) 0px 0px 5px;*/
+    text-shadow: var(--theme-color) 0px 0px 5px;
+}
+
+
+.top-part {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.top-part> DIV {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.icon {
+    font-size: var(--main-giga-huge-font-size);
+    /*font-size: 75pt;*/
+}
+
+
+.device-name {
+    font-size: var(--main-big-font-size);
+    font-weight: bold;
+}
+
+
+.device-info {
+    font-size: var(--main-font-size);
+}
+
+.comand-slider-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+SPAN.p-slider-handle,
+::ng-deep span.p-slider-handle
+{
+    opacity: 0 !important;
+}
+
+/* slider verticale: la parte piena cresce dal basso, arrotondata in alto */
+.comand-slider ::ng-deep .p-slider-range {
+    border-radius: 1rem 1rem 0.3rem 0.3rem;
+
+}
+
+
+/* verticale con orientation="vertical", non con rotate: il trascinamento segue l'asse Y */
+.comand-slider {
+    height: 20rem;
+    width: 6rem;
+    border-radius: 1rem;
+}
+
+
+H4 {
+    margin-left: 1rem;
+    margin-bottom: 0rem;
+}
+
+
+/* timer *****************************************************************************/
+
+
+.timer-block {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    align-items: center;
+    background: var(--color-background-3);
+    border-radius: 6px;
+    margin: 0.5rem auto;
+    min-width: 90cqw;
+    width: 100%;
+    max-width: 95cqw;
+    padding: 0.5rem 1rem;
+    height: 4rem;
+
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+}
+
+.timer-block-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+
+    align-items: flex-start;;
+    /*margin: 0.5rem auto;*/
+    /*min-width: 90vw;*/
+    /*width: 100%;*/
+    /*max-width: 95vw;*/
+    /*padding: 0.6rem;*/
+    height: 100%;
+
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+}
+
+.timer-block-section.first {
+    flex: 1;
+    /* senza min-width: 0 un flex item non si restringe sotto la larghezza del testo */
+    min-width: 0;
+}
+
+.timer-block-section.action {
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row;
+    position: relative;
+    left: 10px;
+    align-items: center;
+    width: 4rem;
+}
+
+.timer-block-section.action > * {
+
+}
+
+::ng-deep.switch-component-container {
+    margin-right: 0rem !important;
+}
+
+.timer-block-section > * {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+
+    align-items: center;
+    /*margin: 0.5rem auto;*/
+    /*min-width: 90vw;*/
+    /*width: 100%;*/
+    /*max-width: 95vw;*/
+    /*padding: 0.6rem;*/
+
+
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+}
+
+
+.timer-block-section > SVG,
+.timer-block-section > svg
+{
+    width: auto;
+    height: 100%;
+    object-fit: contain;
+    aspect-ratio: 1 / 1;
+    flex: 1;
+    transform: rotate(-90deg);
+}
+
+.sub-row,
+.sub-row > *,
+.week-days,
+.week-days,
+.has-holidays,
+.has-holidays.active
+{
+    font-size: var(--tiny-font-size);
+    color: var(--color-text-1);
+    font-family: var(--page-font);
+}
+
+.sub-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between !important;
+    width: 100%;
+    min-width: 100%;
+}
+
+
+.week-days-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.week-days {
+    color: var(--color-text-0);
+    opacity: 0.3;
+}
+
+.week-days.active {
+    color: var(--color-text-0);
+    opacity: 1;
+}
+
+.has-holidays {
+    opacity: 0.3;
+}
+
+.has-holidays.active {
+    opacity: 1;
+}
+
+.timer-name {
+    /* block e non flex: text-overflow non si applica al testo di un contenitore flex */
+    display: block !important;
+    max-width: 90%;
+    min-width: 6rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#top-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    /*align-items: center;*/
+    align-items: first baseline;
+    width: 100%;
+    min-width: 100%;
+    margin-bottom: 1rem;
+    padding: 0rem 1rem;
+}
+
+
+#delete-button {
+    align-items: inherit;
+    justify-content: flex-end;
+    display: flex;
+    flex: 1;
+}
+
+.running {
+    background: var(--color-background-2);
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 100rem;
+    margin-left: 0rem;
+    position: relative;
+    top: -1.2rem;
+    left: 0.5rem;
+    aspect-ratio: 1;
+}
+
+.running.active {
+    background: var(--color-evident-2);
+}
+
+
+/**************************************************************************** timer */
+
+
+/* scenario ****************************************************************************/
+
+.scenario-block {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    align-items: center;
+    background: var(--color-background-3);
+    border-radius: 6px;
+    margin: 0.5rem auto;
+    min-width: 90cqw;
+    width: 100%;
+    max-width: 95cqw;
+    padding: 0.6rem;
+
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+}
+
+.scenario-block-section {
+
+}
+
+.scenario-block-section.first {
+
+}
+
+.scenario-name {
+    font-weight: bold;
+}
+
+.scenario-description {
+    font-size: var(--tiny-font-size);
+    font-family: var(--page-font);
+    color: var(--color-text-2);
+    width: 100%;
+    white-space: wrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 1rem;
+}
+/**************************************************************************** scenario */
+
+
+
+/* gruppi *****************************************************************************/
+
+SVG, svg {
+    height: 1.5rem;
+    /*height: 100%;*/
+    opacity: 0.5;
+    aspect-ratio: 1;
+    object-fit: cover;
+    margin-right: 0.5rem
+}
+
+
+.device-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+
+    align-items: center;
+    background: var(--color-background-3);
+    border-radius: 6px;
+    margin: 0.5rem auto;
+    min-width: 90cqw;
+    width: 100%;
+    max-width: 95cqw;
+    padding: 0.6rem;
+    /*height: 5.5rem;*/
+
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+}
+
+.device-row-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    flex: 1.5;
+}
+
+.device-row-info > DIV {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    max-width: 100%;
+}
+
+.group-row {}
+
+.device-row-svg {
+    margin-right: 0.5rem;
+    margin-left: 0.2rem;
+}
+
+.device-row-data {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.device-row-data > DIV {
+    font-size: var(--tiny-font-size);
+}
+
+.device-mac {
+    font-size: var(--micro-font-size) !important;
+}
+
+.description {
+    font-family: var(--page-font);
+    /*font-size: var(--micro-font-size) !important;*/   /* ereditato */
+    color: var(--color-text-2);
+    width: 100%;
+    white-space: wrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 3.3rem;
+}
+
+
+
+
+/**************************************************************************** gruppi */
+
+
+/* room *****************************************************************************/
+
+
+/* div che contiene le stanze */
+.rooms {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: flex-start;
+    min-width: calc(100% - 2rem);
+    align-items: center;
+    margin: 1rem;
+}
+
+.room-block::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        var(--theme-color-inverse-for-gradient-0) 0%,
+        var(--theme-color-inverse-for-gradient-50) 50%,
+        var(--theme-color-inverse-for-gradient-70) 100%
+    );
+    pointer-events: none;
+}
+
+.room-block {
+    display: block;
+    position: relative;
+    width: calc(100% - 1rem);
+    height: 10rem;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+    margin: 0rem auto;
+}
+/* l'immagine riempie il blocco e viene ritagliata, senza deformarsi */
+.room-block > IMG {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+/* nome e dispositivi sovrapposti al fondo dell'immagine */
+.room-block-info {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    bottom: 0rem;
+}
+.room-block-info > DIV,
+.room-block-info > LABEL
+{
+    color: var(--color-background-1);
+    font-family: var(--page-font);
+    font-size: var(--main-big-font-size);
+    text-shadow: var(--color-ambient-1) 0px 0px 10px;
+    z-index: 10;
+}
+
+/**************************************************************************** room */
+

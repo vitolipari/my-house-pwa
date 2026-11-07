@@ -1,5 +1,5 @@
 <page-title
-    [title]="'Gruppo'"
+    [title]="!!isInEdit() ? 'Gruppo' : group().name"
     [hasPlusButton]="false"
     [hasMenuButton]="true"
     [menu]="groupPageMenu.template"
@@ -38,19 +38,21 @@
     }
 
     <div style="padding-top: 1rem;">
-        <div class="base-text-style row-field">
-            <label for="groupName">Nome</label>
-            <input
-                pInputText
-                id="groupName"
-                placeholder="gruppo"
-                class="fixed-value-input"
-                [readonly]="!isInEdit()"
-                [disabled]="!isInEdit()"
-                [ngModel]="group().name"
-                (ngModelChange)="setName($event)"
-            />
-        </div>
+        @if(!!isInEdit()) {
+            <div class="base-text-style row-field">
+                <label for="groupName">Nome</label>
+                <input
+                    pInputText
+                    id="groupName"
+                    placeholder="gruppo"
+                    class="fixed-value-input"
+                    [readonly]="!isInEdit()"
+                    [disabled]="!isInEdit()"
+                    [ngModel]="group().name"
+                    (ngModelChange)="setName($event)"
+                />
+            </div>
+        }
         <div class="base-text-style row-field">
 
             @if(!isInEdit()) {

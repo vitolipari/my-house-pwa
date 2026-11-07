@@ -3,38 +3,15 @@
     [title]="'Dispositivo'"
     [hasPlusButton]="false"
     [hasMenuButton]="true"
-    [menu]="deviceMenu"
+    [menu]="devicePageMenu.template"
 ></page-title>
-
-
-<ng-template #deviceMenu let-popover>
-    <div class="page-menu">
-        <div (click)="null; popover.hide()">
-            <svg class="svg-icon" style="position: static;">
-                <use href="#icon-209"></use>
-            </svg>
-            <div>voce 1</div>
-        </div>
-        <div (click)="null; popover.hide()">
-            <svg class="svg-icon" style="position: static;">
-                <use href="#icon-209"></use>
-            </svg>
-            <div>voce 2</div>
-        </div>
-        <div (click)="null; popover.hide()">
-            <svg class="svg-icon" style="position: static;">
-                <use href="#icon-209"></use>
-            </svg>
-            <div>voce 3</div>
-        </div>
-        <div (click)="null; popover.hide()">
-            <svg class="svg-icon" style="position: static;">
-                <use href="#icon-209"></use>
-            </svg>
-            <div>voce 4</div>
-        </div>
-    </div>
-</ng-template>
+<page-menu
+    #devicePageMenu
+    (editClick)="editData()"
+    (duplicateClick)="duplicate()"
+    (deleteClick)="delete()"
+>
+</page-menu>
 <p-drawer
     [(visible)]="openConfirmDeletion"
     position="bottom"
@@ -47,53 +24,719 @@
         borderTopRightRadius: '24px'
       }"
 >
-    <div
-        style="
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-        "
-    >
-        <div
-            style="
-                font-family: var(--page-font);
-                font-size: var(--main-font-size);
-                color: var(--color-text-2);
-            "
-        >confermi eliminazione?</div>
-        <div
-            style="margin: 2rem 0rem 5rem 0rem; height: 4rem;"
-        >
-            @if(!!isInDeleteDeviceInWaiting()) {
-                <svg
-                    class="svg-icon"
-                    style="width: 3rem;"
-                >
-                    <use href="#orologio-1-1"></use>
-                </svg>
-            }
-            @else {
-                <img
-                    src="/assets/images/trash.png"
-                    style="height: 100%"
-                >
-            }
-        </div>
-        <div>
-            <div
-                style="
-                      cursor: pointer;
-                      font-family: var(--page-font);
-                      font-size: var(--main-font-size);
-                      color: var(--theme-color);
-                      background: var(--color-red-outer-glow);
-                      border-radius: 100px;
-                      padding: 0.1rem 1rem;
-                "
-                (click)="!isInDeleteDeviceInWaiting() ? confirmDeleteDevice() : null"
-            >conferma</div>
-        </div>
-    </div>
+    <delete-confirm-component
+        [item]="device"
+        [itemApiDelete]="deleteDeviceByIDs"
+        [exitOnDelete]="exit"
+    ></delete-confirm-component>
 </p-drawer>
 
+
+<div class="top-part">
+    <div class="icon">{{ itemEmojIcon(device.emoj) }}</div>
+    <div>
+        <div class="device-name">{{ device.name }}</div>
+        <div class="device-info">{{ device.mac }}</div>
+        <div class="device-info">{{ device.ip }}</div>
+    </div>
+</div>
+
+
+<!-- comando accensione -->
+@switch (device.type.id) {
+
+    @case ('SWITCH')
+    @case ('METERED_SWITCH')
+    @case ('METERED_DIMMER')
+    @case ('POWER_METER')
+    @case ('SENSING_AIR_CONDITIONER')
+    @case ('DIMMER')
+    @case ('COLOR_DIMMER')
+    @case ('AIR_CONDITIONER')
+    @case ('TV')
+    @case ('DOOR')
+    @case ('GATE')
+    @case ('ENERGY_METER')
+    {
+        <div class="comand-slider-container">
+            <div>SWITCH</div>
+        </div>
+    }
+
+}
+
+
+<!-- impostazione valore -->
+@switch (device.type.id) {
+    @case ('METERED_DIMMER')
+    @case ('DIMMER')
+    @case ('COLOR_DIMMER')
+    @case ('MOTORIZED_CANOPY')
+    @case ('MOTORIZED_DYNAMIC_CANOPY')
+    @case ('METERED_CURTAIN')
+    {
+        <div class="comand-slider-container">
+            <p-slider
+                [(ngModel)]="setValue"
+                [step]="5"
+                [min]="5"
+                [max]="60"
+                (ngModelChange)="onSlideValue()"
+                (onSlideEnd)="onSlideValueEnd()"
+                orientation="vertical"
+                class="comand-slider"
+                style=""
+            />
+        </div>
+    }
+}
+
+<h4>Stanza</h4>
+@if( !!roomWaiting() ) {
+    waiting
+}
+@else {
+    <div
+        class="room-block"
+    >
+        <img
+            [src]="room.picture"
+            [style]="{ opacity: 1 }"
+        >
+        <div class="room-block-info">
+            <label>{{ room.name }}</label>
+            <label>{{ room.devices?.length }}</label>
+        </div>
+    </div>
+}
+
+
+
+<h4>Gruppi</h4>
+@if( !!groupWaiting() ) {
+    waiting
+}
+@else {
+    @for (group of groups; track group.id) {
+        <div class="device-row group-row">
+            <svg class="device-row-svg">
+                <use
+                    [attr.href]="'#icon-541'"
+                    [attr.xlink:href]="'#icon-541'">
+                </use>
+            </svg>
+            <div
+                class="device-row-info"
+            >
+                <div>
+                    <strong>{{ group.name }}</strong>
+                </div>
+                <div class="device-row-data">
+                    <div class="device-mac description">{{ group.description }}</div>
+                </div>
+            </div>
+
+        </div>
+    }
+}
+
+
+<h4>Timers</h4>
+@if( !!timersWaiting() ) {
+    waiting
+}
+@else {
+    @for (timer of timers; track timer.id) {
+        <div class="device mobile">
+
+            <div
+                class="timer-block"
+            >
+                <div class="timer-block-section first">
+                    <div class="timer-name">{{ timer.name }}</div>
+                    <div class="sub-row">
+                        <div>{{ timer.start }} - {{ timer.end }}</div>
+                        <div class="week-days-container">
+                            <div class="week-days {{ !!timer.weekDays[0] ? 'active' : '' }}">L</div>
+                            <div class="week-days {{ !!timer.weekDays[1] ? 'active' : '' }}">M</div>
+                            <div class="week-days {{ !!timer.weekDays[2] ? 'active' : '' }}">M</div>
+                            <div class="week-days {{ !!timer.weekDays[3] ? 'active' : '' }}">G</div>
+                            <div class="week-days {{ !!timer.weekDays[4] ? 'active' : '' }}">V</div>
+                            <div class="week-days {{ !!timer.weekDays[5] ? 'active' : '' }}">S</div>
+                            <div class="week-days {{ !!timer.weekDays[6] ? 'active' : '' }}">D</div>
+                        </div>
+                        <div class="has-holidays {{ !!timer.isHolidays ? 'active': '' }}">{{ itemEmojIcon('party_popper') }}</div>
+                    </div>
+                </div>
+
+
+                <div class="timer-block-section" style="margin-right: 0rem; margin-left: 1.5rem;">
+                    <svg viewBox="0 0 100 100">
+                        <circle
+                            [attr.r]="circle.r"
+                            [attr.cx]="circle.x"
+                            [attr.cy]="circle.y"
+                            fill="none"
+                            stroke="var(--color-background-1)"
+                            [attr.stroke-width]=" circle.width "
+                        ></circle>
+                        @for(arc of timer.arcs; track $index) {
+                            <path
+                                [attr.d]="arc"
+                                fill="none"
+                                stroke="var(--color-ambient-2)"
+                                [attr.stroke-width]=" circle.width "
+
+                            ></path>
+                        }
+                    </svg>
+                </div>
+
+                <!--
+                <div class="timer-block-section action">
+                    @if( !!isTimerInWaiting( timer ) ) {
+                        <svg class="svg-icon inside-device-list-status" style="position: static; top: 1.1rem; left: 3.8rem;">
+                            <use href="#orologio-1-1"></use>
+                        </svg>
+                    }
+                    @else {
+                        <switcher-component
+                            [check]="!!timer.enabled"
+                            [isReadOnly]="false"
+                            [inWait]="!!isTimerInWaiting( timer )"
+                            (toggle)="toggleEnableTimer(timer, $event)"
+                        ></switcher-component>
+                    }
+                </div>
+                -->
+                <div class="running {{ ( !!timer.isRunning ) ? 'active heartbeat-flash' : '' }}"></div>
+            </div>
+        </div>
+    }
+}
+
+
+
+<h4>Scenario</h4>
+@if( !!scenariosWaiting() ) {
+    wait
+}
+@else {
+    @for (scenario of scenarios; track scenario.id) {
+
+        <div
+            class="scenario-block"
+        >
+            <div class="scenario-block-section first">
+                <div class="scenario-name">{{ scenario.name }}</div>
+                <div class="scenario-description">{{ scenario.description }}</div>
+            </div>
+
+            <div
+                style="display: flex; flex-direction: row;"
+            >
+                <!--
+                <div class="scenario-block-section action">
+                    @if( !!isScenarioInWaiting( scenario ) ) {
+                        <svg class="svg-icon inside-device-list-status" style="position: static; top: 1.1rem; left: 3.8rem;">
+                            <use href="#orologio-1-1"></use>
+                        </svg>
+                    }
+                    @else {
+                        <switcher-component
+                            [check]="!!scenario.enabled"
+                            [isReadOnly]="false"
+                            [style]="'transform: rotate(270deg);'"
+                            [inWait]="!!isScenarioInWaiting( scenario )"
+                            (toggle)="toggleEnableScenario(scenario, $event)"
+                        ></switcher-component>
+                    }
+                </div>
+                -->
+                <div class="running {{ ( !!scenario.running ) ? 'active heartbeat-flash' : '' }}"></div>
+            </div>
+
+        </div>
+    }
+}
+
+
+
+
+
+<div>grafici per canale</div>
+<div>storico per canale</div>
+<div>log per canale</div>
+<div>tutte le info hardware Shelly</div>
+<div>tutte le info hardware Tuya</div>
+<div>tutte le info hardware Matter</div>
+
+
+
+<!-- grafico canale -->
+
+@switch (device.type.id) {
+    @case ('SWITCH')
+    @case ('METERED_SWITCH')
+    @case ('TEMPERATURE_HUMIDITY_SENSOR')
+    @case ('METERED_DIMMER')
+    @case ('POWER_METER')
+    @case ('METERED_RELAY_CURTAIN')
+    @case ('SENSING_AIR_CONDITIONER')
+    @case ('BINARY_STATE_SENSOR')
+    @case ('SOLAR_SYSTEM_MONITOR')
+    @case ('DIMMER')
+    @case ('COLOR_DIMMER')
+    @case ('CURTAIN')
+    @case ('RELAY_CURTAIN')
+    @case ('AIR_CONDITIONER')
+    @case ('TV')
+    @case ('MOTORIZED_CANOPY')
+    @case ('MOTORIZED_DYNAMIC_CANOPY')
+    @case ('DOOR')
+    @case ('GATE')
+    @case ('GAME_CONSOLE')
+    @case ('PRINTER')
+    @case ('HEADPHONES')
+    @case ('SPEAKER')
+    @case ('METERED_CURTAIN')
+    @case ('THERMOSTAT')
+    @case ('MOVEMENT_SENSOR_SWITCH')
+    @case ('LIGHT_SENSOR_SWITCH')
+    @case ('THREE_D_PRINTER')
+    @case ('SMART_WATCH')
+    @case ('CAR')
+    @case ('ELECTRIC_CAR')
+    @case ('ELECTRIC_BICYCLE')
+    @case ('ELECTRIC_SCOOTER')
+    @case ('MOTORCYCLE')
+    @case ('LIGHT_SENSOR')
+    @case ('MOVEMENT_SENSOR')
+    @case ('WATER_LEVEL_SENSOR')
+    @case ('FIRE_SENSOR')
+    @case ('ENERGY_METER')
+    @case ('GPS_TAG')
+    {}
+}
+
+<!-- storico log -->
+
+@switch (device.type.id) {
+    @case ('SWITCH')
+    @case ('METERED_SWITCH')
+    @case ('TEMPERATURE_HUMIDITY_SENSOR')
+    @case ('METERED_DIMMER')
+    @case ('POWER_METER')
+    @case ('METERED_RELAY_CURTAIN')
+    @case ('SENSING_AIR_CONDITIONER')
+    @case ('BINARY_STATE_SENSOR')
+    @case ('SOLAR_SYSTEM_MONITOR')
+    @case ('DIMMER')
+    @case ('COLOR_DIMMER')
+    @case ('CURTAIN')
+    @case ('RELAY_CURTAIN')
+    @case ('AIR_CONDITIONER')
+    @case ('TV')
+    @case ('MOTORIZED_CANOPY')
+    @case ('MOTORIZED_DYNAMIC_CANOPY')
+    @case ('DOOR')
+    @case ('GATE')
+    @case ('GAME_CONSOLE')
+    @case ('PRINTER')
+    @case ('HEADPHONES')
+    @case ('SPEAKER')
+    @case ('METERED_CURTAIN')
+    @case ('THERMOSTAT')
+    @case ('MOVEMENT_SENSOR_SWITCH')
+    @case ('LIGHT_SENSOR_SWITCH')
+    @case ('THREE_D_PRINTER')
+    @case ('SMART_WATCH')
+    @case ('CAR')
+    @case ('ELECTRIC_CAR')
+    @case ('ELECTRIC_BICYCLE')
+    @case ('ELECTRIC_SCOOTER')
+    @case ('MOTORCYCLE')
+    @case ('LIGHT_SENSOR')
+    @case ('MOVEMENT_SENSOR')
+    @case ('WATER_LEVEL_SENSOR')
+    @case ('FIRE_SENSOR')
+    @case ('ENERGY_METER')
+    @case ('GPS_TAG')
+    {}
+}
+
+
+
+
+
+
+<!-- per debug e sviluppo  -->
+@switch (device.type.id) {
+
+    <!-- --- attuatori --------------------------------------------->
+    @case ('SWITCH') {
+        <div>
+
+            <div>SWITCH</div>
+        </div>
+    }
+
+    @case ('METERED_SWITCH') {
+        <div>
+
+            <div>METERED_SWITCH</div>
+        </div>
+    }
+
+    @case ('TEMPERATURE_HUMIDITY_SENSOR') {
+        <div>
+
+            <div>TEMPERATURE_HUMIDITY_SENSOR</div>
+        </div>
+    }
+
+    @case ('METERED_DIMMER') {
+        <div>
+
+            <div>METERED_DIMMER</div>
+        </div>
+    }
+
+    @case ('POWER_METER') {
+        <div>
+
+            <div>POWER_METER</div>
+        </div>
+    }
+
+    @case ('METERED_RELAY_CURTAIN') {
+        <div>
+
+            <div>METERED_RELAY_CURTAIN</div>
+        </div>
+    }
+
+    @case ('SENSING_AIR_CONDITIONER') {
+        <div>
+
+            <div>SENSING_AIR_CONDITIONER</div>
+        </div>
+    }
+
+    @case ('BINARY_STATE_SENSOR') {
+        <div>
+
+            <div>BINARY_STATE_SENSOR</div>
+        </div>
+    }
+
+    @case ('SOLAR_SYSTEM_MONITOR') {
+        <div>
+
+            <div>SOLAR_SYSTEM_MONITOR</div>
+        </div>
+    }
+
+
+
+    @case ('DIMMER') {
+        <div>
+
+            <div>DIMMER</div>
+        </div>
+    }
+    @case ('COLOR_DIMMER') {
+        <div>
+
+            <div>COLOR_DIMMER</div>
+        </div>
+    }
+    @case ('CURTAIN') {
+        <div>
+
+            <div>CURTAIN</div>
+        </div>
+    }
+    @case ('RELAY_CURTAIN') {
+        <div>
+
+            <div>RELAY_CURTAIN</div>
+        </div>
+    }
+    @case ('AIR_CONDITIONER') {
+        <div>
+
+            <div>AIR_CONDITIONER</div>
+        </div>
+    }
+    @case ('TV') {
+        <div>
+
+            <div>TV</div>
+        </div>
+    }
+    @case ('MOTORIZED_CANOPY') {
+        <div>
+
+            <div>MOTORIZED_CANOPY</div>
+        </div>
+    }
+    @case ('MOTORIZED_DYNAMIC_CANOPY') {
+        <div>
+
+            <div>MOTORIZED_DYNAMIC_CANOPY</div>
+        </div>
+    }
+    @case ('DOOR') {
+        <div>
+
+            <div>DOOR</div>
+        </div>
+    }
+    @case ('GATE') {
+        <div>
+
+            <div>GATE</div>
+        </div>
+    }
+    @case ('GAME_CONSOLE') {
+        <div>
+
+            <div>GAME_CONSOLE</div>
+        </div>
+    }
+    @case ('PRINTER') {
+        <div>
+
+            <div>PRINTER</div>
+        </div>
+    }
+    @case ('HEADPHONES') {
+        <div>
+
+            <div>HEADPHONES</div>
+        </div>
+    }
+    @case ('SPEAKER') {
+        <div>
+
+            <div>SPEAKER</div>
+        </div>
+    }
+
+
+    @case ('METERED_CURTAIN') {
+        <div>
+
+            <div>METERED_CURTAIN</div>
+        </div>
+    }
+
+
+    @case ('THERMOSTAT') {
+        <div>
+
+            <div>THERMOSTAT</div>
+        </div>
+    }
+
+    @case ('MOVEMENT_SENSOR_SWITCH') {
+        <div>
+
+            <div>MOVEMENT_SENSOR_SWITCH</div>
+        </div>
+    }
+    @case ('LIGHT_SENSOR_SWITCH') {
+        <div>
+
+            <div>LIGHT_SENSOR_SWITCH</div>
+        </div>
+    }
+    @case ('THREE_D_PRINTER') {
+        <div>
+
+            <div>THREE_D_PRINTER</div>
+        </div>
+    }
+    @case ('SMART_WATCH') {
+        <div>
+
+            <div>SMART_WATCH</div>
+        </div>
+    }
+    @case ('CAR') {
+        <div>
+
+            <div>CAR</div>
+        </div>
+    }
+    @case ('ELECTRIC_CAR') {
+        <div>
+
+            <div>ELECTRIC_CAR</div>
+        </div>
+    }
+    @case ('ELECTRIC_BICYCLE') {
+        <div>
+
+            <div>ELECTRIC_BICYCLE</div>
+        </div>
+    }
+    @case ('ELECTRIC_SCOOTER') {
+        <div>
+
+            <div>ELECTRIC_SCOOTER</div>
+        </div>
+    }
+    @case ('MOTORCYCLE') {
+        <div>
+
+            <div>MOTORCYCLE</div>
+        </div>
+    }
+
+    @case ('LIGHT_SENSOR') {
+        <div>
+
+            <div>LIGHT_SENSOR</div>
+        </div>
+    }
+    @case ('MOVEMENT_SENSOR') {
+        <div>
+
+            <div>MOVEMENT_SENSOR</div>
+        </div>
+    }
+    @case ('WATER_LEVEL_SENSOR') {
+        <div>
+
+            <div>WATER_LEVEL_SENSOR</div>
+        </div>
+    }
+
+    @case ('FIRE_SENSOR') {
+        <div>
+
+            <div>FIRE_SENSOR</div>
+        </div>
+    }
+    @case ('ENERGY_METER') {
+        <div>
+
+            <div>ENERGY_METER</div>
+        </div>
+    }
+
+    @case ('GPS_TAG') {
+        <div>
+
+            <div>GPS_TAG</div>
+        </div>
+    }
+    @default {
+        <div>Dispositivo non catalogato</div>
+    }
+
+
+
+
+}
+
+
+
+
+<!--
+
+
+
+@switch (device.type.id) {
+    @case ('SWITCH')
+    @case ('METERED_SWITCH')
+    @case ('TEMPERATURE_HUMIDITY_SENSOR')
+    @case ('METERED_DIMMER')
+    @case ('POWER_METER')
+    @case ('METERED_RELAY_CURTAIN')
+    @case ('SENSING_AIR_CONDITIONER')
+    @case ('BINARY_STATE_SENSOR')
+    @case ('SOLAR_SYSTEM_MONITOR')
+    @case ('DIMMER')
+    @case ('COLOR_DIMMER')
+    @case ('CURTAIN')
+    @case ('RELAY_CURTAIN')
+    @case ('AIR_CONDITIONER')
+    @case ('TV')
+    @case ('MOTORIZED_CANOPY')
+    @case ('MOTORIZED_DYNAMIC_CANOPY')
+    @case ('DOOR')
+    @case ('GATE')
+    @case ('GAME_CONSOLE')
+    @case ('PRINTER')
+    @case ('HEADPHONES')
+    @case ('SPEAKER')
+    @case ('METERED_CURTAIN')
+    @case ('THERMOSTAT')
+    @case ('MOVEMENT_SENSOR_SWITCH')
+    @case ('LIGHT_SENSOR_SWITCH')
+    @case ('THREE_D_PRINTER')
+    @case ('SMART_WATCH')
+    @case ('CAR')
+    @case ('ELECTRIC_CAR')
+    @case ('ELECTRIC_BICYCLE')
+    @case ('ELECTRIC_SCOOTER')
+    @case ('MOTORCYCLE')
+    @case ('LIGHT_SENSOR')
+    @case ('MOVEMENT_SENSOR')
+    @case ('WATER_LEVEL_SENSOR')
+    @case ('FIRE_SENSOR')
+    @case ('ENERGY_METER')
+    @case ('GPS_TAG')
+    {}
+}
+
+
+
+@switch (device.type.id) {
+    @case ('SWITCH')
+    @case ('METERED_SWITCH')
+    @case ('TEMPERATURE_HUMIDITY_SENSOR')
+    @case ('METERED_DIMMER')
+    @case ('POWER_METER')
+    @case ('METERED_RELAY_CURTAIN')
+    @case ('SENSING_AIR_CONDITIONER')
+    @case ('BINARY_STATE_SENSOR')
+    @case ('SOLAR_SYSTEM_MONITOR')
+    @case ('DIMMER')
+    @case ('COLOR_DIMMER')
+    @case ('CURTAIN')
+    @case ('RELAY_CURTAIN')
+    @case ('AIR_CONDITIONER')
+    @case ('TV')
+    @case ('MOTORIZED_CANOPY')
+    @case ('MOTORIZED_DYNAMIC_CANOPY')
+    @case ('DOOR')
+    @case ('GATE')
+    @case ('GAME_CONSOLE')
+    @case ('PRINTER')
+    @case ('HEADPHONES')
+    @case ('SPEAKER')
+    @case ('METERED_CURTAIN')
+    @case ('THERMOSTAT')
+    @case ('MOVEMENT_SENSOR_SWITCH')
+    @case ('LIGHT_SENSOR_SWITCH')
+    @case ('THREE_D_PRINTER')
+    @case ('SMART_WATCH')
+    @case ('CAR')
+    @case ('ELECTRIC_CAR')
+    @case ('ELECTRIC_BICYCLE')
+    @case ('ELECTRIC_SCOOTER')
+    @case ('MOTORCYCLE')
+    @case ('LIGHT_SENSOR')
+    @case ('MOVEMENT_SENSOR')
+    @case ('WATER_LEVEL_SENSOR')
+    @case ('FIRE_SENSOR')
+    @case ('ENERGY_METER')
+    @case ('GPS_TAG')
+    {}
+}
+
+-->

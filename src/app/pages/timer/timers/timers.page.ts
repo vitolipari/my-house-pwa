@@ -152,7 +152,7 @@ export class TimersPage implements OnInit {
                                             if( !isNaN(startAngle) && !isNaN(stopAngle) ) {
 
                                                 // coordinate svg
-                                                console.log([startAngle, stopAngle]);
+                                                // console.log([startAngle, stopAngle]);
                                                 const ampiezza = stopAngle - startAngle;
 
                                                 // Questa funzione gestisce archi maggiori di 0 e minori di un giro.
