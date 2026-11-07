@@ -85,6 +85,7 @@
                     (mouseup)="stopPropagation($event)"
                 >
                     <div>
+                        <div class="running {{ ( !!timer.isRunning ) ? 'active heartbeat-flash' : '' }}"></div>
                         <div>
                             @if(!!isInSelection()) {
                                 <div
@@ -104,11 +105,6 @@
                             }
                         </div>
                         <div class="timer-name">{{ timer.name }}</div>
-                        <div>
-                            @if( !!isRunning( timer ) ) {
-                                <div class="running"></div>
-                            }
-                        </div>
                     </div>
                     <div style="flex: 5;">
                         <svg viewBox="0 0 100 100">
@@ -244,6 +240,7 @@
                             ></switcher-component>
                         }
                     </div>
+                    <div class="running {{ ( !!timer.isRunning ) ? 'active heartbeat-flash' : '' }}"></div>
                 </div>
             }
         </div>

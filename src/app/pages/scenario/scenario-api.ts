@@ -72,4 +72,8 @@ export class ScenarioApiService {
     }
 
 
+    getRunningScenarios(): Observable<number[]> {
+        return this.http.get<number[]>(`${this.baseUrl}/running-scenario`);
+    }
+
 }

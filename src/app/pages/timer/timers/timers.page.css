@@ -38,7 +38,8 @@ and (min-width: 1024px) {
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        flex: 1;
+        flex: 0;
+        max-width: 100%;
     }
 
     .timer-card > DIV > SVG,
@@ -50,6 +51,17 @@ and (min-width: 1024px) {
 
     .timer-name {
         font-weight: bold;
+    }
+
+
+    .running {
+        background: var(--color-background-2);
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 100rem;
+        margin-left: 0rem;
+        margin-right: 0.5rem;
+        position: static !important;
     }
 }
 
@@ -96,7 +108,8 @@ and (max-width: 1023.98px)
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        flex: 1;
+        flex: 0;
+        max-width: 100%;
     }
 
     .timer-card > DIV > SVG,
@@ -107,7 +120,29 @@ and (max-width: 1023.98px)
     }
 
     .timer-name {
+        display: block !important;
+        max-width: 90%;
+        min-width: 6rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         font-weight: bold;
+        text-align: center;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+
+    }
+
+
+
+    .running {
+        background: var(--color-background-2);
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 100rem;
+        margin-left: 0rem;
+        margin-right: 0.5rem;
+        position: static !important;
     }
 
 }
@@ -283,3 +318,18 @@ and (max-width: 1023.98px)
     flex: 1;
 }
 
+.running {
+    background: var(--color-background-2);
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 100rem;
+    margin-left: 0rem;
+    position: relative;
+    top: -1.2rem;
+    left: 0.5rem;
+    aspect-ratio: 1;
+}
+
+.running.active {
+    background: var(--color-evident-2);
+}

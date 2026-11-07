@@ -125,4 +125,9 @@ export class TimerApiService {
     toggleTimer(id: number, event: boolean): Observable<void> {
         return this.http.put<void>(`${this.baseUrl}/toggle-timer/${id}?enabled=${event}`, {});
     }
+
+
+    getRunningTimers(): Observable<{ id: number; devices: number[] }[]> {
+        return this.http.get<{ id: number; devices: number[] }[]>(`${this.baseUrl}/current-timer`);
+    }
 }

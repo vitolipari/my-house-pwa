@@ -14,6 +14,8 @@ import {ZoneType} from '../../devices/devices.models';
 import {Button} from 'primeng/button';
 import {FormsModule} from '@angular/forms';
 import {InputText} from 'primeng/inputtext';
+import moment from 'moment';
+import {italianHolidays} from '../../../utils/time-utils';
 
 
 @Component({
@@ -76,6 +78,8 @@ export class TimersPage implements OnInit {
     }
 
 
+
+
     searchTimers() {
 
         /*
@@ -102,6 +106,30 @@ export class TimersPage implements OnInit {
 
                             timer.sectors =
                                     timer.slots
+                                        .map((slot: EventTimerType) => {
+
+                                            let isHolidayToday: boolean = italianHolidays(moment().year()).includes(moment().format('YYYY-MM-DD'));
+                                            if(
+                                                moment(slot.trigger_time, 'HHmm') <= moment()
+                                                && moment(slot.slot_until, 'HHmm') >= moment()
+                                                && !!timer.weekDays[moment().isoWeekday() -1]
+                                                && ( !!isHolidayToday ? !!timer.isHolidays : true )
+                                                && !!timer.enabled
+                                            ) {
+                                                timer.isRunning = true
+                                            }
+
+                                            console.log('controllo timer '+ timer.id +' '+ timer.name );
+                                            console.log('dopo il trigger '+ slot.trigger_time +' '+ moment().format('HHmm') +' '+ (moment(slot.trigger_time, 'HHmm') <= moment()));
+                                            console.log( 'entro la fine '+ (moment(slot.slot_until, 'HHmm') >= moment()));
+                                            console.log( 'questo giorno '+ !!timer.weekDays[moment().isoWeekday() -1]);
+                                            console.log( 'in festa se festa '+ ( !!isHolidayToday ? !!timer.isHolidays : true ));
+                                            console.log( 'acceso '+!!timer.enabled);
+
+
+
+                                            return slot;
+                                        })
                                         .map((slot: EventTimerType) => {
 
                                             let startH = parseInt((''+ slot.trigger_time).split('')[0] + (''+ slot.trigger_time).split('')[1]);
@@ -160,8 +188,8 @@ export class TimersPage implements OnInit {
 
 
                     this.timers.set(list);
-                    this.isInWaiting.update(() => false);
                     console.log(list);
+                    this.isInWaiting.update(() => false);
                     return list;
                 })
                 .catch((error: unknown) => {

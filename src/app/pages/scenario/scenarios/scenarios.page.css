@@ -102,3 +102,17 @@ and (max-width: 1023.98px)
 
 }
 
+
+.running {
+    background: var(--color-background-2);
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 100rem;
+    margin-left: 0rem;
+    align-self: center;
+    aspect-ratio: 1;
+}
+
+.running.active {
+    background: var(--color-evident-2);
+}

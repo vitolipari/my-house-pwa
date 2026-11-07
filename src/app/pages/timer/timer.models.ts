@@ -47,6 +47,5 @@ export type FullTimerType = TimerType & {
     id: number;
     slots: EventTimerType[];
     devices: DeviceType[];
-    // TODO EventTimerActionType
-    // TODO DeviceEventTimerActionType
+    isRunning?: boolean;
 };

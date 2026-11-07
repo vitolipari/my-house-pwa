@@ -33,6 +33,7 @@ export class ScenariosPage implements OnInit {
     searchName: string = ''
 
 
+
     protected readonly isInWaiting = signal<boolean>(false);
     protected readonly isInSelection = signal<boolean>(false);
     protected readonly waitingScenarios = signal<number[]>([]);
@@ -43,12 +44,24 @@ export class ScenariosPage implements OnInit {
     readonly router = inject(Router);
     readonly scenarioApi: ScenarioApiService = inject(ScenarioApiService);
     selectedScenarios: number[] = [];
+    runningScenarios: number[] = [];
 
 
     ngOnInit(): void {
 
         this.isInWaiting.update(() => true);
         this.searchScenarios();
+
+
+        firstValueFrom(this.scenarioApi.getRunningScenarios())
+            .then((runningScenariosIDs: number[]) => {
+                this.runningScenarios = runningScenariosIDs;
+            })
+            .catch((error) => {
+                console.log('errore in getRunningScenarios');
+                console.error(error);
+                return null;
+            })
 
     }
 
@@ -219,6 +232,10 @@ export class ScenariosPage implements OnInit {
         this.isInSelection.set(true);
     }
 
+
+    isRunning(scen: ScenarioType) {
+        return (this.runningScenarios.includes(scen.id));
+    }
 
 
 }
