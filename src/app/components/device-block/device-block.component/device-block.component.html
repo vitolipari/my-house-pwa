@@ -308,7 +308,9 @@
                                                 >
                                             </use>
                                         </svg>
-                                        {{ sensorChannelText(device, 'battery_power', {forceKW: true}) }}
+                                        <span style="{{ greenOrRedValue(device, 'battery_power') }}">
+                                            {{ sensorChannelText(device, 'battery_power', {forceKW: true}) }}
+                                        </span>
                                         ({{ sensorChannelText(device, 'battery_soc') }})
                                     </div>
                                 </div>

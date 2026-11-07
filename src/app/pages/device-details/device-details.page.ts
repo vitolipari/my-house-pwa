@@ -18,6 +18,7 @@ import moment from 'moment/moment';
 import {firstValueFrom} from 'rxjs';
 import {ScenarioApiService} from '../scenario/scenario-api';
 import {ScenarioType} from '../scenario/scenario.models';
+import {getLastElementOr} from '../../utils/array-util';
 
 @Component({
     selector: 'app-device-details.page',
@@ -59,7 +60,7 @@ export class DeviceDetailsPage implements OnInit {
     readonly scenarioApi: ScenarioApiService = inject(ScenarioApiService);
 
     readonly data = this.router.currentNavigation()?.extras.state as { from: string; device?: DeviceType; } | undefined;
-    readonly device: DeviceType = this.data?.device as unknown as DeviceType;
+    protected device: DeviceType = this.data?.device as unknown as DeviceType;
     readonly deviceId = this.route.snapshot.paramMap.get('id');
     protected openConfirmDeletion: boolean = false;
     protected readonly isInDeleteDeviceInWaiting = signal<boolean>(false);
@@ -67,6 +68,7 @@ export class DeviceDetailsPage implements OnInit {
     protected readonly scenariosWaiting = signal<boolean>(true);
     protected readonly groupWaiting = signal<boolean>(true);
     protected readonly roomWaiting = signal<boolean>(true);
+    protected readonly deviceWaiting = signal<boolean>(true);
 
 
     constructor() {
@@ -83,15 +85,23 @@ export class DeviceDetailsPage implements OnInit {
 
         if(!!this.device) {
             // device presente
+            this.deviceWaiting.set(false);
         }
         else {
             if ( !!this.router.currentNavigation()?.extras.state?.['device'] ) {
                 // device passato da navigazione
+                this.deviceWaiting.set(false);
             }
             else {
                 // device non passato da navigazione
 
                 if( !!this.route.snapshot.params['id'] ) {
+
+                    firstValueFrom(this.deviceApi.search({ids: [parseInt(''+ this.deviceId)] }))
+                        .then((device: DeviceType[]) => {
+                            this.device = device.reduce(getLastElementOr, null as unknown as DeviceType);
+                            this.deviceWaiting.set(false);
+                        })
 
                 }
                 else {

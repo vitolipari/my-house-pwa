@@ -33,9 +33,9 @@
 
     /* Font */
     --page-font: 'Prompt', 'Montserrat', 'Calisto MT', 'Calisto', 'Trebuchet MS', sans-serif;
-    --mono-font: 'Ubuntu', -apple-system, 'Helvetica Neue', 'Roboto', BlinkMacSystemFont, 'Oxygen', 'Cantarell', 'Fira Sans', 'Droid Sans', sans-serif;
-    --main-font: 'Segoe UI', 'Candara', 'Trebuchet MS', 'Varela Round', Verdana, "Open Sans Regular", "Arial Unicode MS Regular", sans-serif;
+    --main-font: 'Prompt', 'Montserrat', 'Calisto MT', 'Calisto', 'Trebuchet MS', 'Segoe UI', 'Candara', 'Trebuchet MS', 'Varela Round', Verdana, "Open Sans Regular", "Arial Unicode MS Regular", sans-serif;
     --reading-font: 'Lora', 'Libre Baskerville', 'Adobe Caslon', Georgia;
+    --mono-font: 'Ubuntu', -apple-system, 'Helvetica Neue', 'Roboto', BlinkMacSystemFont, 'Oxygen', 'Cantarell', 'Fira Sans', 'Droid Sans', sans-serif;
     --orbitron-font: Orbitron, sans-serif;
 
     /* Dimensioni */

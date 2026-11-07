@@ -1,3 +1,10 @@
+:host {
+    display: block;
+    max-width: 40rem;
+    margin: 0rem auto;
+}
+
+
 DIV
 , LABEL
 , SPAN
@@ -79,6 +86,156 @@ H4 {
 
 /* timer *****************************************************************************/
 
+/* desktop */
+@media
+only screen
+and (min-width: 1024px) {
+
+
+    .timer-block-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin: 0rem auto;
+        justify-content: center;
+    }
+
+    .timer-block.mobile {
+        display: none;
+    }
+    .timer-block.non-mobile {
+        display: flex;
+    }
+
+    .timer-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--color-background-3);
+        border-radius: 12px;
+        width: 9rem;
+        height: 14rem;
+        padding: 0.5rem 1rem;
+        margin: 0.5rem;
+        font-size: var(--main-font-size);
+        color: var(--color-text-2);
+    }
+
+    .timer-card > DIV {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        flex: 0;
+        max-width: 100%;
+    }
+
+    .timer-card > DIV > SVG,
+    .timer-card > DIV > svg
+    {
+        height: 100%;
+        padding: 0.2rem;
+    }
+
+    .timer-name {
+        font-weight: bold;
+    }
+
+
+    .running {
+        background: var(--color-background-2);
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 100rem;
+        margin-left: 0rem;
+        margin-right: 0.5rem;
+        position: static !important;
+    }
+}
+
+
+
+/* tablet */
+@media
+only screen
+and (min-width: 640px)
+and (max-width: 1023.98px)
+{
+
+    .timer-block-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin: 0rem auto;
+        justify-content: center;
+    }
+
+    .timer-block.mobile {
+        display: none;
+    }
+    .timer-block.non-mobile {
+        display: flex;
+    }
+
+    .timer-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--color-background-3);
+        border-radius: 12px;
+        width: 9rem;
+        height: 14rem;
+        padding: 0.5rem 1rem;
+        margin: 0.5rem;
+        font-size: var(--main-font-size);
+        color: var(--color-text-2);
+    }
+
+    .timer-card > DIV {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        flex: 0;
+        max-width: 100%;
+    }
+
+    .timer-card > DIV > SVG,
+    .timer-card > DIV > svg
+    {
+        height: 100%;
+        padding: 0.2rem;
+    }
+
+    .timer-name {
+        display: block !important;
+        max-width: 90%;
+        min-width: 6rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+
+    }
+
+
+
+    .running {
+        background: var(--color-background-2);
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 100rem;
+        margin-left: 0rem;
+        margin-right: 0.5rem;
+        position: static !important;
+    }
+
+}
 
 .timer-block {
     display: flex;
@@ -89,9 +246,9 @@ H4 {
     background: var(--color-background-3);
     border-radius: 6px;
     margin: 0.5rem auto;
-    min-width: 90cqw;
+    min-width: 90%;
     width: 100%;
-    max-width: 95cqw;
+    max-width: 95%;
     padding: 0.5rem 1rem;
     height: 4rem;
 
@@ -276,9 +433,9 @@ H4 {
     background: var(--color-background-3);
     border-radius: 6px;
     margin: 0.5rem auto;
-    min-width: 90cqw;
+    min-width: 90%;
     width: 100%;
-    max-width: 95cqw;
+    max-width: 95%;
     padding: 0.6rem;
 
     font-size: var(--main-font-size);
@@ -332,9 +489,9 @@ SVG, svg {
     background: var(--color-background-3);
     border-radius: 6px;
     margin: 0.5rem auto;
-    min-width: 90cqw;
+    min-width: 90%;
     width: 100%;
-    max-width: 95cqw;
+    max-width: 95%;
     padding: 0.6rem;
     /*height: 5.5rem;*/
 

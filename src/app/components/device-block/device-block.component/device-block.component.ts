@@ -354,8 +354,9 @@ export class DeviceBlockComponent implements OnInit {
 
                 // channels
                 [
-                    'power_0',
-                    'grid_power'
+                    'power_0'
+                    , 'grid_power'
+                    // , 'battery_power'
                 ]
                     .map((ch: string) => {
                         const powerChannelIndex: number = d.channel.lastIndexOf(ch);
@@ -497,5 +498,13 @@ export class DeviceBlockComponent implements OnInit {
                 return null;
             });
 
+    }
+
+    protected greenOrRedValue(device: DeviceType, channel: string) {
+        return (
+            ((device as any).value[ device.channel.indexOf(channel) ] < 0)
+                ? 'text-shadow: var(--color-red-outer-glow) 0px 0px 16px; color: var(--color-red-outer-glow);'
+                : 'text-shadow: var(--color-outer-glow) 0px 0px 16px; color: var(--color-text-2);'
+        );
     }
 }
