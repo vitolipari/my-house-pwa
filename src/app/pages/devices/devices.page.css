@@ -1,3 +1,40 @@
+/* desktop */
+@media
+only screen
+and (min-width: 1024px) {
+
+    .device-grid-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin: 1rem auto;
+        justify-content: center;
+    }
+
+}
+
+
+
+/* tablet */
+@media
+only screen
+and (min-width: 640px)
+and (max-width: 1023.98px)
+{
+
+    .device-grid-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin: 1rem auto;
+        justify-content: center;
+    }
+
+}
+
+
+
+
 p-tabs, p-tablist, p-tabpanels, p-tabpanel {
     background: transparent !important;
 }
@@ -95,11 +132,11 @@ p-tab > DIV > SPAN, B {
     background: var(--color-background-3);
     border-radius: 6px;
     margin: 0.5rem auto;
-    min-width: 90vw;
+    min-width: 90cqw;
     width: 100%;
-    max-width: 95vw;
+    max-width: 95cqw;
     padding: 0.6rem;
-    height: 5.5rem;
+    /*height: 5.5rem;*/
 
     font-size: var(--main-font-size);
     color: var(--color-text-2);
@@ -285,3 +322,7 @@ p-tab > DIV > SPAN, B {
     justify-content: center;
     margin-top: -0.75rem;
 }
+
+
+
+

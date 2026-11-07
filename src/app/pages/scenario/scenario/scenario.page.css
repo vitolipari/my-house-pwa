@@ -97,3 +97,52 @@
     align-items: center;
 }
 
+.timed-action-comand {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+
+.timed-action-comand > DIV {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 0.1rem 0rem;
+}
+
+.timed-action-comand > DIV > DIV {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    flex: 0;
+}
+
+.timed-action-comand > DIV > DIV > SVG,
+.timed-action-comand > DIV > DIV > svg
+{
+    height: 20px !important;
+    width: 20px !important;
+    margin-right: 0.5rem;
+}
+
+
+.timed-action-input {
+    background: var(--color-background-2);
+    color: var(--color-text-1);
+    font-family: var(--main-font);
+    font-size: var(--tiny-font-size);
+    padding: 0.3rem;
+    min-width: 3rem;
+    max-width: 5rem;
+}
+
+.timed-action-unit {
+    color: var(--color-text-1);
+    font-family: var(--main-font);
+    font-size: var(--tiny-font-size);
+    margin-left: 0.2rem;
+}
+

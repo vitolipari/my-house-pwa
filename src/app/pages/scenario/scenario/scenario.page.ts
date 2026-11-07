@@ -11,7 +11,13 @@ import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
 import {RadioButton} from 'primeng/radiobutton';
 import {ActivatedRoute, Router} from '@angular/router';
 import {PermissionService} from '../../../services/permission.service';
-import {ActionChannelDeviceType, EventTriggerChannelDeviceType, ScenarioDTOType, ScenarioType} from '../scenario.models';
+import {
+    ActionChannelDeviceType,
+    EventTriggerChannelDeviceType,
+    ScenarioActionValuesType,
+    ScenarioDTOType,
+    ScenarioType
+} from '../scenario.models';
 import {getLastElementOr} from '../../../utils/array-util';
 import {debounceTime, distinctUntilChanged, firstValueFrom, map, Subject} from 'rxjs';
 import {ScenarioApiService} from '../scenario-api';
@@ -22,6 +28,8 @@ import {emoj} from '../../../utils/string-utils';
 import {Select, SelectModule} from 'primeng/select';
 import {JsonPipe} from '@angular/common';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {PageMenu} from '../../../components/page-menu/page-menu';
+import {DeleteConfirmComponent} from '../../../components/delete-confirm-component/delete-confirm-component';
 
 
 
@@ -56,6 +64,41 @@ export const CHANNEL_MAPPING = {
     mode: 'modalità'
 };
 
+// valori di un'azione dal comando del Core (POWER:ON;delay=30;duration=60): booleano per POWER, testo per SET; ritardo
+// e durata 0 se mancano. Serve alla modifica e all'abilitazione dalla lista, che mandano il DTO della creazione
+export const readScenarioAction = (action: string): ScenarioActionValuesType => {
+
+    let parts: string[] = (''+ (action || '')).split(';');
+    let command: string[] = parts[0].split(':');
+    let actionValues: ScenarioActionValuesType = {
+        value: command[1] ?? '',
+        delay: 0,
+        duration: 0
+    };
+
+    if( command[0] === 'POWER' ) {
+        actionValues.value = (command[1] === 'ON');
+    }
+
+    parts
+        .forEach((part: string) => {
+
+            let keyValue: string[] = part.split('=');
+
+            if( keyValue[0] === 'delay' ) {
+                actionValues.delay = parseInt(''+ keyValue[1]) || 0;
+            }
+
+            if( keyValue[0] === 'duration' ) {
+                actionValues.duration = parseInt(''+ keyValue[1]) || 0;
+            }
+
+        })
+    ;
+
+    return actionValues;
+};
+
 @Component({
   selector: 'app-scenario.page',
     imports: [
@@ -74,7 +117,9 @@ export const CHANNEL_MAPPING = {
         // RadioButton,
         Select,
         SelectModule,
-        JsonPipe
+        JsonPipe,
+        PageMenu,
+        DeleteConfirmComponent
     ],
   templateUrl: './scenario.page.html',
   styleUrl: './scenario.page.css',
@@ -143,7 +188,7 @@ export class ScenarioPage implements OnInit {
     eventOuput: string[] = ['acceso', 'spento'];
 
     readonly inWaiting = signal<boolean>(false);
-    readonly isInDeleteScenarioInWaiting = signal<boolean>(false);
+    // readonly isInDeleteScenarioInWaiting = signal<boolean>(false);    // ora l'attesa è in <delete-confirm-component>
     readonly isConfirmable = signal<boolean>(true);
     protected readonly isDeviceLoading = signal<boolean>(true);
 
@@ -200,8 +245,9 @@ export class ScenarioPage implements OnInit {
                             this.scenario.triggers
                                 .map((triggerDevice: EventTriggerChannelDeviceType) => {
 
-                                    // channel
-                                    triggerDevice.channel = (triggerDevice.channel as unknown as {id: number; name: string;}).name;
+                                    // channel: chiave del Core → etichetta della pagina, come in setDevices
+                                    let channelName: string = (triggerDevice.channel as unknown as {id: number; name: string;}).name;
+                                    triggerDevice.channel = CHANNEL_MAPPING[channelName as keyof typeof CHANNEL_MAPPING] ?? channelName;
 
                                     // valueBy
                                     triggerDevice.valueBy =
@@ -210,11 +256,25 @@ export class ScenarioPage implements OnInit {
                                             : triggerDevice.valueBy
                                     ;
 
-                                    // unit
+                                    // valueUpTo
+                                    triggerDevice.valueUpTo =
+                                        !!(triggerDevice as any).eventValueUpTo
+                                            ? (triggerDevice as any).eventValueUpTo
+                                            : triggerDevice.valueUpTo
+                                    ;
+
+                                    // valueAt
+                                    triggerDevice.valueAt =
+                                        !!(triggerDevice as any).eventValueAt
+                                            ? (triggerDevice as any).eventValueAt
+                                            : triggerDevice.valueAt
+                                    ;
+
+                                    // unit: '' per i canali senza misura, come in setDevices
                                     triggerDevice.channelUnit =
                                         !!(triggerDevice as any).unit
                                             ? (triggerDevice as any).unit
-                                            : triggerDevice.channelUnit
+                                            : ''
                                     ;
 
                                     return triggerDevice;
@@ -225,12 +285,25 @@ export class ScenarioPage implements OnInit {
                             this.scenario.actions
                                 .map((actionDevice: ActionChannelDeviceType)=> {
 
-                                    // channel
-                                    actionDevice.channel = (actionDevice.channel as unknown as {id: number; name: string;}).name;
+                                    // channel: chiave del Core → etichetta della pagina, come in setDevices
+                                    let channelName: string = (actionDevice.channel as unknown as {id: number; name: string;}).name;
+                                    actionDevice.channel = CHANNEL_MAPPING[channelName as keyof typeof CHANNEL_MAPPING] ?? channelName;
+
+
+                                    // unit: '' per i canali senza misura, come in setDevices
+                                    actionDevice.channelUnit =
+                                        !!(actionDevice as any).unit
+                                            ? (actionDevice as any).unit
+                                            : ''
+                                    ;
+
 
                                     return actionDevice;
                                 })
                         ;
+
+                        this.isAtEvents = !this.scenario.isImmediate;
+
 
 
                         this.inWaiting.update(() => false);
@@ -241,6 +314,7 @@ export class ScenarioPage implements OnInit {
                     .catch((e: any) => {
                         console.log('errore nelle ricerca dello scenario '+ this.pathVariables['id']);
                         console.log(e);
+                        this.inWaiting.update(() => false);
                     })
             }
             else {
@@ -253,8 +327,9 @@ export class ScenarioPage implements OnInit {
                     this.scenario.triggers
                         .map((triggerDevice: EventTriggerChannelDeviceType) => {
 
-                            // channel
-                            triggerDevice.channel = (triggerDevice.channel as unknown as {id: number; name: string;}).name;
+                            // channel: chiave del Core → etichetta della pagina, come in setDevices
+                            let channelName: string = (triggerDevice.channel as unknown as {id: number; name: string;}).name;
+                            triggerDevice.channel = CHANNEL_MAPPING[channelName as keyof typeof CHANNEL_MAPPING] ?? channelName;
 
                             // valueBy
                             triggerDevice.valueBy =
@@ -277,11 +352,11 @@ export class ScenarioPage implements OnInit {
                                     : triggerDevice.valueAt
                             ;
 
-                            // unit
+                            // unit: '' per i canali senza misura, come in setDevices
                             triggerDevice.channelUnit =
                                 !!(triggerDevice as any).unit
                                     ? (triggerDevice as any).unit
-                                    : triggerDevice.channelUnit
+                                    : ''
                             ;
 
                             return triggerDevice;
@@ -292,13 +367,23 @@ export class ScenarioPage implements OnInit {
                     this.scenario.actions
                         .map((actionDevice: ActionChannelDeviceType)=> {
 
-                            // channel
-                            actionDevice.channel = (actionDevice.channel as unknown as {id: number; name: string;}).name;
+                            // channel: chiave del Core → etichetta della pagina, come in setDevices
+                            let channelName: string = (actionDevice.channel as unknown as {id: number; name: string;}).name;
+                            actionDevice.channel = CHANNEL_MAPPING[channelName as keyof typeof CHANNEL_MAPPING] ?? channelName;
+
+
+                            // unit: '' per i canali senza misura, come in setDevices
+                            actionDevice.channelUnit =
+                                !!(actionDevice as any).unit
+                                    ? (actionDevice as any).unit
+                                    : ''
+                            ;
 
                             return actionDevice;
                         })
                 ;
 
+                this.isAtEvents = !this.scenario.isImmediate;
 
 
                 console.log('dati passati da navigazione');
@@ -435,29 +520,72 @@ export class ScenarioPage implements OnInit {
 
     protected editData() {
         this.currentMode = this.Mode.EDIT;
+
+        // eventi e azioni salvati appartengono allo scenario: in modifica partono selezionati. Il Core manda il
+        // DeviceType intero: la pagina tiene l'id e ne copia nome, stanza ed emoji, come setDevices
+        this.scenario.triggers
+            .forEach((trigger: EventTriggerChannelDeviceType) => {
+
+                let deviceObj: DeviceType = trigger.device as unknown as DeviceType;
+
+                trigger.isOwned = true;
+                trigger.device = parseInt(''+ deviceObj.id);
+                trigger.name = deviceObj.name;
+                trigger.room = deviceObj.where.reduce(getLastElementOr, {id: 0, name: 'Nessuna Stanza'}).name;
+                trigger.deviceEmojIcon = deviceObj.emoj;
+            })
+        ;
+
+        // le azioni prendono anche il tipo del canale (valueType del Core) e, dal comando, valore, ritardo e durata
+        this.scenario.actions
+            .forEach((action: ActionChannelDeviceType) => {
+
+                let deviceObj: DeviceType = action.device as unknown as DeviceType;
+                let actionValues: ScenarioActionValuesType = readScenarioAction((action as any).action);
+
+                action.isOwned = true;
+                action.device = parseInt(''+ deviceObj.id);
+                action.name = deviceObj.name;
+                action.room = deviceObj.where.reduce(getLastElementOr, {id: 0, name: 'Nessuna Stanza'}).name;
+                action.deviceEmojIcon = deviceObj.emoj;
+                action.channelType = (''+ (action as any).valueType).toLowerCase();
+                action.value = actionValues.value;
+                action.delay = actionValues.delay;
+                action.duration = actionValues.duration;
+            })
+        ;
+
+        this.visibleTriggers.set( this.scenario.triggers );
+        this.visibleActions.set( this.scenario.actions );
+
+        // tutti i dispositivi, per aggiungere eventi e azioni nuovi a quelli dello scenario
+        this.loadDevices();
+
     }
 
     protected duplicate() {
 
     }
 
-    protected deleteScenario() {
-        this.openConfirmDeletion = true;
-    }
 
-    protected confirmDeleteScenario() {
-        this.isInDeleteScenarioInWaiting.update(() => true);
-        firstValueFrom(this.scenarioApi.deleteScenarios([(this.scenario as any).id]))
-            .then(() => {
-                this.isInDeleteScenarioInWaiting.update(() => false);
-                this.router.navigate(['/scenarios-page']);
-                // window.location.reload();
-            })
-            .catch((e) => {
-                console.log(e);
-            })
-        ;
-    }
+
+    // per <delete-confirm-component>: arrow function, così il componente le chiama senza perdere il this
+    protected readonly deleteScenarioByIDs = (ids: number[]) => this.scenarioApi.deleteScenarios(ids);
+    protected readonly exitToScenarios = () => this.router.navigate(['/scenarios-page']);
+
+    // protected confirmDeleteScenario() {
+    //     this.isInDeleteScenarioInWaiting.update(() => true);
+    //     firstValueFrom(this.scenarioApi.deleteScenarios([(this.scenario as any).id]))
+    //         .then(() => {
+    //             this.isInDeleteScenarioInWaiting.update(() => false);
+    //             this.router.navigate(['/scenarios-page']);
+    //             // window.location.reload();
+    //         })
+    //         .catch((e) => {
+    //             console.log(e);
+    //         })
+    //     ;
+    // }
 
     protected setName(event: any) {
 
@@ -473,7 +601,9 @@ export class ScenarioPage implements OnInit {
 
     protected switchScenarioEvent(scenario: ScenarioType, event: boolean) {
         this.isAtEvents = event;
-        this.scenario.isImmediate = !!event;
+
+        // con gli eventi lo scenario non è immediato
+        this.scenario.isImmediate = !event;
         if(this.scenario.triggers.length === 0) {
             this.loadDevices();
         }
@@ -495,36 +625,31 @@ export class ScenarioPage implements OnInit {
                 // event trigger
                 device.channel
                     .filter((ch: string) => !AVOID_CHANNELS.includes(ch))
-                    .forEach((ch: string, chIndex: number) => {
+                    .forEach((ch: string) => {
 
-                        this.scenario.triggers = [
-                            ...this.scenario.triggers,
-                            {
-                                id: (dIndex * 10) + chIndex,
-                                device: parseInt(''+ device.id),
-                                name: device.name,
-                                channel: CHANNEL_MAPPING[ch as keyof typeof CHANNEL_MAPPING] ?? ch,
-                                isOwned: false,
-                                deviceEmojIcon: device.emoj,
-                                channelSvgIcon: '',
-                                channelUnit: ((''+ device.category.id).trim().toLowerCase().indexOf('sensor') !== -1) ? (device as any).unit[chIndex] : '',
-                                channelType: typeof device.status[chIndex],
-                                room: device.where.reduce(getLastElementOr, {id: 0, name: 'Nessuna Stanza'}).name,
-                                valueBy: null,
-                                valueUpTo: null,
-                                valueAt: null
-                            }
-                        ]
-                            .filter((tr: EventTriggerChannelDeviceType) => !!tr.device)
-                            .sort((a: EventTriggerChannelDeviceType, b: EventTriggerChannelDeviceType) => {
-                                if(( a.isOwned !== b.isOwned ) && !!a.isOwned) return -1;
-                                return 1;
-                            })
+                        // posizione del canale nel DeviceType, per stato e unità (non nella lista filtrata); l'id è solo
+                        // della pagina, negativo per non coincidere con gli id di eventi e azioni salvati, in modifica
+                        let chIndex: number = device.channel.indexOf(ch);
+                        let pageID: number = -((dIndex * 100) + chIndex + 1);
+                        let deviceID: number = parseInt(''+ device.id);
+                        let channelName: string = CHANNEL_MAPPING[ch as keyof typeof CHANNEL_MAPPING] ?? ch;
+
+                        // in modifica gli eventi e le azioni dello scenario sono già nella lista
+                        let isTriggerPresent: boolean =
+                            this.scenario.triggers
+                                .filter((tr: EventTriggerChannelDeviceType) => tr.device === deviceID)
+                                .filter((tr: EventTriggerChannelDeviceType) => tr.channel === channelName)
+                                .length > 0
                         ;
 
+                        let isActionPresent: boolean =
+                            this.scenario.actions
+                                .filter((ac: ActionChannelDeviceType) => ac.device === deviceID)
+                                .filter((ac: ActionChannelDeviceType) => ac.channel === channelName)
+                                .length > 0
+                        ;
 
-
-                        if(
+                        let isActionChannel: boolean =
                             [
                                 'output',
                                 'brightness',
@@ -537,16 +662,50 @@ export class ScenarioPage implements OnInit {
                                 'air_flow_vertical_position',
                                 'air_flow_horizontal_position'
                             ].includes(ch)
-                        ) {
+                        ;
+
+
+                        if( !isTriggerPresent ) {
+
+                            this.scenario.triggers = [
+                                ...this.scenario.triggers,
+                                {
+                                    id: pageID,
+                                    device: deviceID,
+                                    name: device.name,
+                                    channel: channelName,
+                                    isOwned: false,
+                                    deviceEmojIcon: device.emoj,
+                                    channelSvgIcon: '',
+                                    channelUnit: ((''+ device.category.id).trim().toLowerCase().indexOf('sensor') !== -1) ? (device as any).unit[chIndex] : '',
+                                    channelType: typeof device.status[chIndex],
+                                    room: device.where.reduce(getLastElementOr, {id: 0, name: 'Nessuna Stanza'}).name,
+                                    valueBy: null,
+                                    valueUpTo: null,
+                                    valueAt: null
+                                }
+                            ]
+                                .filter((tr: EventTriggerChannelDeviceType) => !!tr.device)
+                                .sort((a: EventTriggerChannelDeviceType, b: EventTriggerChannelDeviceType) => {
+                                    if(( a.isOwned !== b.isOwned ) && !!a.isOwned) return -1;
+                                    return 1;
+                                })
+                            ;
+
+                        }
+
+
+
+                        if( isActionChannel && !isActionPresent ) {
 
                             // action
                             this.scenario.actions = [
                                 ...this.scenario.actions,
                                 {
-                                    id: (dIndex * 10) + chIndex,
-                                    device: parseInt(''+ device.id),
+                                    id: pageID,
+                                    device: deviceID,
                                     name: device.name,
-                                    channel: CHANNEL_MAPPING[ch as keyof typeof CHANNEL_MAPPING] ?? ch,
+                                    channel: channelName,
                                     isOwned: false,
                                     deviceEmojIcon: device.emoj,
                                     channelSvgIcon: '',
@@ -607,14 +766,15 @@ export class ScenarioPage implements OnInit {
                 console.log('dispositivi arrivati per lo scenario');
                 console.log(this.devices);
 
-                if( this.currentMode === this.Mode.NEW ) {
+                // in creazione e in modifica tutti i canali diventano eventi e azioni da scegliere
+                if( this.currentMode !== this.Mode.DETAILS ) {
                     this.setDevices();
                 }
 
                 this.isDeviceLoading.update(() => false);
             })
             .catch((error: unknown) => {
-                console.log('errore in loadDevices del nuovo gruppo');
+                console.log('errore in loadDevices della pagina dello scenario');
                 console.log(error);
                 this.isDeviceLoading.update(() => false);
             });
@@ -638,18 +798,10 @@ export class ScenarioPage implements OnInit {
                 return 1;
             })
         ;
-        this.scenario.isImmediate = !event.checked;
 
     }
 
 
-
-
-    protected selectedOutputEvent(device: EventTriggerChannelDeviceType) {
-        console.log('model change');
-        device.valueAt = (device.valueAt as unknown as {name: string; code: any}).code;
-        console.log(device);
-    }
 
 
     protected toggleOwnedActionDevice(device: ActionChannelDeviceType, event: CheckboxChangeEvent) {
@@ -684,12 +836,20 @@ export class ScenarioPage implements OnInit {
                 }))
         ;
 
+        // scenario immediato: nessun evento, anche se nella lista ne restano di selezionati
+        if( !this.isAtEvents ) {
+            scenarioObj.triggers = [];
+        }
+
         scenarioObj.actions =
             scenarioObj.actions
                 .filter(( da: ActionChannelDeviceType) => da.isOwned)
                 .map((da: ActionChannelDeviceType) => ({
                     device: da.device,
                     value: da.value,
+                    // ritardo e durata dei comandi salvati, finché la pagina non li fa scegliere
+                    delay: da.delay,
+                    duration: da.duration,
                     channel:
                         Object.keys(CHANNEL_MAPPING)
                             .filter( (key: string) => (CHANNEL_MAPPING[key as keyof typeof CHANNEL_MAPPING] === da.channel) || (key === da.channel) )
@@ -701,23 +861,32 @@ export class ScenarioPage implements OnInit {
         console.log( scenarioDto );
         debugger;
 
+        this.inWaiting.update(() => true);
+
         return (
-            firstValueFrom(this.scenarioApi.createNewScenario(scenarioDto))
+            firstValueFrom(
+                // in modifica la PUT, con lo stesso DTO della creazione
+                ( this.currentMode === this.Mode.EDIT )
+                    ? this.scenarioApi.editScenario(scenarioDto)
+                    : this.scenarioApi.createNewScenario(scenarioDto)
+            )
                 .then((result: any) => {
 
+                    this.inWaiting.update(() => false);
                     this.router.navigate(
                         ['/scenarios-page'],
                         {
                             state: {
-                                from: 'newScenario'
+                                from: ( this.currentMode === this.Mode.EDIT ) ? 'editScenario' : 'newScenario'
                             }
                         }
                     );
 
                 })
                 .catch((error) => {
-                    console.log('errore al caricamento degli scenari');
+                    console.log('errore in saveScenario: salvataggio dello scenario');
                     console.error(error);
+                    this.inWaiting.update(() => false);
                     return [];
                 })
         )
@@ -797,18 +966,14 @@ export class ScenarioPage implements OnInit {
 
     }
 
+    // valore del comando anche con ritardo e durata (POWER:ON;delay=30 è acceso)
     protected getActionValue(deviceAction: ActionChannelDeviceType) {
-        if( !!(deviceAction as unknown as any).action ) {
+        return readScenarioAction((deviceAction as unknown as any).action).value;
+    }
 
-            switch ((deviceAction as unknown as any).action.split(':')[0]) {
-                case 'POWER':
-                    let comand: string = (deviceAction as unknown as any).action.split(':')[1];
-                    return (comand === 'ON');
-                case 'SET':
-                    return (deviceAction as unknown as any).action.split(':')[1];
-                default:
-                    return '';
-            }
-        };
+
+
+    protected delete() {
+        this.openConfirmDeletion = true;
     }
 }

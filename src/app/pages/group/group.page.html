@@ -1,10 +1,35 @@
 <page-title
     [title]="'Gruppo'"
     [hasPlusButton]="false"
-    [hasEditButton]="!isInEdit()"
+    [hasMenuButton]="true"
+    [menu]="groupPageMenu.template"
     [iconID]="'icon-541'"
-    (editButtonClick)="editData()"
 ></page-title>
+<page-menu
+    #groupPageMenu
+    (editClick)="editData()"
+    (duplicateClick)="duplicate()"
+    (deleteClick)="delete()"
+>
+</page-menu>
+<p-drawer
+    [(visible)]="openConfirmDeletion"
+    position="bottom"
+    [modal]="true"
+    [dismissible]="true"
+    [showCloseIcon]="false"
+    [style]="{
+        height: '55vh',
+        borderTopLeftRadius: '24px',
+        borderTopRightRadius: '24px'
+      }"
+>
+    <delete-confirm-component
+        [item]="group()"
+        [itemApiDelete]="deleteGroupByIDs"
+        [exitOnDelete]="exitToGroup"
+    ></delete-confirm-component>
+</p-drawer>
 
 <div style="padding: 1rem;">
 

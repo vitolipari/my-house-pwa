@@ -1,3 +1,123 @@
+/* desktop */
+@media
+only screen
+and (min-width: 1024px) {
+
+
+    .timer-block-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin: 0rem auto;
+    }
+
+    .timer-block.mobile {
+        display: none;
+    }
+    .timer-block.non-mobile {
+        display: flex;
+    }
+
+    .timer-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--color-background-3);
+        border-radius: 12px;
+        width: 9rem;
+        height: 14rem;
+        padding: 0.5rem 1rem;
+        margin: 0.5rem;
+        font-size: var(--main-font-size);
+        color: var(--color-text-2);
+    }
+
+    .timer-card > DIV {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        flex: 1;
+    }
+
+    .timer-card > DIV > SVG,
+    .timer-card > DIV > svg
+    {
+        height: 100%;
+        padding: 0.2rem;
+    }
+
+    .timer-name {
+        font-weight: bold;
+    }
+}
+
+
+
+/* tablet */
+@media
+only screen
+and (min-width: 640px)
+and (max-width: 1023.98px)
+{
+
+    .timer-block-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin: 0rem auto;
+    }
+
+    .timer-block.mobile {
+        display: none;
+    }
+    .timer-block.non-mobile {
+        display: flex;
+    }
+
+    .timer-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--color-background-3);
+        border-radius: 12px;
+        width: 9rem;
+        height: 14rem;
+        padding: 0.5rem 1rem;
+        margin: 0.5rem;
+        font-size: var(--main-font-size);
+        color: var(--color-text-2);
+    }
+
+    .timer-card > DIV {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        flex: 1;
+    }
+
+    .timer-card > DIV > SVG,
+    .timer-card > DIV > svg
+    {
+        height: 100%;
+        padding: 0.2rem;
+    }
+
+    .timer-name {
+        font-weight: bold;
+    }
+
+}
+
+
+.timer-block.non-mobile {
+    display: none;
+}
+
+
 .timer-block {
     display: flex;
     flex-direction: row;
@@ -7,9 +127,9 @@
     background: var(--color-background-3);
     border-radius: 6px;
     margin: 0.5rem auto;
-    min-width: 90vw;
+    min-width: 90cqw;
     width: 100%;
-    max-width: 95vw;
+    max-width: 95cqw;
     padding: 0.5rem 1rem;
     height: 4rem;
 
@@ -136,7 +256,8 @@
 .timer-name {
     /* block e non flex: text-overflow non si applica al testo di un contenitore flex */
     display: block !important;
-    width: 100%;
+    max-width: 90%;
+    min-width: 6rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

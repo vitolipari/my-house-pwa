@@ -28,6 +28,8 @@ import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
 import {GroupsApiService} from '../../groups/groups-api';
 import {RadioButton} from 'primeng/radiobutton';
 import {emoj} from '../../../utils/string-utils';
+import {PageMenu} from '../../../components/page-menu/page-menu';
+import {DeleteConfirmComponent} from '../../../components/delete-confirm-component/delete-confirm-component';
 
 
 @Component({
@@ -50,7 +52,9 @@ import {emoj} from '../../../utils/string-utils';
         SlicePipe,
         DeviceBlockComponent,
         Checkbox,
-        RadioButton
+        // RadioButton,
+        PageMenu,
+        DeleteConfirmComponent
     ],
   templateUrl: './new-timer.page.html',
   styleUrl: './new-timer.page.css',
@@ -557,27 +561,8 @@ export class NewTimerPage {
         // TODO
     }
 
-    protected deleteTimer() {
-        this.openConfirmDeletion = true;
-    }
 
 
-    confirmDeleteTimer() {
-
-        this.isInDeleteTimerInWaiting.update(() => true);
-        firstValueFrom(this.timerApi.deleteTimers([(this.timer as any).id || this.detailsTimer.id]))
-            .then(() => {
-                this.isInDeleteTimerInWaiting.update(() => false);
-                this.router.navigate(['/timers-page']);
-                // window.location.reload();
-            })
-            .catch((e) => {
-                console.log(e);
-            })
-        ;
-
-
-    }
 
 
     openDevicePanel() {
@@ -710,4 +695,15 @@ export class NewTimerPage {
     protected itemEmojIcon(emojIconName: string) {
         return emoj(emojIconName || '');
     }
+
+
+    protected delete() {
+        this.openConfirmDeletion = true;
+    }
+    // per <delete-confirm-component>: arrow function, così il componente le chiama senza perdere il this
+    protected readonly deleteTimerByIDs = (ids: number[]) => this.timerApi.deleteTimers(ids);
+    protected readonly exitToTimers = () => this.router.navigate(['/timers-page']);
+
+
 }
+

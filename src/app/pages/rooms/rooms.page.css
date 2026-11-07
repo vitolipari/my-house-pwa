@@ -1,3 +1,33 @@
+/* desktop */
+@media
+only screen
+and (min-width: 1024px) {
+    ::ng-deep.app-content {
+        width: calc(60cqw - 2rem) !important;
+        max-width: 1024px !important;
+    }
+}
+
+
+
+/* tablet */
+@media
+only screen
+and (min-width: 640px)
+and (max-width: 1023.98px)
+{
+    ::ng-deep.app-content {
+        max-width: calc(75cqw - 2rem) !important;
+        max-width: 1024px !important;
+    }
+}
+
+
+
+
+
+
+
 /* div che contiene le stanze */
 .rooms {
     display: flex;

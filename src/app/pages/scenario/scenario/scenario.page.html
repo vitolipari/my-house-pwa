@@ -10,32 +10,15 @@
     "
     [hasPlusButton]="false"
     [hasMenuButton]="( currentMode === Mode.DETAILS )"
-    [menu]="scenarioMenu"
+    [menu]="scenarioMenu.template"
 ></page-title>
-
-
-<ng-template #scenarioMenu let-popover>
-    <div class="page-menu">
-        <div (click)="editData(); popover.hide()">
-            <svg class="svg-icon" style="position: static;">
-                <use href="#icon-407"></use>
-            </svg>
-            <div>Modifica</div>
-        </div>
-        <div (click)="duplicate(); popover.hide()">
-            <svg class="svg-icon" style="position: static;">
-                <use href="#icon-529"></use>
-            </svg>
-            <div>Duplica</div>
-        </div>
-        <div (click)="deleteScenario(); popover.hide()">
-            <svg class="svg-icon" style="">
-                <use href="#icon-102-red-trash"></use>
-            </svg>
-            <div>Elimina</div>
-        </div>
-    </div>
-</ng-template>
+<page-menu
+    #scenarioMenu
+    (editClick)="editData()"
+    (duplicateClick)="duplicate()"
+    (deleteClick)="delete()"
+>
+</page-menu>
 <p-drawer
     [(visible)]="openConfirmDeletion"
     position="bottom"
@@ -48,54 +31,11 @@
         borderTopRightRadius: '24px'
       }"
 >
-    <div
-        style="
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-        "
-    >
-        <div
-            style="
-                font-family: var(--page-font);
-                font-size: var(--main-font-size);
-                color: var(--color-text-2);
-            "
-        >confermi eliminazione?</div>
-        <div
-            style="margin: 2rem 0rem 5rem 0rem; height: 4rem;"
-        >
-            @if(!!isInDeleteScenarioInWaiting()) {
-                <svg
-                    class="svg-icon"
-                    style="width: 3rem;"
-                >
-                    <use href="#orologio-1-1"></use>
-                </svg>
-            }
-            @else {
-                <img
-                    src="/assets/images/trash.png"
-                    style="height: 100%"
-                >
-            }
-        </div>
-        <div>
-            <div
-                style="
-                      cursor: pointer;
-                      font-family: var(--page-font);
-                      font-size: var(--main-font-size);
-                      color: var(--theme-color);
-                      background: var(--color-red-outer-glow);
-                      border-radius: 100px;
-                      padding: 0.1rem 1rem;
-                "
-                (click)="!isInDeleteScenarioInWaiting() ? confirmDeleteScenario() : null"
-            >conferma</div>
-        </div>
-    </div>
+    <delete-confirm-component
+        [item]="scenario"
+        [itemApiDelete]="deleteScenarioByIDs"
+        [exitOnDelete]="exitToScenarios"
+    ></delete-confirm-component>
 </p-drawer>
 
 <div style="padding: 1rem;">
@@ -245,17 +185,17 @@
                                 <div>
                                     <switcher-component
                                         [isReadOnly]="true"
-                                        [check]="getActionValue( deviceAction )"
+                                        [check]="!!getActionValue( deviceAction )"
                                     ></switcher-component>
                                 </div>
                             }
                             @case('SET') {
                                 <!-- TODO -->
-                                <div>{{ getActionValue( deviceAction ) }}</div>
+                                <div>{{ getActionValue( deviceAction ) }}{{ deviceAction.channelUnit }}</div>
                             }
                             @case('') {
                                 <!-- TODO -->
-                                <div>{{ getActionValue( deviceAction ) }}</div>
+                                <div>{{ getActionValue( deviceAction ) }}x</div>
                             }
                         }
                     </div>
@@ -364,6 +304,7 @@
                                         (onChange)="toggleOwnedDevice(device, $event)"
                                         (click)="$event.stopPropagation();"
                                         [binary]="true"
+                                        [(ngModel)]="device.isOwned"
                                         inputId="size_small"
                                         name="size"
                                         value="Small"
@@ -377,7 +318,7 @@
                                     <div class="scenario name">{{ device.name }}</div>
                                     <div class="scenario channel">{{ device.channel }}</div>
                                 </div>
-                                @if( device.channelUnit !== '' ) {
+                                @if( !!device.channelUnit ) {
                                     <div class="trigger-comand">
                                         <div>
                                                 <div class="scenario small-text">da</div>
@@ -416,10 +357,10 @@
                                         @switch (device.channel) {
                                             @case( CHANNEL_MAPPING.output ) {
                                                 <p-select
-                                                    [options]="[{name: 'accensione', code: true}, {name: 'spegnimento', code: false}]"
+                                                    [options]="[{name: 'accensione', code: '1'}, {name: 'spegnimento', code: '0'}]"
                                                     [(ngModel)]="device.valueAt"
-                                                    (ngModelChange)="selectedOutputEvent(device)"
                                                     optionLabel="name"
+                                                    optionValue="code"
                                                     placeholder="seleziona evento"
                                                     class="w-full md:w-56"
                                                 />
@@ -428,10 +369,10 @@
                                             @case( CHANNEL_MAPPING.close )
                                             {
                                                 <p-select
-                                                    [options]="[{name: 'avvio', code: true}, {name: 'termine', code: false}]"
+                                                    [options]="[{name: 'avvio', code: '1'}, {name: 'termine', code: '0'}]"
                                                     [(ngModel)]="device.valueAt"
-                                                    (ngModelChange)="selectedOutputEvent(device)"
                                                     optionLabel="name"
+                                                    optionValue="code"
                                                     placeholder="seleziona evento"
                                                     class="w-full md:w-56"
                                                 />
@@ -447,8 +388,8 @@
                                                         {name: 'auto', code: 'auto'}
                                                     ]"
                                                     [(ngModel)]="device.valueAt"
-                                                    (ngModelChange)="selectedOutputEvent(device)"
                                                     optionLabel="name"
+                                                    optionValue="code"
                                                     placeholder="seleziona evento"
                                                     class="w-full md:w-56"
                                                 />
@@ -467,8 +408,8 @@
                                                         {name: 'auto', code: 'auto'}
                                                     ]"
                                                     [(ngModel)]="device.valueAt"
-                                                    (ngModelChange)="selectedOutputEvent(device)"
                                                     optionLabel="name"
+                                                    optionValue="code"
                                                     placeholder="seleziona evento"
                                                     class="w-full md:w-56"
                                                 />
@@ -482,8 +423,8 @@
                                                         {name: 'carica', code: 'high'}
                                                     ]"
                                                     [(ngModel)]="device.valueAt"
-                                                    (ngModelChange)="selectedOutputEvent(device)"
                                                     optionLabel="name"
+                                                    optionValue="code"
                                                     placeholder="seleziona evento"
                                                     class="w-full md:w-56"
                                                 />
@@ -497,12 +438,12 @@
                                             {
                                                 <p-select
                                                     [options]="[
-                                                        {name: 'attivo', code: true},
-                                                        {name: 'disattivo', code: false}
+                                                        {name: 'attivo', code: '1'},
+                                                        {name: 'disattivo', code: '0'}
                                                     ]"
                                                     [(ngModel)]="device.valueAt"
-                                                    (ngModelChange)="selectedOutputEvent(device)"
                                                     optionLabel="name"
+                                                    optionValue="code"
                                                     placeholder="seleziona evento"
                                                     class="w-full md:w-56"
                                                 />
@@ -518,8 +459,8 @@
                                                         {name: 'basso', code: '3'}
                                                     ]"
                                                     [(ngModel)]="device.valueAt"
-                                                    (ngModelChange)="selectedOutputEvent(device)"
                                                     optionLabel="name"
+                                                    optionValue="code"
                                                     placeholder="seleziona evento"
                                                     class="w-full md:w-56"
                                                 />
@@ -534,8 +475,8 @@
                                                         {name: 'destra', code: '4'}
                                                     ]"
                                                     [(ngModel)]="device.valueAt"
-                                                    (ngModelChange)="selectedOutputEvent(device)"
                                                     optionLabel="name"
+                                                    optionValue="code"
                                                     placeholder="seleziona evento"
                                                     class="w-full md:w-56"
                                                 />
@@ -551,8 +492,8 @@
                                                         {name: 'basso', code: '5'}
                                                     ]"
                                                     [(ngModel)]="device.valueAt"
-                                                    (ngModelChange)="selectedOutputEvent(device)"
                                                     optionLabel="name"
+                                                    optionValue="code"
                                                     placeholder="seleziona evento"
                                                     class="w-full md:w-56"
                                                 />
@@ -568,8 +509,8 @@
                                                         {name: 'destra', code: '5'}
                                                     ]"
                                                     [(ngModel)]="device.valueAt"
-                                                    (ngModelChange)="selectedOutputEvent(device)"
                                                     optionLabel="name"
+                                                    optionValue="code"
                                                     placeholder="seleziona evento"
                                                     class="w-full md:w-56"
                                                 />
@@ -587,8 +528,8 @@
                                                         {name: 'veryverybad', code: 'veryverybad'}
                                                     ]"
                                                     [(ngModel)]="device.valueAt"
-                                                    (ngModelChange)="selectedOutputEvent(device)"
                                                     optionLabel="name"
+                                                    optionValue="code"
                                                     placeholder="seleziona evento"
                                                     class="w-full md:w-56"
                                                 />
@@ -657,6 +598,7 @@
                                     (onChange)="toggleOwnedActionDevice(device, $event)"
                                     (click)="$event.stopPropagation();"
                                     [binary]="true"
+                                    [(ngModel)]="device.isOwned"
                                     inputId="size_small"
                                     name="size"
                                     value="Small"
@@ -672,15 +614,48 @@
                             </div>
 
 
-                            <div>
+                            <div style="flex: 0;">
                                 @switch (device.channelType) {
                                     @case('boolean') {
-                                        <div>
+                                        <div class="timed-action-comand">
                                             <switcher-component
                                                 [isReadOnly]="false"
                                                 [check]="!!device.value"
                                                 (toggle)="device.value = !!$event"
+                                                [style]="'margin-bottom: 0.5rem;'"
                                             ></switcher-component>
+                                            <div>
+                                                <div>
+                                                    <svg class="svg-icon"><use href="#icon-196"></use></svg>
+                                                </div>
+                                                <div>
+                                                    <input
+                                                        pInputText
+                                                        id="groupName"
+                                                        placeholder="dopo"
+                                                        class="timed-action-input"
+                                                        [(ngModel)]="device.delay"
+                                                    />
+                                                    <div class="timed-action-unit">sec</div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div>
+                                                    <svg class="svg-icon">
+                                                        <use href="#icon-446"></use>
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <input
+                                                        pInputText
+                                                        id="groupName"
+                                                        placeholder="durata"
+                                                        class="timed-action-input"
+                                                        [(ngModel)]="device.duration"
+                                                    />
+                                                    <div class="timed-action-unit">sec</div>
+                                                </div>
+                                            </div>
                                         </div>
                                     }
                                     @case('number') {

@@ -56,7 +56,18 @@ export type ActionChannelDeviceType = {
     room: string;
     channel: string;
     value: number | string | boolean;
+    // secondi prima del comando e prima del ritorno allo stato di prima, letti dal comando del Core in modifica
+    delay?: number;
+    duration?: number;
 }
+
+
+// valori di un'azione letti dal comando del Core (POWER:ON;delay=30;duration=60): booleano per POWER, testo per SET
+export type ScenarioActionValuesType = {
+    value: boolean | string;
+    delay: number;
+    duration: number;
+};
 
 
 export type ScenarioDTOType = {
@@ -78,6 +89,9 @@ export type ScenarioDTOType = {
             "device": number;
             "value": number | string | boolean | null;
             "channel": string;
+            // secondi prima del comando e prima del ritorno allo stato di prima (Vito, 05/11)
+            "delay"?: number;
+            "duration"?: number;
         }[]
 };
 

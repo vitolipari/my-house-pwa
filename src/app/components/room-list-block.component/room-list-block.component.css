@@ -6,9 +6,9 @@
     background: var(--color-background-3);
     border-radius: 4px;
     margin: 0rem auto;
-    min-width: 10vw;
+    min-width: 10cqw;
     width: 100%;
-    max-width: 95vw;
+    max-width: 95cqw;
     padding: 0rem;
     height: 4rem;
     font-size: var(--main-font-size);

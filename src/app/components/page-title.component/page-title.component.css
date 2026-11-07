@@ -2,7 +2,7 @@
     --title-height: 2rem;
 
     height: var(--title-height);
-    width: 100vw;
+    width: 100cqw;
     display: flex;
     flex-direction: row;
     justify-content: space-around;

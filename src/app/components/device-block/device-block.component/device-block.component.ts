@@ -232,7 +232,7 @@ export class DeviceBlockComponent implements OnInit {
 
     getMainChannel(device: DeviceSmallType): string {
 
-        console.log('main channel per '+ device.name);
+        // console.log('main channel per '+ device.name);
 
         let d: DeviceType = this.device
         ;
@@ -242,7 +242,7 @@ export class DeviceBlockComponent implements OnInit {
 
         if (isSensorDevice(d)) {
 
-            console.log('in dispositivo é un sensore');
+            // console.log('in dispositivo é un sensore');
 
             const powerChannelIndex: number = d.channel.lastIndexOf('power');
             const power = (powerChannelIndex !== -1) ? d.value?.[powerChannelIndex] : null;
@@ -321,8 +321,8 @@ export class DeviceBlockComponent implements OnInit {
                     let airFlowOrizontalPosition = d.status[1 + d.channel.lastIndexOf('air_flow_horizontal_position')];
 
 
-                    console.log('main channel per clima');
-                    console.log(`${ mode },${ targetTemperature },${ currentTemperature },fan_04-${ fanSpeed },flow_vertical-${ airFlowVertical },flow_orizontal-${ airFlowOrizontal }`);
+                    // console.log('main channel per clima');
+                    // console.log(`${ mode },${ targetTemperature },${ currentTemperature },fan_04-${ fanSpeed },flow_vertical-${ airFlowVertical },flow_orizontal-${ airFlowOrizontal }`);
 
                     return `${ mode },${ targetTemperature },${ currentTemperature },fan_04-${ fanSpeed },flow_vertical-${ airFlowVertical },flow_orizontal-${ airFlowOrizontal }`;
                 }

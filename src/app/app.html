@@ -31,13 +31,16 @@
         ></app-header>
     }
 
-    <div>
+    <div class="layout">
         @if ( user(); as user ) {
             <div class="device tablet desktop">
-                Menu
+                <sidebar-menu
+                ></sidebar-menu>
             </div>
         }
-            <router-outlet />
+        <main class="app-content">
+            <router-outlet class="target-page"/>
+        </main>
     </div>
 
 

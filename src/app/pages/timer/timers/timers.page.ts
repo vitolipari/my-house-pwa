@@ -240,4 +240,8 @@ export class TimersPage implements OnInit {
             }
         });
     }
+
+    protected isRunning(timer: FullTimerType & { sectors: number[][]; arcs: string[] }) {
+        return true;
+    }
 }

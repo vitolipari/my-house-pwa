@@ -18,6 +18,8 @@ import {FormBuilder, FormsModule, Validators} from '@angular/forms';
 import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
 import {Drawer} from 'primeng/drawer';
 import {DeviceBlockComponent} from '../../components/device-block/device-block.component/device-block.component';
+import {PageMenu} from '../../components/page-menu/page-menu';
+import {DeleteConfirmComponent} from '../../components/delete-confirm-component/delete-confirm-component';
 
 @Component({
   selector: 'app-room.page',
@@ -29,7 +31,9 @@ import {DeviceBlockComponent} from '../../components/device-block/device-block.c
         FormsModule,
         // Checkbox,
         Drawer,
-        DeviceBlockComponent
+        DeviceBlockComponent,
+        PageMenu,
+        DeleteConfirmComponent
     ],
   templateUrl: './room.page.html',
   styleUrl: './room.page.css',
@@ -410,9 +414,7 @@ export class RoomPage implements OnInit {
 
     }
 
-    protected deleteRoom() {
-        this.openConfirmDeletion = true;
-    }
+
 
     protected duplicate() {
 
@@ -465,4 +467,12 @@ export class RoomPage implements OnInit {
     }
 
     isOwned = (device: DeviceType) => !!this.room.devices?.find((od: DeviceType) => od.id === device.id);
+
+    protected delete() {
+        this.openConfirmDeletion = true;
+    }
+    // per <delete-confirm-component>: arrow function, così il componente le chiama senza perdere il this
+    protected readonly deleteRoomByIDs = (ids: number[]) => this.roomsApi.deleteRooms([this.room]);
+    protected readonly exitToRooms = () => this.router.navigate(['/rooms-page']);
+
 }

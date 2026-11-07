@@ -6,7 +6,7 @@
 ></page-title>
 
 
-<div>
+<div class="timer-block-container">
 
     @if(!!isInWaiting()) {
         <div>caricamento...</div>
@@ -74,88 +74,179 @@
             }
         </div>
 
-        @for (timer of timers(); track timer.id) {
 
-            <div
-                class="timer-block"
-                (longPress)="onLongPress(timers)"
-                (click)="gotoTimerPage(timer)"
-            >
-                <div class="timer-block-section selection">
-                    @if(!!isInSelection()) {
-                        <div
-                            style=""
-                        >
-                            <p-checkbox
-                                (onChange)="toggleSelctedTimers(timer, $event)"
-                                (click)="stopPropagation($event)"
-                                [binary]="true"
-                                inputId="size_small"
-                                name="size"
-                                value="Small"
-                                size="small"
-                                style="margin: 0rem 0.75rem 0rem 0rem;"
-                            />
+
+        <div class="device tablet desktop timer-block-container">
+            @for (timer of timers(); track timer.id) {
+                <div
+                    class="timer-card"
+                    (longPress)="onLongPress(timers)"
+                    (click)="gotoTimerPage(timer); stopPropagation($event)"
+                    (mouseup)="stopPropagation($event)"
+                >
+                    <div>
+                        <div>
+                            @if(!!isInSelection()) {
+                                <div
+                                    style=""
+                                >
+                                    <p-checkbox
+                                        (onChange)="toggleSelctedTimers(timer, $event)"
+                                        (click)="stopPropagation($event)"
+                                        [binary]="true"
+                                        inputId="size_small"
+                                        name="size"
+                                        value="Small"
+                                        size="small"
+                                        style="margin: 0rem 0.75rem 0rem 0rem;"
+                                    />
+                                </div>
+                            }
                         </div>
-                    }
-                </div>
-                <div class="timer-block-section first">
-                    <div class="timer-name">{{ timer.name }}</div>
-                    <div class="sub-row">
-                        <div>{{ timer.start }} - {{ timer.end }}</div>
-                        <div class="week-days-container">
-                            <div class="week-days {{ !!timer.weekDays[0] ? 'active' : '' }}">L</div>
-                            <div class="week-days {{ !!timer.weekDays[1] ? 'active' : '' }}">M</div>
-                            <div class="week-days {{ !!timer.weekDays[2] ? 'active' : '' }}">M</div>
-                            <div class="week-days {{ !timer.weekDays[3] ? 'active' : '' }}">G</div>
-                            <div class="week-days {{ !!timer.weekDays[4] ? 'active' : '' }}">V</div>
-                            <div class="week-days {{ !!timer.weekDays[5] ? 'active' : '' }}">S</div>
-                            <div class="week-days {{ !!timer.weekDays[6] ? 'active' : '' }}">D</div>
+                        <div class="timer-name">{{ timer.name }}</div>
+                        <div>
+                            @if( !!isRunning( timer ) ) {
+                                <div class="running"></div>
+                            }
                         </div>
+                    </div>
+                    <div style="flex: 5;">
+                        <svg viewBox="0 0 100 100">
+                            <circle
+                                [attr.r]="circle.r"
+                                [attr.cx]="circle.x"
+                                [attr.cy]="circle.y"
+                                fill="none"
+                                stroke="var(--color-background-1)"
+                                [attr.stroke-width]=" circle.width "
+                            ></circle>
+                            @for(arc of timer.arcs; track $index) {
+                                <path
+                                    [attr.d]="arc"
+                                    fill="none"
+                                    stroke="var(--color-ambient-2)"
+                                    [attr.stroke-width]=" circle.width "
+
+                                ></path>
+                            }
+                        </svg>
+                    </div>
+                    <div style="width: 100%; margin-top: 1rem;">
+                        <div class="week-days {{ !!timer.weekDays[0] ? 'active' : '' }}">L</div>
+                        <div class="week-days {{ !!timer.weekDays[1] ? 'active' : '' }}">M</div>
+                        <div class="week-days {{ !!timer.weekDays[2] ? 'active' : '' }}">M</div>
+                        <div class="week-days {{ !!timer.weekDays[3] ? 'active' : '' }}">G</div>
+                        <div class="week-days {{ !!timer.weekDays[4] ? 'active' : '' }}">V</div>
+                        <div class="week-days {{ !!timer.weekDays[5] ? 'active' : '' }}">S</div>
+                        <div class="week-days {{ !!timer.weekDays[6] ? 'active' : '' }}">D</div>
                         <div class="has-holidays {{ !!timer.isHolidays ? 'active': '' }}">{{ emoj('party_popper') }}</div>
                     </div>
+                    <div style="width: 100%;">
+                        <div>abilita</div>
+                        <div>
+                            @if( !!isTimerInWaiting( timer ) ) {
+                                <svg class="svg-icon inside-device-list-status" style="position: static; top: 1.1rem; left: 3.8rem;">
+                                    <use href="#orologio-1-1"></use>
+                                </svg>
+                            }
+                            @else {
+                                <switcher-component
+                                    [check]="!!timer.enabled"
+                                    [isReadOnly]="false"
+                                    [inWait]="!!isTimerInWaiting( timer )"
+                                    (toggle)="toggleEnableTimer(timer, $event)"
+                                ></switcher-component>
+                            }
+                        </div>
+                    </div>
                 </div>
+            }
+        </div>
 
+        <div class="device mobile">
+            @for (timer of timers(); track timer.id) {
 
-                <div class="timer-block-section" style="margin-right: 0rem; margin-left: 1.5rem;">
-                    <svg viewBox="0 0 100 100">
-                        <circle
-                            [attr.r]="circle.r"
-                            [attr.cx]="circle.x"
-                            [attr.cy]="circle.y"
-                            fill="none"
-                            stroke="var(--color-background-1)"
-                            [attr.stroke-width]=" circle.width "
-                        ></circle>
-                        @for(arc of timer.arcs; track $index) {
-                            <path
-                                [attr.d]="arc"
-                                fill="none"
-                                stroke="var(--color-ambient-2)"
-                                [attr.stroke-width]=" circle.width "
-
-                            ></path>
+                <div
+                    class="timer-block"
+                    (longPress)="onLongPress(timers)"
+                    (click)="gotoTimerPage(timer)"
+                >
+                    <div class="timer-block-section selection">
+                        @if(!!isInSelection()) {
+                            <div
+                                style=""
+                            >
+                                <p-checkbox
+                                    (onChange)="toggleSelctedTimers(timer, $event)"
+                                    (click)="stopPropagation($event)"
+                                    [binary]="true"
+                                    inputId="size_small"
+                                    name="size"
+                                    value="Small"
+                                    size="small"
+                                    style="margin: 0rem 0.75rem 0rem 0rem;"
+                                />
+                            </div>
                         }
-                    </svg>
-                </div>
+                    </div>
+                    <div class="timer-block-section first">
+                        <div class="timer-name">{{ timer.name }}</div>
+                        <div class="sub-row">
+                            <div>{{ timer.start }} - {{ timer.end }}</div>
+                            <div class="week-days-container">
+                                <div class="week-days {{ !!timer.weekDays[0] ? 'active' : '' }}">L</div>
+                                <div class="week-days {{ !!timer.weekDays[1] ? 'active' : '' }}">M</div>
+                                <div class="week-days {{ !!timer.weekDays[2] ? 'active' : '' }}">M</div>
+                                <div class="week-days {{ !!timer.weekDays[3] ? 'active' : '' }}">G</div>
+                                <div class="week-days {{ !!timer.weekDays[4] ? 'active' : '' }}">V</div>
+                                <div class="week-days {{ !!timer.weekDays[5] ? 'active' : '' }}">S</div>
+                                <div class="week-days {{ !!timer.weekDays[6] ? 'active' : '' }}">D</div>
+                            </div>
+                            <div class="has-holidays {{ !!timer.isHolidays ? 'active': '' }}">{{ emoj('party_popper') }}</div>
+                        </div>
+                    </div>
 
-                <div class="timer-block-section action">
-                    @if( !!isTimerInWaiting( timer ) ) {
-                        <svg class="svg-icon inside-device-list-status" style="position: static; top: 1.1rem; left: 3.8rem;">
-                            <use href="#orologio-1-1"></use>
+
+                    <div class="timer-block-section" style="margin-right: 0rem; margin-left: 1.5rem;">
+                        <svg viewBox="0 0 100 100">
+                            <circle
+                                [attr.r]="circle.r"
+                                [attr.cx]="circle.x"
+                                [attr.cy]="circle.y"
+                                fill="none"
+                                stroke="var(--color-background-1)"
+                                [attr.stroke-width]=" circle.width "
+                            ></circle>
+                            @for(arc of timer.arcs; track $index) {
+                                <path
+                                    [attr.d]="arc"
+                                    fill="none"
+                                    stroke="var(--color-ambient-2)"
+                                    [attr.stroke-width]=" circle.width "
+
+                                ></path>
+                            }
                         </svg>
-                    }
-                    @else {
-                        <switcher-component
-                            [check]="!!timer.enabled"
-                            [isReadOnly]="false"
-                            [inWait]="!!isTimerInWaiting( timer )"
-                            (toggle)="toggleEnableTimer(timer, $event)"
-                        ></switcher-component>
-                    }
+                    </div>
+
+                    <div class="timer-block-section action">
+                        @if( !!isTimerInWaiting( timer ) ) {
+                            <svg class="svg-icon inside-device-list-status" style="position: static; top: 1.1rem; left: 3.8rem;">
+                                <use href="#orologio-1-1"></use>
+                            </svg>
+                        }
+                        @else {
+                            <switcher-component
+                                [check]="!!timer.enabled"
+                                [isReadOnly]="false"
+                                [inWait]="!!isTimerInWaiting( timer )"
+                                (toggle)="toggleEnableTimer(timer, $event)"
+                            ></switcher-component>
+                        }
+                    </div>
                 </div>
-            </div>
-        }
+            }
+        </div>
     }
 
 

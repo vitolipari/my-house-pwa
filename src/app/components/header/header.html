@@ -23,35 +23,23 @@
             (click)="openMobileMenu()"
         ></i>
     </div>
+    <div class="device tablet desktop" style="margin-right: 1rem;">
+        @if( !!user ) {
+            <img
+                id="header-profile-image"
+                [src]="!!user ? user.picture : ''"
+                (click)="gotoPage('/profile/page')"
+            />
+        }
+        @else {
+            <svg
+                class="svg-icon"
+                id="header-profile-image-placeholder"
+                (click)="gotoPage('/profile/page')"
+            >
+                <use href="#header-profile-image-placeholder"></use>
+            </svg>
+        }
+    </div>
 </div>
 
-
-
-        <!--    <div>-->
-
-<!--        @if( !!isInProfilePage ) {-->
-<!--            <i-->
-<!--                class="pi pi-times-circle svg-icon primeicons"-->
-<!--                (click)="goBack()"-->
-<!--            ></i>-->
-<!--        }-->
-<!--        @else {-->
-<!--            @if( !!user ) {-->
-<!--                <img-->
-<!--                    id="header-profile-image"-->
-<!--                    [src]="!!user ? user.picture : ''"-->
-<!--                    (click)="gotoProfilePage()"-->
-<!--                />-->
-<!--            }-->
-<!--            @else {-->
-<!--                <svg-->
-<!--                    class="svg-icon"-->
-<!--                    id="header-profile-image-placeholder"-->
-<!--                    (click)="gotoProfilePage()"-->
-<!--                >-->
-<!--                    <use href="#header-profile-image-placeholder"></use>-->
-<!--                </svg>-->
-<!--            }-->
-<!--        }-->
-
-<!--    </div>-->

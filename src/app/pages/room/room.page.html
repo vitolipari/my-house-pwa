@@ -1,37 +1,16 @@
-<!--
-    [hasEditButton]="!isInEditMode()"
-    [iconID]="'BxsDoorOpen'"
-    (editButtonClick)="editData()"
--->
 <page-title
     [title]="!!isInDetailsMode() ? 'Stanza' : ( !!isInEditMode() ? 'Modifica Stanza' : 'Nuova Stanza' )"
     [hasPlusButton]="false"
     [hasMenuButton]="(!!isInDetailsMode() || !!isInEditMode())"
-    [menu]="roomMenu"
+    [menu]="roomMenu.template"
 ></page-title>
-
-<ng-template #roomMenu let-popover>
-    <div class="page-menu">
-        <div (click)="editData(); popover.hide()">
-            <svg class="svg-icon" style="position: static;">
-                <use href="#icon-407"></use>
-            </svg>
-            <div>Modifica</div>
-        </div>
-        <div (click)="duplicate(); popover.hide()">
-            <svg class="svg-icon" style="position: static;">
-                <use href="#icon-529"></use>
-            </svg>
-            <div>Duplpica</div>
-        </div>
-        <div (click)="deleteRoom(); popover.hide()">
-            <svg class="svg-icon" style="">
-                <use href="#icon-102-red-trash"></use>
-            </svg>
-            <div>Elimina</div>
-        </div>
-    </div>
-</ng-template>
+<page-menu
+    #roomMenu
+    (editClick)="editData()"
+    (duplicateClick)="duplicate()"
+    (deleteClick)="delete()"
+>
+</page-menu>
 <p-drawer
     [(visible)]="openConfirmDeletion"
     position="bottom"
@@ -44,54 +23,11 @@
         borderTopRightRadius: '24px'
       }"
 >
-    <div
-        style="
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-        "
-    >
-        <div
-            style="
-                font-family: var(--page-font);
-                font-size: var(--main-font-size);
-                color: var(--color-text-2);
-            "
-        >confermi eliminazione?</div>
-        <div
-            style="margin: 2rem 0rem 5rem 0rem; height: 4rem;"
-        >
-            @if(!!isInDeleteRoomInWaiting()) {
-                <svg
-                    class="svg-icon"
-                    style="width: 3rem;"
-                >
-                    <use href="#orologio-1-1"></use>
-                </svg>
-            }
-            @else {
-                <img
-                    src="/assets/images/trash.png"
-                    style="height: 100%"
-                >
-            }
-        </div>
-        <div>
-            <div
-                style="
-                      cursor: pointer;
-                      font-family: var(--page-font);
-                      font-size: var(--main-font-size);
-                      color: var(--theme-color);
-                      background: var(--color-red-outer-glow);
-                      border-radius: 100px;
-                      padding: 0.1rem 1rem;
-                "
-                (click)="!isInDeleteRoomInWaiting() ? confirmDeleteRoom() : null"
-            >conferma</div>
-        </div>
-    </div>
+    <delete-confirm-component
+        [item]="room"
+        [itemApiDelete]="deleteRoomByIDs"
+        [exitOnDelete]="exitToRooms"
+    ></delete-confirm-component>
 </p-drawer>
 
 

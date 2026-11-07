@@ -30,6 +30,7 @@ import {LongPressDirective} from '../../directives/long-press.directive';
 import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
 import {Button} from 'primeng/button';
 import {DeviceBlockComponent} from '../../components/device-block/device-block.component/device-block.component';
+import {DeviceGridComponent} from '../../components/device-grid.component/device-grid.component';
 
 export const DEVICE_STATUS_MAX_AGE_MS = 60_000;
 
@@ -52,12 +53,12 @@ export const DEVICE_STATUS_MAX_AGE_MS = 60_000;
         // , SwitcherComponent
         , LongPressDirective
         , Checkbox
-        , Button, SwitcherComponent
+        , Button, SwitcherComponent, DeviceGridComponent
     ],
     templateUrl: './devices.page.html',
     styleUrls: ['../../../page.css', './devices.page.css']
 })
-export class DevicesPage implements OnInit {
+export class DevicesPage implements OnInit, OnDestroy {
 
 
     isInWaiting = signal(true);
@@ -70,6 +71,7 @@ export class DevicesPage implements OnInit {
     // readonly devicesInList = signal<DeviceSmallType[]>([]);
     readonly devicesLoading = signal(true);
     readonly devicesError = signal<string | null>(null);
+    private channel: WebSocket | null = null;     // WebSocket con il Core, aperta in ngOnInit e chiusa in ngOnDestroy
     // readonly isDeviceStatusInWaiting = signal<{ id: number | string; inWaiting: boolean }[]>([{
     //     id: 0,
     //     inWaiting: false
@@ -175,12 +177,60 @@ export class DevicesPage implements OnInit {
     }
 
     ngOnInit(): void {
+
+
+        // this.darkModeService.isDarkMode();
+
+
         // dalle pagine dei gruppi si torna direttamente sul tab dei gruppi
         if (this.navigationData?.['tab'] === 'groups') {
             this.value = 'groups';
         }
         void this.loadDevices();
         void this.loadGroups();
+
+        let protocol = (location.protocol === 'https:') ? 'wss://' : 'ws://';
+        let channel = new WebSocket(protocol + location.host + '/api/core/');
+        this.channel = channel;
+
+        channel.onopen = (ch: any) => {
+            // channel.send(JSON.stringify({
+            //     app: 'cashcode-vector',
+            //     from: notificId
+            // }))
+            console.log('canale websocket aperto');
+            console.log(ch);
+        }
+
+        // dal Core arriva il DeviceType di un dispositivo che ha cambiato lo stato o il valore di un canale: prende il
+        // posto di quello con lo stesso id, e le liste derivate da `devices` (stanze) si ricalcolano da sole
+        channel.onmessage = (msg: any) => {
+            console.log('dati ricevuti');
+            console.log( JSON.parse(msg.data) );
+
+            try {
+                let updatedDevice: DeviceType = JSON.parse(msg.data);
+
+                this.devices
+                    .update((devices: DeviceType[]) => (
+                        devices
+                            .map((device: DeviceType) => (device.id === updatedDevice.id) ? updatedDevice : device)
+                    ))
+                ;
+            }
+            catch (e: any) {
+                console.log('errore in onmessage di DevicesPage: messaggio della WebSocket non valido');
+                console.log(e);
+            }
+        }
+
+    }
+
+    // uscendo dalla pagina la WebSocket si chiude, altrimenti a ogni nuova apertura se ne aggiungerebbe un'altra
+    ngOnDestroy(): void {
+        if( this.channel ) {
+            this.channel.close();
+        }
     }
 
 
@@ -356,8 +406,8 @@ export class DevicesPage implements OnInit {
                                 })
                         ;
 
-                        // console.log('groupStatusList');
-                        // console.log(gr);
+                        console.log('groupStatusList');
+                        console.log(gr);
                     })
 
 

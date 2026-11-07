@@ -61,4 +61,46 @@ and (max-width: 1023.98px)
         justify-self: center;
     }
 
+
+    /* classi non presenti in app.html: regole mai applicate */
+    /*.app-body { display: flex; flex-direction: row; }*/
+
+    /*.app-sidebar {*/
+    /*    flex: 0 0 var(--sidebar-width);*/
+    /*    position: sticky;*/
+    /*    top: 0;*/
+    /*    align-self: flex-start;*/
+    /*    height: calc(100vh - var(--header-height));*/
+    /*    overflow-y: auto;*/
+    /*}*/
+
+    .app-content {
+        /* flex e min-width ora in app.css, validi anche su mobile */
+        /*flex: 1 1 auto;*/
+        /*min-width: 0;*/
+        max-height: calc(100vh - var(--header-height) - 0rem);
+        /* solo scorrimento verticale: in orizzontale si taglia, come fa BODY su mobile */
+        overflow-x: hidden;
+        overflow-y: auto;
+        /*overflow: auto;*/
+        /*display: inline-block;*/
+        /* la sidebar è larga quanto il suo contenuto, non --sidebar-width */
+        /*max-width: calc(100vw - var(--sidebar-width) - 1rem);*/
+    }
+
+
+    .layout {
+        flex-direction: row;
+    }
+
+    #header-profile-image,
+    #header-profile-image-placeholder
+    {
+        height: calc(var(--header-height) - 1rem) !important;
+    }
+
+    /* stile comune a tutte le pagine */
+    .app-content > router-outlet + * {
+    }
+
 }

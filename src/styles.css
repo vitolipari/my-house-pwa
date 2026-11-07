@@ -87,6 +87,10 @@
 
     --max-panel-width: 1024px;
 
+
+    --sidebar-width: 5rem;
+
+
 }
 
 :host {
@@ -431,6 +435,12 @@ A > DIV {
         animation: none;
         opacity: 1;
     }
+}
+
+
+
+.running {
+    background: var(--sky-color);
 }
 
 

@@ -50,6 +50,7 @@
         "changeOrigin": true,
         "pathRewrite": {
             "^/api/core": ""
-        }
+        },
+        "ws": true
     }
 }

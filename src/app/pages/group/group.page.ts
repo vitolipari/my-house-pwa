@@ -14,6 +14,9 @@ import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
 import moment from 'moment';
 import {DeviceBlockComponent} from '../../components/device-block/device-block.component/device-block.component';
 import { TextareaModule } from 'primeng/textarea';
+import {DeleteConfirmComponent} from '../../components/delete-confirm-component/delete-confirm-component';
+import {Drawer} from 'primeng/drawer';
+import {PageMenu} from '../../components/page-menu/page-menu';
 
 @Component({
   selector: 'app-group.page',
@@ -24,7 +27,10 @@ import { TextareaModule } from 'primeng/textarea';
         FormsModule,
         Checkbox,
         DeviceBlockComponent,
-        TextareaModule
+        TextareaModule,
+        DeleteConfirmComponent,
+        Drawer,
+        PageMenu
     ],
   templateUrl: './group.page.html',
   styleUrl: './group.page.css',
@@ -55,6 +61,10 @@ export class GroupPage implements OnInit {
         const ids: string[] = this.groupDeviceIds();
         return this.devices().filter((device: DeviceType) => ids.includes(String(device.id)));
     });
+
+
+    openConfirmDeletion: boolean = false;
+
 
 
     ngOnInit(): void {
@@ -298,4 +308,16 @@ export class GroupPage implements OnInit {
                 this.inWaiting.set(false);
             });
     }
+
+    protected duplicate() {
+
+    }
+
+    protected delete() {
+        this.openConfirmDeletion = true;
+    }
+    // per <delete-confirm-component>: arrow function, così il componente le chiama senza perdere il this
+    protected readonly deleteGroupByIDs = (ids: number[]) => this.groupsApi.deleteGroups([this.group()]);
+    protected readonly exitToGroup = () => this.router.navigate(['/devices-page']);
+
 }

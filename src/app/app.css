@@ -12,6 +12,32 @@
     min-height: calc(100vh - var(--header-height));
 }
 
+/* e lo stesso di sopra */
+.layout {
+    display: flex;
+    justify-content: flex-start;
+}
+
+/*
+ * main prende tutto lo spazio accanto alla sidebar (su mobile tutto lo schermo);
+ * container-type fa misurare i cqw dei contenuti sulla larghezza di main e non dello schermo
+ */
+.app-content {
+    flex: 1 1 auto;
+    min-width: 0;
+    container-type: inline-size;
+
+    /*max-width: calc(60cqw - 2rem);*/
+    max-width: 100%;
+    margin: 1rem auto;
+}
+
+
+/* stile comune a tutte le pagine */
+.app-content > router-outlet + * {
+}
+
+
 .pwa-notice {
     position: fixed;
     right: 1rem;

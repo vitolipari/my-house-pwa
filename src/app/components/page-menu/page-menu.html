@@ -1,0 +1,22 @@
+<ng-template #itemMenu let-popover>
+    <div class="page-menu">
+        <div (click)="editData(); popover.hide()">
+            <svg class="svg-icon" style="position: static;">
+                <use href="#icon-407"></use>
+            </svg>
+            <div>Modifica</div>
+        </div>
+        <div (click)="duplicate(); popover.hide()">
+            <svg class="svg-icon" style="position: static;">
+                <use href="#icon-529"></use>
+            </svg>
+            <div>Duplica</div>
+        </div>
+        <div (click)="deleteItem(); popover.hide()">
+            <svg class="svg-icon" style="">
+                <use href="#icon-102-red-trash"></use>
+            </svg>
+            <div>Elimina</div>
+        </div>
+    </div>
+</ng-template>

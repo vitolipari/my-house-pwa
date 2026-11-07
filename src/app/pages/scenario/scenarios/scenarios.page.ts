@@ -5,7 +5,8 @@ import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
 import {FormsModule} from '@angular/forms';
 import {InputText} from 'primeng/inputtext';
 import {SwitcherComponent} from '../../../components/switcher/switcher.component';
-import {ScenarioType} from '../scenario.models';
+import {ScenarioActionValuesType, ScenarioDTOType, ScenarioType} from '../scenario.models';
+import {readScenarioAction} from '../scenario/scenario.page';
 import {LongPressDirective} from '../../../directives/long-press.directive';
 import {Router} from '@angular/router';
 import {ScenarioApiService} from '../scenario-api';
@@ -156,8 +157,42 @@ export class ScenariosPage implements OnInit {
 
         scenario.enabled = event;
 
+        // la PUT riceve lo stesso DTO della creazione: id del dispositivo, chiave del canale e valori; quelli delle
+        // azioni si leggono dal comando del Core (POWER:ON;delay=30)
+        let scenarioDto: ScenarioDTOType = {
+            id: scenario.id,
+            name: scenario.name,
+            description: scenario.description,
+            enabled: !!event,
+            isImmediate: scenario.isImmediate,
+            triggers:
+                scenario.triggers
+                    .map((trigger: any) => ({
+                        device: parseInt(''+ trigger.device.id),
+                        channel: trigger.channel.name,
+                        valueBy: trigger.eventValueFrom,
+                        valueUpTo: trigger.eventValueUpTo,
+                        valueAt: trigger.eventValueAt
+                    }))
+            ,
+            actions:
+                scenario.actions
+                    .map((action: any) => {
+
+                        let actionValues: ScenarioActionValuesType = readScenarioAction(action.action);
+
+                        return ({
+                            device: parseInt(''+ action.device.id),
+                            channel: action.channel.name,
+                            value: actionValues.value,
+                            delay: actionValues.delay,
+                            duration: actionValues.duration
+                        });
+                    })
+        };
+
         return (
-            firstValueFrom(this.scenarioApi.enableScenarios( scenario ))
+            firstValueFrom(this.scenarioApi.editScenario( scenarioDto ))
                 .then((result: any) => {
 
                     this.waitingScenarios.update((list) => {
@@ -167,8 +202,14 @@ export class ScenariosPage implements OnInit {
 
                 })
                 .catch((error) => {
-                    console.log('errore al caricamento degli scenari');
+                    console.log('errore in toggleEnableScenario: abilitazione dello scenario');
                     console.error(error);
+
+                    this.waitingScenarios.update((list) => {
+                        list = list.filter((id) => id !== scenario.id);
+                        return list;
+                    });
+
                     return [];
                 })
         )

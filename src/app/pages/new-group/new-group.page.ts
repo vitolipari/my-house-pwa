@@ -12,6 +12,9 @@ import {Router} from '@angular/router';
 import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
 import {DeviceBlockComponent} from '../../components/device-block/device-block.component/device-block.component';
 import { TextareaModule } from 'primeng/textarea';
+import {PageMenu} from '../../components/page-menu/page-menu';
+import {DeleteConfirmComponent} from '../../components/delete-confirm-component/delete-confirm-component';
+import {Drawer} from 'primeng/drawer';
 
 
 @Component({
@@ -23,7 +26,10 @@ import { TextareaModule } from 'primeng/textarea';
         Button,
         Checkbox,
         DeviceBlockComponent,
-        TextareaModule
+        TextareaModule,
+        PageMenu,
+        DeleteConfirmComponent,
+        Drawer
     ],
   templateUrl: './new-group.page.html',
   styleUrl: './new-group.page.css',
@@ -51,6 +57,7 @@ export class NewGroupPage implements OnInit {
     private readonly deviceApi = inject(DeviceApiService);
     private readonly groupsApi = inject(GroupsApiService);
     private readonly router = inject(Router);
+    openConfirmDeletion: boolean = false;
 
 
     ngOnInit(): void {
@@ -140,5 +147,23 @@ export class NewGroupPage implements OnInit {
                 );
                 this.isSavingInWait.set(false);
             });
+    }
+
+    protected editData() {
+
+    }
+
+    protected duplicate() {
+
+    }
+
+
+    // per <delete-confirm-component>: arrow function, così il componente le chiama senza perdere il this
+    protected readonly deleteScenarioByIDs = (ids: number[]) => this.groupsApi.deleteGroups([this.data()]);
+    protected readonly exitToScenarios = () => this.router.navigate(['/scenarios-page']);
+
+
+    protected delete() {
+        this.openConfirmDeletion = true;
     }
 }

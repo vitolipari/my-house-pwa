@@ -37,4 +37,17 @@ export class Header {
     openMobileMenu() {
         this.menuToggle.emit( true );
     }
+
+    protected gotoPage(path: string) {
+
+            this.router.navigate(
+                [path],
+                {
+                    state: {
+                        from: 'mobileMenu'
+                    }
+                }
+            );
+
+    }
 }

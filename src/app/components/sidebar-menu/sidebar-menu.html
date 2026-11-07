@@ -1,0 +1,99 @@
+
+<div>
+    <!-- scenari ------------------------------------------------------------------>
+    <section
+        (click)="gotoPage('/scenarios-page')"
+    >
+        <svg
+            class="svg-icon"
+        >
+            <use href="#scenario_icon_1"></use>
+            <!--                <use href="#scenario_icon_2"></use>-->
+            <!--                <use href="#scenario_icon_3"></use>-->
+        </svg>
+        <label>Scenari</label>
+    </section>
+
+
+
+    <!-- dispositivi ----------------------------------------------------------------->
+    <section
+        (click)="gotoPage('/devices-page')"
+    >
+        <svg
+            class="svg-icon"
+        >
+            <!--        <use href="#devices-list-icon-1"></use>-->
+            <use href="#icon-581"></use>
+            <!--                    <use href="#devices-list-icon-2"></use>-->
+            <!--                    <use href="#devices-list-icon-3"></use>-->
+        </svg>
+        <label>Dispositivi</label>
+    </section>
+
+
+
+
+    <!-- timer ------------------------------------------------------------------------->
+    <section
+        (click)="gotoPage('/timers-page')"
+    >
+        <svg
+            class="svg-icon"
+        >
+            <use href="#timer_icon_1"></use>
+            <!--                <use href="#timer_icon_2"></use>-->
+        </svg>
+        <label>Timer</label>
+    </section>
+
+
+    <!-- raccolta rifiuti ---------------------------------------------------------------
+    <section
+        (click)="gotoPage('/waste-collection')"
+    >
+        <svg
+            class="svg-icon"
+        >
+            <use href="#timer_icon_1"></use>
+        </svg>
+        <label>Raccolta</label>
+    </section>
+    -->
+
+
+
+    <!-- stanze ------------------------------------------------------------------------->
+    @if (hasPermission('READ_ROOMS')) {
+        <section
+            (click)="gotoPage('/rooms-page')"
+        >
+            <svg
+                class="svg-icon"
+            >
+                <use href="#Door02"></use>
+                <!--                <use href="#timer_icon_2"></use>-->
+            </svg>
+            <label>Stanze</label>
+        </section>
+    }
+
+</div>
+<div>
+    <!--credentials-->
+    <section
+        (click)="gotoPage('')"
+        style="height: 2rem; margin: 0px;"
+    >
+        <img
+            [src]="lipariStudiosImage()"
+            class="lipariStudiosLogo"
+        >
+<!--        <label>LipariOS</label>-->
+    </section>
+</div>
+
+
+
+
+

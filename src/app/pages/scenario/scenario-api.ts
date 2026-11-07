@@ -61,7 +61,8 @@ export class ScenarioApiService {
         return this.http.post<any>(`${this.baseUrl}/scenario`, scenario);
     }
 
-    enableScenarios( scenario: ScenarioType ): Observable<any> {
+    // modifica e abilitazione: PUT /scenario/:id con lo stesso DTO della creazione (decisione di Vito del 05/11)
+    editScenario( scenario: ScenarioDTOType ): Observable<any> {
         return this.http.put<any>(`${this.baseUrl}/scenario/${ scenario.id }`, scenario);
     }
 

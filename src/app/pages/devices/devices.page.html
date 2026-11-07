@@ -113,20 +113,38 @@
                     </div>
 
 
-                    @for(zone of deviceZones(); track zone.room.id) {
-                        <div>{{ (zone.room.name === 'Nessuna Stanza') ? '' : zone.room.name }}</div>
+                    <div class="device tablet desktop device-grid-container">
+                        @for(zone of deviceZones(); track zone.room.id) {
+                            <div>{{ (zone.room.name === 'Nessuna Stanza') ? '' : zone.room.name }}</div>
 
+                            @for (device of zone.devices; track device.id) {
 
-                        @for (device of zone.devices; track device.id) {
+                                <device-grid-component
+                                    [device]="device"
+                                ></device-grid-component>
 
-                            <device-block-component
-                                [device]="device"
-                                [noDetails]="false"
-                                [noNavigateToDetails]="false"
-                            ></device-block-component>
+                            }
 
                         }
-                    }
+                    </div>
+
+
+                    <div class="device mobile">
+                        @for(zone of deviceZones(); track zone.room.id) {
+                            <div>{{ (zone.room.name === 'Nessuna Stanza') ? '' : zone.room.name }}</div>
+
+
+                            @for (device of zone.devices; track device.id) {
+
+                                <device-block-component
+                                    [device]="device"
+                                    [noDetails]="false"
+                                    [noNavigateToDetails]="false"
+                                ></device-block-component>
+
+                            }
+                        }
+                    </div>
 
 
                 </div>
@@ -135,16 +153,6 @@
         <p-tabpanel value="groups">
             @if( !!isGroupsInSelection() ) {
                 <div id="delete-button">
-                    <!--
-                    <p-button
-                        label="annulla"
-                        [rounded]="true"
-                        [size]="'small'"
-                        [text]="true"
-                        [disabled]="!!isGroupsDeleteInWaiting()"
-                        (click)="cancelGroupsSelection()"
-                    ></p-button>
-                    -->
                     @if (!!isGroupsDeleteInWaiting()) {
                         <svg class="svg-icon inside-button" style="position: static; top: 1rem; left: 1.5rem;">
                             <use href="#orologio-1-1"></use>
@@ -259,7 +267,24 @@
                                             @if (status.channel === 'liquidLevel') {}
                                             @if (status.channel === 'lightLevel') {}
                                             @if (status.channel === 'windLevel') {}
-                                            <div>{{ status.averageValue }}</div>
+                                            <div>{{ status.averageValue | number: '2.2-2' }}&nbsp;</div>
+
+                                            @switch (status.channel) {
+                                                @case('temperature') {
+                                                    <div>ºC</div>
+                                                }
+                                                @case('humidity') {
+                                                    <div>%</div>
+                                                }
+                                                @case('power') {
+                                                    <div>W</div>
+                                                }
+                                                @case('energy') {
+                                                    <div>Wh</div>
+                                                }
+
+                                            }
+
                                         </div>
                                     }
 
@@ -270,7 +295,7 @@
                             <div
                                 class="group-action"
                             >
-                                <div class="device-mac" style="margin-bottom: 0.75rem;">{{ groupDeviceCount(group) }} dispositivi</div>
+                                <div class="device-mac" style="margin-bottom: 1.2rem;">{{ groupDeviceCount(group) }} dispositivi</div>
 
                                 <switcher-component
                                     [isReadOnly]="false"

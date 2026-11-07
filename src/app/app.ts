@@ -10,12 +10,13 @@ import { DrawerModule } from 'primeng/drawer';
 import {MobileMenuComponent} from './components/menu-component/mobile-menu.component';
 import {PwaInstallService} from './services/pwa-install';
 import {coreOffline} from './interceptor/offline-cache.interceptor';
+import {SidebarMenu} from './components/sidebar-menu/sidebar-menu';
 
 
 @Component({
     selector: 'app-root',
     standalone: true,
-    imports: [RouterOutlet, SvgSprite, Header, DrawerModule, MobileMenuComponent],
+    imports: [RouterOutlet, SvgSprite, Header, DrawerModule, MobileMenuComponent, SidebarMenu],
     templateUrl: `./app.html`,
     styleUrl: './app.css',
 })
