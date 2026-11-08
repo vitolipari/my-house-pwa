@@ -5,7 +5,8 @@ export const getLastElementOr = (final: any, current: any) => current;
 
 /**
  * Appiattisce un oggetto JSON in un array di coppie { "percorso.del.campo": valore },
- * una per ogni valore finale, a qualsiasi profondità; gli indici degli array entrano nel percorso
+ * una per ogni valore finale, a qualsiasi profondità; gli indici degli array entrano nel percorso,
+ * oggetti e array vuoti valgono null
  */
 export const flattenToKeyValue = (obj: any, prefix: string = ''): { [key: string]: any }[] => {
 
@@ -24,7 +25,13 @@ export const flattenToKeyValue = (obj: any, prefix: string = ''): { [key: string
                 return;
             }
 
-            // valore finale: stringa, numero, booleano, null, {} o []
+            // oggetto o array vuoto: nessun dato, quindi null (un {} nel template si legge [object Object])
+            if( isContainer ) {
+                result.push({ [key]: null });
+                return;
+            }
+
+            // valore finale: stringa, numero, booleano o null
             result.push({ [key]: value });
 
         })
