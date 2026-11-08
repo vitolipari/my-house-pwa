@@ -25,7 +25,7 @@
       }"
 >
     <delete-confirm-component
-        [item]="device"
+        [item]="device()"
         [itemApiDelete]="deleteDeviceByIDs"
         [exitOnDelete]="exit"
     ></delete-confirm-component>
@@ -36,9 +36,9 @@
 
     <div class="top-part">
         <div class="icon">
-            {{ itemEmojIcon(device.emoj) }}
+            {{ itemEmojIcon(device().emoj) }}
 
-            @switch (device.type.id) {
+            @switch (device().type.id) {
 
                 <!-- --- attuatori --------------------------------------------->
                 @case ('SWITCH') {
@@ -192,11 +192,11 @@
 
         </div>
         <div>
-            <div class="device-name">{{ device.name }}</div>
-            <div class="device-info">{{ device.mac }}</div>
-            <div class="device-info">{{ device.ip }}</div>
+            <div class="device-name">{{ device().name }}</div>
+            <div class="device-info">{{ device().mac }}</div>
+            <div class="device-info">{{ device().ip }}</div>
             <div style="width: 1.25rem; ">
-                @if( wifiSignalInOpacityRange(device) < 0.3 ) {
+                @if( wifiSignalInOpacityRange(device()) < 0.3 ) {
                     <svg
                         class="svg-icon inside-device-list-status"
                         style="height: 1.25rem; width: 1.25rem; opacity: 0.1;"
@@ -207,13 +207,13 @@
                 @else {
                     <svg
                         class="svg-icon inside-device-list-status"
-                        [style]="'opacity: '+ wifiSignalInOpacityRange(device) +';'"
+                        [style]="'opacity: '+ wifiSignalInOpacityRange(device()) +';'"
                         style="height: 1.25rem; width: 1.25rem;"
                     >
                         <use href="#signal"></use>
                     </svg>
-                    <div class="wifi-signal-line-container" [style]="'width: 100%; opacity: '+ ((wifiSignalInOpacityRange(device) > 0.1) ? '1;': '0;')">
-                        <div class="wifi-signal-line" [style]="'width: '+ (wifiSignalInOpacityRange(device) * 100) +'%;'"></div>
+                    <div class="wifi-signal-line-container" [style]="'width: 100%; opacity: '+ ((wifiSignalInOpacityRange(device()) > 0.1) ? '1;': '0;')">
+                        <div class="wifi-signal-line" [style]="'width: '+ (wifiSignalInOpacityRange(device()) * 100) +'%;'"></div>
                     </div>
                 }
             </div>
@@ -222,7 +222,7 @@
 
 
     <!-- comando accensione -->
-    @switch (device.type.id) {
+    @switch (device().type.id) {
 
         @case ('SWITCH')
         @case ('METERED_SWITCH')
@@ -238,21 +238,36 @@
         @case ('ENERGY_METER')
         {
             <div class="comand-slider-container">
-                <div class="action-comand-container {{ !!isRunning(device) ? 'is-running' : '' }}">
-                    @if( !!isRunning(device) ) {
-                        <svg class="action-comand is-running">
-                            <use
-                                href="#circle-inside-circle"
-                            ></use>
+                <div class="action-comand-container {{ !!isRunning(device()) ? 'is-running' : '' }}">
+
+                    @if( !!isDeviceActionInWaiting() ) {
+                        <svg class="action-comand">
+                            <use href="#orologio-1-1"></use>
                         </svg>
                     }
                     @else {
-                        <svg class="action-comand">
-                            <use
-                                href="#line-inside-circle"
-                            ></use>
-                        </svg>
+                        @if( !!isRunning(device()) ) {
+                            <svg
+                                class="action-comand is-running"
+                                (click)="switchAction(device(), false)"
+                            >
+                                <use
+                                    href="#circle-inside-circle"
+                                ></use>
+                            </svg>
+                        }
+                        @else {
+                            <svg
+                                class="action-comand"
+                                (click)="switchAction(device(), true)"
+                            >
+                                <use
+                                    href="#line-inside-circle"
+                                ></use>
+                            </svg>
+                        }
                     }
+
                 </div>
             </div>
         }
@@ -261,7 +276,7 @@
 
 
     <!-- impostazione valore -->
-    @switch (device.type.id) {
+    @switch (device().type.id) {
         @case ('METERED_DIMMER')
         @case ('DIMMER')
         @case ('COLOR_DIMMER')
@@ -271,12 +286,12 @@
         {
             <div class="comand-slider-container">
                 <p-slider
-                    [(ngModel)]="setValue"
-                    [step]="5"
-                    [min]="5"
-                    [max]="60"
+                    [(ngModel)]="device().status[ device().channel.indexOf('brightness') ]"
+                    [step]="1"
+                    [min]="0"
+                    [max]="100"
                     (ngModelChange)="onSlideValue()"
-                    (onSlideEnd)="onSlideValueEnd()"
+                    (onSlideEnd)="onSlideValueEnd($event)"
                     orientation="vertical"
                     class="comand-slider"
                     style=""
@@ -385,24 +400,6 @@
                             }
                         </svg>
                     </div>
-
-                    <!--
-                    <div class="timer-block-section action">
-                        @if( !!isTimerInWaiting( timer ) ) {
-                            <svg class="svg-icon inside-device-list-status" style="position: static; top: 1.1rem; left: 3.8rem;">
-                                <use href="#orologio-1-1"></use>
-                            </svg>
-                        }
-                        @else {
-                            <switcher-component
-                                [check]="!!timer.enabled"
-                                [isReadOnly]="false"
-                                [inWait]="!!isTimerInWaiting( timer )"
-                                (toggle)="toggleEnableTimer(timer, $event)"
-                            ></switcher-component>
-                        }
-                    </div>
-                    -->
                     <div class="running {{ ( !!timer.isRunning ) ? 'active heartbeat-flash' : '' }}"></div>
                 </div>
             </div>
@@ -452,26 +449,6 @@
                         <div class="week-days {{ !!timer.weekDays[6] ? 'active' : '' }}">D</div>
                         <div class="has-holidays {{ !!timer.isHolidays ? 'active': '' }}">{{ itemEmojIcon('party_popper') }}</div>
                     </div>
-                    <!--
-                    <div style="width: 100%;">
-                        <div>abilita</div>
-                        <div>
-                            @if( !!isTimerInWaiting( timer ) ) {
-                                <svg class="svg-icon inside-device-list-status" style="position: static; top: 1.1rem; left: 3.8rem;">
-                                    <use href="#orologio-1-1"></use>
-                                </svg>
-                            }
-                            @else {
-                                <switcher-component
-                                    [check]="!!timer.enabled"
-                                    [isReadOnly]="false"
-                                    [inWait]="!!isTimerInWaiting( timer )"
-                                    (toggle)="toggleEnableTimer(timer, $event)"
-                                ></switcher-component>
-                            }
-                        </div>
-                    </div>
-                    -->
                 </div>
 
             }
@@ -500,24 +477,6 @@
                 <div
                     style="display: flex; flex-direction: row;"
                 >
-                    <!--
-                    <div class="scenario-block-section action">
-                        @if( !!isScenarioInWaiting( scenario ) ) {
-                            <svg class="svg-icon inside-device-list-status" style="position: static; top: 1.1rem; left: 3.8rem;">
-                                <use href="#orologio-1-1"></use>
-                            </svg>
-                        }
-                        @else {
-                            <switcher-component
-                                [check]="!!scenario.enabled"
-                                [isReadOnly]="false"
-                                [style]="'transform: rotate(270deg);'"
-                                [inWait]="!!isScenarioInWaiting( scenario )"
-                                (toggle)="toggleEnableScenario(scenario, $event)"
-                            ></switcher-component>
-                        }
-                    </div>
-                    -->
                     <div class="running {{ ( !!scenario.running ) ? 'active heartbeat-flash' : '' }}"></div>
                 </div>
 
@@ -540,7 +499,7 @@
                 Dettagli tecnici
             </p-accordion-header>
             <p-accordion-content>
-                @for( data of flattenToKeyValue( device ); track $index) {
+                @for( data of flattenToKeyValue( device() ); track $index) {
                     @for( field of data | keyvalue; track field.key ) {
                         <div class="device-data-row">
                             <div class="device-data-row-field">{{ field.key }}</div>
@@ -1129,7 +1088,7 @@
 
     <!-- grafico canale -->
 
-    @switch (device.type.id) {
+    @switch (device().type.id) {
         @case ('SWITCH')
         @case ('METERED_SWITCH')
         @case ('TEMPERATURE_HUMIDITY_SENSOR')
@@ -1175,7 +1134,7 @@
 
     <!-- storico log -->
 
-    @switch (device.type.id) {
+    @switch (device().type.id) {
         @case ('SWITCH')
         @case ('METERED_SWITCH')
         @case ('TEMPERATURE_HUMIDITY_SENSOR')
@@ -1234,7 +1193,7 @@
 
 
 
-    @switch (device.type.id) {
+    @switch (device().type.id) {
         @case ('SWITCH')
         @case ('METERED_SWITCH')
         @case ('TEMPERATURE_HUMIDITY_SENSOR')
@@ -1280,7 +1239,7 @@
 
 
 
-    @switch (device.type.id) {
+    @switch (device().type.id) {
         @case ('SWITCH')
         @case ('METERED_SWITCH')
         @case ('TEMPERATURE_HUMIDITY_SENSOR')

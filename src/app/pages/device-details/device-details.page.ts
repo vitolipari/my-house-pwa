@@ -1,6 +1,6 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {DeviceSmallType, DeviceType, GroupType, ZoneType} from '../devices/devices.models';
+import {DeviceSmallType, DeviceType, GroupType, VOID_DEVICE, ZoneType} from '../devices/devices.models';
 import {DecimalPipe, JsonPipe, KeyValuePipe} from '@angular/common';
 import {Drawer} from 'primeng/drawer';
 import {PageTitleComponent} from '../../components/page-title.component/page-title.component';
@@ -8,7 +8,7 @@ import {DeleteConfirmComponent} from '../../components/delete-confirm-component/
 import {PageMenu} from '../../components/page-menu/page-menu';
 import {DeviceApiService} from '../devices/device-api';
 import {emoj} from '../../utils/string-utils';
-import {Slider} from 'primeng/slider';
+import {Slider, SliderSlideEndEvent} from 'primeng/slider';
 import {FormsModule} from '@angular/forms';
 import {EventTimerType, FullTimerType} from '../timer/timer.models';
 import {Checkbox} from 'primeng/checkbox';
@@ -59,6 +59,7 @@ export class DeviceDetailsPage implements OnInit {
     protected scenarios: (ScenarioType & { running: boolean; })[] = [];
     protected groups: GroupType[] = [];
     protected room: ZoneType = null as unknown as ZoneType;
+    private webSocketChannel!: WebSocket;
 
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
@@ -66,7 +67,6 @@ export class DeviceDetailsPage implements OnInit {
     readonly scenarioApi: ScenarioApiService = inject(ScenarioApiService);
 
     readonly data = this.router.currentNavigation()?.extras.state as { from: string; device?: DeviceType; } | undefined;
-    protected device: DeviceType = this.data?.device as unknown as DeviceType;
     readonly deviceId = this.route.snapshot.paramMap.get('id');
     protected openConfirmDeletion: boolean = false;
     protected readonly isInDeleteDeviceInWaiting = signal<boolean>(false);
@@ -75,11 +75,13 @@ export class DeviceDetailsPage implements OnInit {
     protected readonly groupWaiting = signal<boolean>(true);
     protected readonly roomWaiting = signal<boolean>(true);
     protected readonly deviceWaiting = signal<boolean>(true);
+    protected readonly isDeviceActionInWaiting = signal<boolean>(false);
+    protected device = signal(VOID_DEVICE);
 
 
     constructor() {
         // controllo se device é stato passato oppure si proviene da url
-        if( !this.device ) {
+        if( !this.device() ) {
             // TODO chiamata a /api/core/device/:id
             // id vale deviceID
         }
@@ -89,15 +91,20 @@ export class DeviceDetailsPage implements OnInit {
     ngOnInit() {
 
 
-        if(!!this.device) {
+        if(!!this.device().id) {
             // device presente
-            console.log(this.device);
+            this.setUpSetValueStatus();
+            this.openWebSocketComunication();
+            console.log(this.device());
             this.deviceWaiting.set(false);
         }
         else {
             if ( !!this.router.currentNavigation()?.extras.state?.['device'] ) {
                 // device passato da navigazione
-                console.log(this.device);
+                this.device.set( this.router.currentNavigation()?.extras.state?.['device'] as DeviceType );
+                this.openWebSocketComunication();
+                this.setUpSetValueStatus();
+                console.log(this.device());
                 this.deviceWaiting.set(false);
             }
             else {
@@ -107,8 +114,10 @@ export class DeviceDetailsPage implements OnInit {
 
                     firstValueFrom(this.deviceApi.search({ids: [parseInt(''+ this.deviceId)] }))
                         .then((device: DeviceType[]) => {
-                            this.device = device.reduce(getLastElementOr, null as unknown as DeviceType);
-                            console.log(this.device);
+                            this.device.set( device.reduce(getLastElementOr, null as unknown as DeviceType) );
+                            this.openWebSocketComunication();
+                            this.setUpSetValueStatus();
+                            console.log(this.device());
                             this.deviceWaiting.set(false);
                         })
 
@@ -274,6 +283,12 @@ export class DeviceDetailsPage implements OnInit {
     }
 
 
+    setUpSetValueStatus() {
+        // brightness
+        this.sliderValue = parseInt( ''+ this.device().status[ this.device().channel.indexOf('brightness') ]);
+    }
+
+
     itemEmojIcon(emojIconName: string) {
         return emoj(emojIconName || '');
     }
@@ -297,16 +312,33 @@ export class DeviceDetailsPage implements OnInit {
         this.openConfirmDeletion = true;
     }
     // per <delete-confirm-component>: arrow function, così il componente le chiama senza perdere il this
-    protected readonly deleteDeviceByIDs = (ids: number[]) => this.deviceApi.deleteDevices([this.device.id]);
+    protected readonly deleteDeviceByIDs = (ids: number[]) => this.deviceApi.deleteDevices([this.device().id]);
     protected readonly exit = () => this.router.navigate(['/devices-page']);
-    protected setValue: number = 0;
+    protected sliderValue: number = 0;
 
 
     protected onSlideValue() {
 
     }
 
-    protected onSlideValueEnd() {
+    protected onSlideValueEnd(event: SliderSlideEndEvent) {
+        console.log(event.value);
+
+        this.isDeviceActionInWaiting.set(true);
+        Promise.all([
+            firstValueFrom(this.deviceApi.deviceAction(this.device().id, 'output', 'POWER:ON')),
+            firstValueFrom(this.deviceApi.deviceAction(this.device().id, 'brightness', `SET:${event.value}`))
+        ])
+            .then((result: unknown) => {
+                console.log(result);
+                this.isDeviceActionInWaiting.set(false);
+            })
+            .catch((error: unknown) => {
+                console.log(`errore in onSlideValueEnd: azione sul dispositivo ${this.device().id}`);
+                console.log(error);
+                this.isDeviceActionInWaiting.set(false);
+                return null;
+            });
 
     }
 
@@ -343,4 +375,63 @@ export class DeviceDetailsPage implements OnInit {
     }
 
     protected readonly flattenToKeyValue = flattenToKeyValue;
+
+    protected switchAction(device: DeviceSmallType, event: boolean) {
+
+        this.isDeviceActionInWaiting.set(true);
+        firstValueFrom(this.deviceApi.deviceAction(this.device().id, 'output', event ? 'POWER:ON' : 'POWER:OFF'))
+            .then((result: unknown) => {
+
+
+                try {
+                    device.status[ device.channel.indexOf('output') ] = !!event;
+                }
+                catch (e) {
+
+                }
+
+                this.isDeviceActionInWaiting.set(false);
+                return result;
+            })
+            .catch((error: unknown) => {
+                console.log(`errore in switchAction: azione sul dispositivo ${this.device().id}`);
+                console.log(error);
+                this.isDeviceActionInWaiting.set(false);
+                return null;
+            });
+    }
+
+
+    private openWebSocketComunication() {
+
+        let protocol = (location.protocol === 'https:') ? 'wss://' : 'ws://';
+        let channel = new WebSocket(protocol + location.host + '/api/core/');
+        this.webSocketChannel = channel;
+
+        channel.onopen = (ch: any) => {
+            console.log('canale websocket aperto');
+            console.log(ch);
+        }
+
+        // dal Core arriva il DeviceType di un dispositivo che ha cambiato lo stato o il valore di un canale: prende il
+        // posto di quello con lo stesso id, e le liste derivate da `devices` (stanze) si ricalcolano da sole
+        channel.onmessage = (msg: any) => {
+
+            try {
+                let device: DeviceType = JSON.parse(msg.data);
+                if(parseInt(''+ device.id) === parseInt(''+ this.device().id)) {
+                    console.log('dati ricevuti');
+                    console.log('status di luminosita al acanale '+ device.channel.indexOf('brightness') );
+                    console.log( device.status[ device.channel.indexOf('brightness') ] );
+                    console.log( JSON.parse(msg.data) );
+                    this.device.set( device );
+                }
+            }
+            catch (e: any) {
+                console.log('errore in onmessage di DevicesPage: messaggio della WebSocket non valido');
+                console.log(e);
+            }
+        }
+
+    }
 }
