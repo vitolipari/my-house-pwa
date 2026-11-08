@@ -35,11 +35,188 @@
 
 
     <div class="top-part">
-        <div class="icon">{{ itemEmojIcon(device.emoj) }}</div>
+        <div class="icon">
+            {{ itemEmojIcon(device.emoj) }}
+
+            @switch (device.type.id) {
+
+                <!-- --- attuatori --------------------------------------------->
+                @case ('SWITCH') {
+                    <div class="rounded-tag">SWITCH</div>
+                }
+
+                @case ('METERED_SWITCH') {
+                    <div class="rounded-tag">METERED_SWITCH</div>
+                }
+
+                @case ('TEMPERATURE_HUMIDITY_SENSOR') {
+                    <div class="rounded-tag">TEMPERATURE_HUMIDITY_SENSOR</div>
+                }
+
+                @case ('METERED_DIMMER') {
+                    <div class="rounded-tag">METERED_DIMMER</div>
+                }
+
+                @case ('POWER_METER') {
+                    <div class="rounded-tag">POWER_METER</div>
+                }
+
+                @case ('METERED_RELAY_CURTAIN') {
+                    <div class="rounded-tag">METERED_RELAY_CURTAIN</div>
+                }
+
+                @case ('SENSING_AIR_CONDITIONER') {
+                    <div class="rounded-tag">SENSING_AIR_CONDITIONER</div>
+                }
+
+                @case ('BINARY_STATE_SENSOR') {
+                    <div class="rounded-tag">BINARY_STATE_SENSOR</div>
+                }
+
+                @case ('SOLAR_SYSTEM_MONITOR') {
+                    <div class="rounded-tag">SOLAR_SYSTEM_MONITOR</div>
+                }
+
+
+
+                @case ('DIMMER') {
+                    <div class="rounded-tag">DIMMER</div>
+                }
+                @case ('COLOR_DIMMER') {
+                    <div class="rounded-tag">COLOR_DIMMER</div>
+                }
+                @case ('CURTAIN') {
+                    <div class="rounded-tag">CURTAIN</div>
+                }
+                @case ('RELAY_CURTAIN') {
+                    <div class="rounded-tag">RELAY_CURTAIN</div>
+                }
+                @case ('AIR_CONDITIONER') {
+                    <div class="rounded-tag">AIR_CONDITIONER</div>
+                }
+                @case ('TV') {
+                    <div class="rounded-tag">TV</div>
+                }
+                @case ('MOTORIZED_CANOPY') {
+                    <div class="rounded-tag">MOTORIZED_CANOPY</div>
+                }
+                @case ('MOTORIZED_DYNAMIC_CANOPY') {
+                    <div class="rounded-tag">MOTORIZED_DYNAMIC_CANOPY</div>
+                }
+                @case ('DOOR') {
+                    <div class="rounded-tag">DOOR</div>
+                }
+                @case ('GATE') {
+                    <div class="rounded-tag">GATE</div>
+                }
+                @case ('GAME_CONSOLE') {
+                    <div class="rounded-tag">GAME_CONSOLE</div>
+                }
+                @case ('PRINTER') {
+                    <div class="rounded-tag">PRINTER</div>
+                }
+                @case ('HEADPHONES') {
+                    <div class="rounded-tag">HEADPHONES</div>
+                }
+                @case ('SPEAKER') {
+                    <div class="rounded-tag">SPEAKER</div>
+                }
+
+
+                @case ('METERED_CURTAIN') {
+                    <div class="rounded-tag">METERED_CURTAIN</div>
+                }
+
+
+                @case ('THERMOSTAT') {
+                    <div class="rounded-tag">THERMOSTAT</div>
+                }
+
+                @case ('MOVEMENT_SENSOR_SWITCH') {
+                    <div class="rounded-tag">MOVEMENT_SENSOR_SWITCH</div>
+                }
+                @case ('LIGHT_SENSOR_SWITCH') {
+                    <div class="rounded-tag">LIGHT_SENSOR_SWITCH</div>
+                }
+                @case ('THREE_D_PRINTER') {
+                    <div class="rounded-tag">THREE_D_PRINTER</div>
+                }
+                @case ('SMART_WATCH') {
+                    <div class="rounded-tag">SMART_WATCH</div>
+                }
+                @case ('CAR') {
+                    <div class="rounded-tag">CAR</div>
+                }
+                @case ('ELECTRIC_CAR') {
+                    <div class="rounded-tag">ELECTRIC_CAR</div>
+                }
+                @case ('ELECTRIC_BICYCLE') {
+                    <div class="rounded-tag">ELECTRIC_BICYCLE</div>
+                }
+                @case ('ELECTRIC_SCOOTER') {
+                    <div class="rounded-tag">ELECTRIC_SCOOTER</div>
+                }
+                @case ('MOTORCYCLE') {
+                    <div class="rounded-tag">MOTORCYCLE</div>
+                }
+
+                @case ('LIGHT_SENSOR') {
+                    <div class="rounded-tag">LIGHT_SENSOR</div>
+                }
+                @case ('MOVEMENT_SENSOR') {
+                    <div class="rounded-tag">MOVEMENT_SENSOR</div>
+                }
+                @case ('WATER_LEVEL_SENSOR') {
+                    <div class="rounded-tag">WATER_LEVEL_SENSOR</div>
+                }
+
+                @case ('FIRE_SENSOR') {
+                    <div class="rounded-tag">FIRE_SENSOR</div>
+                }
+                @case ('ENERGY_METER') {
+                    <div class="rounded-tag">ENERGY_METER</div>
+                }
+
+                @case ('GPS_TAG') {
+                    <div class="rounded-tag">GPS_TAG</div>
+                }
+                @default {
+                    <div>Dispositivo non catalogato</div>
+                }
+
+
+
+
+            }
+
+
+        </div>
         <div>
             <div class="device-name">{{ device.name }}</div>
             <div class="device-info">{{ device.mac }}</div>
             <div class="device-info">{{ device.ip }}</div>
+            <div style="width: 1.25rem; ">
+                @if( wifiSignalInOpacityRange(device) < 0.3 ) {
+                    <svg
+                        class="svg-icon inside-device-list-status"
+                        style="height: 1.25rem; width: 1.25rem; opacity: 0.1;"
+                    >
+                        <use href="#icon-519"></use>
+                    </svg>
+                }
+                @else {
+                    <svg
+                        class="svg-icon inside-device-list-status"
+                        [style]="'opacity: '+ wifiSignalInOpacityRange(device) +';'"
+                        style="height: 1.25rem; width: 1.25rem;"
+                    >
+                        <use href="#signal"></use>
+                    </svg>
+                    <div class="wifi-signal-line-container" [style]="'width: 100%; opacity: '+ ((wifiSignalInOpacityRange(device) > 0.1) ? '1;': '0;')">
+                        <div class="wifi-signal-line" [style]="'width: '+ (wifiSignalInOpacityRange(device) * 100) +'%;'"></div>
+                    </div>
+                }
+            </div>
         </div>
     </div>
 
@@ -61,7 +238,22 @@
         @case ('ENERGY_METER')
         {
             <div class="comand-slider-container">
-                <div>SWITCH</div>
+                <div class="action-comand-container {{ !!isRunning(device) ? 'is-running' : '' }}">
+                    @if( !!isRunning(device) ) {
+                        <svg class="action-comand is-running">
+                            <use
+                                href="#circle-inside-circle"
+                            ></use>
+                        </svg>
+                    }
+                    @else {
+                        <svg class="action-comand">
+                            <use
+                                href="#line-inside-circle"
+                            ></use>
+                        </svg>
+                    }
+                </div>
             </div>
         }
 
@@ -338,11 +530,600 @@
 
 
     <div>grafici per canale</div>
-    <div>storico per canale</div>
-    <div>log per canale</div>
-    <div>tutte le info hardware Shelly</div>
-    <div>tutte le info hardware Tuya</div>
-    <div>tutte le info hardware Matter</div>
+
+
+
+    <p-accordion [value]="">
+
+        <p-accordion-panel [value]="'tech'">
+            <p-accordion-header>
+                Dettagli tecnici
+            </p-accordion-header>
+            <p-accordion-content>
+                @for( data of flattenToKeyValue( device ); track $index) {
+                    @for( field of data | keyvalue; track field.key ) {
+                        <div class="device-data-row">
+                            <div class="device-data-row-field">{{ field.key }}</div>
+                            <div class="device-data-row-value">{{ field.value }}</div>
+                        </div>
+                    }
+                }
+            </p-accordion-content>
+        </p-accordion-panel>
+
+
+        <p-accordion-panel [value]="'log'">
+            <p-accordion-header>
+                Logs
+            </p-accordion-header>
+            <p-accordion-content>
+                <div class="device-data-row">
+                    <div class="device-data-row-field">riga</div>
+                    <div class="device-data-row-field">riga di log</div>
+                </div>
+            </p-accordion-content>
+        </p-accordion-panel>
+
+        <p-accordion-panel [value]="'storico'">
+            <p-accordion-header>
+                Storico
+            </p-accordion-header>
+            <p-accordion-content>
+                <div class="device-data-row">
+                    <div class="device-data-row-field">riga di storico eventi</div>
+                    <div class="device-data-row-field">riga</div>
+                </div>
+            </p-accordion-content>
+        </p-accordion-panel>
+    </p-accordion>
+
+
+
+
+
+    <!--
+    {
+      "id": 4,
+      "family": "shelly",
+      "hardware": {
+        "id": "shelly1pmminig4-e4b063774e2c",
+        "name": "Shelly Mini 1PM Gen4",
+        "gen": "4",
+        "config": {
+          "Humidity": {},
+          "MQTT": {
+            "enable": true,
+            "server": "192.168.1.34:1883",
+            "client_id": "shelly1pmminig4-e4b063774e2c",
+            "user": "liparios-shelly",
+            "ssl_ca": null,
+            "topic_prefix": "liparios/devices/actuator/light/shelly1pmminig4-e4b063774e2c",
+            "rpc_ntf": true,
+            "status_ntf": true,
+            "use_client_cert": false,
+            "enable_rpc": false,
+            "enable_control": false
+          },
+          "Input": {
+            "id": 0,
+            "name": null,
+            "type": "switch",
+            "enable": true,
+            "invert": false,
+            "factory_reset": true
+          },
+          "Shelly": {
+            "ble": {
+              "enable": true,
+              "rpc": {
+                "enable": true
+              }
+            },
+            "bthome": {},
+            "cloud": {
+              "enable": true,
+              "server": "shelly-172-eu.shelly.cloud:6022/jrpc"
+            },
+            "input:0": {
+              "id": 0,
+              "name": null,
+              "type": "switch",
+              "enable": true,
+              "invert": false,
+              "factory_reset": true
+            },
+            "knx": {
+              "enable": false,
+              "ia": "15.15.255",
+              "routing": {
+                "addr": "224.0.23.12:3671"
+              }
+            },
+            "matter": {
+              "enable": true
+            },
+            "mqtt": {
+              "enable": true,
+              "server": "192.168.1.34:1883",
+              "client_id": "shelly1pmminig4-e4b063774e2c",
+              "user": "liparios-shelly",
+              "ssl_ca": null,
+              "topic_prefix": "liparios/devices/actuator/light/shelly1pmminig4-e4b063774e2c",
+              "rpc_ntf": true,
+              "status_ntf": true,
+              "use_client_cert": false,
+              "enable_rpc": false,
+              "enable_control": false
+            },
+            "switch:0": {
+              "id": 0,
+              "name": null,
+              "in_mode": "follow",
+              "in_locked": false,
+              "initial_state": "match_input",
+              "auto_on": false,
+              "auto_on_delay": 60,
+              "auto_off": false,
+              "auto_off_delay": 60,
+              "power_limit": 2240,
+              "voltage_limit": 280,
+              "autorecover_voltage_errors": false,
+              "current_limit": 8,
+              "reverse": false
+            },
+            "sys": {
+              "device": {
+                "name": null,
+                "mac": "E4B063774E2C",
+                "fw_id": "20250214-121727/1.5.99-g4prod1-gc32c24b",
+                "discoverable": true,
+                "eco_mode": false
+              },
+              "location": {
+                "tz": "Europe/Rome",
+                "lat": 38.1302,
+                "lon": 13.329
+              },
+              "debug": {
+                "level": 2,
+                "file_level": null,
+                "mqtt": {
+                  "enable": false
+                },
+                "websocket": {
+                  "enable": false
+                },
+                "udp": {
+                  "addr": null
+                }
+              },
+              "ui_data": {},
+              "rpc_udp": {
+                "dst_addr": null,
+                "listen_port": null
+              },
+              "sntp": {
+                "server": "time.cloudflare.com"
+              },
+              "cfg_rev": 17
+            },
+            "wifi": {
+              "ap": {
+                "ssid": "Shelly1PMMiniG4-E4B063774E2C",
+                "is_open": true,
+                "enable": true,
+                "range_extender": {
+                  "enable": false
+                }
+              },
+              "sta": {
+                "ssid": "TIM-37999422",
+                "is_open": false,
+                "enable": true,
+                "ipv4mode": "dhcp",
+                "ip": null,
+                "netmask": null,
+                "gw": null,
+                "nameserver": null
+              },
+              "sta1": {
+                "ssid": null,
+                "is_open": true,
+                "enable": false,
+                "ipv4mode": "dhcp",
+                "ip": null,
+                "netmask": null,
+                "gw": null,
+                "nameserver": null
+              },
+              "roam": {
+                "rssi_thr": -80,
+                "interval": 60
+              }
+            },
+            "ws": {
+              "enable": false,
+              "server": null,
+              "ssl_ca": "ca.pem"
+            }
+          },
+          "Switch": {
+            "id": 0,
+            "name": null,
+            "in_mode": "follow",
+            "in_locked": false,
+            "initial_state": "match_input",
+            "auto_on": false,
+            "auto_on_delay": 60,
+            "auto_off": false,
+            "auto_off_delay": 60,
+            "power_limit": 2240,
+            "voltage_limit": 280,
+            "autorecover_voltage_errors": false,
+            "current_limit": 8,
+            "reverse": false
+          },
+          "Sys": {
+            "device": {
+              "name": null,
+              "mac": "E4B063774E2C",
+              "fw_id": "20250214-121727/1.5.99-g4prod1-gc32c24b",
+              "discoverable": true,
+              "eco_mode": false
+            },
+            "location": {
+              "tz": "Europe/Rome",
+              "lat": 38.1302,
+              "lon": 13.329
+            },
+            "debug": {
+              "level": 2,
+              "file_level": null,
+              "mqtt": {
+                "enable": false
+              },
+              "websocket": {
+                "enable": false
+              },
+              "udp": {
+                "addr": null
+              }
+            },
+            "ui_data": {},
+            "rpc_udp": {
+              "dst_addr": null,
+              "listen_port": null
+            },
+            "sntp": {
+              "server": "time.cloudflare.com"
+            },
+            "cfg_rev": 17
+          },
+          "Cloud": {
+            "enable": true,
+            "server": "shelly-172-eu.shelly.cloud:6022/jrpc"
+          },
+          "WiFi": {
+            "ap": {
+              "ssid": "Shelly1PMMiniG4-E4B063774E2C",
+              "is_open": true,
+              "enable": true,
+              "range_extender": {
+                "enable": false
+              }
+            },
+            "sta": {
+              "ssid": "TIM-37999422",
+              "is_open": false,
+              "enable": true,
+              "ipv4mode": "dhcp",
+              "ip": null,
+              "netmask": null,
+              "gw": null,
+              "nameserver": null
+            },
+            "sta1": {
+              "ssid": null,
+              "is_open": true,
+              "enable": false,
+              "ipv4mode": "dhcp",
+              "ip": null,
+              "netmask": null,
+              "gw": null,
+              "nameserver": null
+            },
+            "roam": {
+              "rssi_thr": -80,
+              "interval": 60
+            }
+          },
+          "BLE": {
+            "enable": true,
+            "rpc": {
+              "enable": true
+            }
+          },
+          "Matter": {
+            "enable": true
+          },
+          "Temperature": {},
+          "Light": {},
+          "RGB": {},
+          "Cover": {},
+          "Presence": {},
+          "Illuminance": {}
+        },
+        "status": {
+          "Humidity": {},
+          "MQTT": {
+            "connected": true
+          },
+          "Input": {
+            "id": 0,
+            "state": false
+          },
+          "Shelly": {
+            "ble": {},
+            "bthome": {},
+            "cloud": {
+              "connected": true
+            },
+            "input:0": {
+              "id": 0,
+              "state": false
+            },
+            "knx": {},
+            "matter": {
+              "num_fabrics": 0,
+              "commissionable": false
+            },
+            "mqtt": {
+              "connected": true
+            },
+            "switch:0": {
+              "id": 0,
+              "source": "switch",
+              "output": false,
+              "apower": 0,
+              "voltage": 238.6,
+              "freq": 50.2,
+              "current": 0,
+              "aenergy": {
+                "total": 6067.486,
+                "by_minute": [
+                  0,
+                  0,
+                  0
+                ],
+                "minute_ts": 1794090240
+              },
+              "ret_aenergy": {
+                "total": 0,
+                "by_minute": [
+                  0,
+                  0,
+                  0
+                ],
+                "minute_ts": 1794090240
+              },
+              "temperature": {
+                "tC": 67.9,
+                "tF": 154.3
+              }
+            },
+            "sys": {
+              "mac": "E4B063774E2C",
+              "restart_required": false,
+              "time": "23:24",
+              "unixtime": 1794090287,
+              "last_sync_ts": 1794089817,
+              "uptime": 514744,
+              "ram_size": 358880,
+              "ram_free": 110308,
+              "ram_min_free": 93720,
+              "fs_size": 917504,
+              "fs_free": 471040,
+              "cfg_rev": 17,
+              "kvs_rev": 0,
+              "schedule_rev": 0,
+              "webhook_rev": 0,
+              "btrelay_rev": 0,
+              "available_updates": {
+                "stable": {
+                  "version": "2.1.1"
+                }
+              },
+              "alt": {
+                "Mini1PMG4ZB": {
+                  "name": "Shelly Mini 1 PM Gen4",
+                  "desc": "Shelly Mini 1 PM Gen4 with Zigbee",
+                  "stable": {
+                    "version": "2.1.1",
+                    "build_id": "20261026-151139/2.1.1-g07e9ad2"
+                  }
+                }
+              },
+              "reset_reason": 1,
+              "utc_offset": 3600
+            },
+            "wifi": {
+              "sta_ip": "192.168.1.27",
+              "status": "got ip",
+              "ssid": "TIM-37999422",
+              "rssi": -55
+            },
+            "ws": {
+              "connected": false
+            }
+          },
+          "Switch": {
+            "id": 0,
+            "source": "switch",
+            "output": true,
+            "apower": 13.6,
+            "voltage": 237.6,
+            "freq": 50.2,
+            "current": 0.098,
+            "aenergy": {
+              "total": 6106.14,
+              "by_minute": [
+                205.607,
+                205.607,
+                411.215
+              ],
+              "minute_ts": 1794154260
+            },
+            "ret_aenergy": {
+              "total": 0,
+              "by_minute": [
+                0,
+                0,
+                0
+              ],
+              "minute_ts": 1794154260
+            },
+            "temperature": {
+              "tC": 75.6,
+              "tF": 168.1
+            }
+          },
+          "Sys": {
+            "mac": "E4B063774E2C",
+            "restart_required": false,
+            "time": "23:24",
+            "unixtime": 1794090287,
+            "last_sync_ts": 1794089817,
+            "uptime": 514744,
+            "ram_size": 358904,
+            "ram_free": 111260,
+            "ram_min_free": 93720,
+            "fs_size": 917504,
+            "fs_free": 471040,
+            "cfg_rev": 17,
+            "kvs_rev": 0,
+            "schedule_rev": 0,
+            "webhook_rev": 0,
+            "btrelay_rev": 0,
+            "available_updates": {
+              "stable": {
+                "version": "2.1.1"
+              }
+            },
+            "alt": {
+              "Mini1PMG4ZB": {
+                "name": "Shelly Mini 1 PM Gen4",
+                "desc": "Shelly Mini 1 PM Gen4 with Zigbee",
+                "stable": {
+                  "version": "2.1.1",
+                  "build_id": "20261026-151139/2.1.1-g07e9ad2"
+                }
+              }
+            },
+            "reset_reason": 1,
+            "utc_offset": 3600
+          },
+          "Cloud": {
+            "connected": true
+          },
+          "WiFi": {
+            "sta_ip": "192.168.1.27",
+            "status": "got ip",
+            "ssid": "TIM-37999422",
+            "rssi": -54
+          },
+          "BLE": {},
+          "Matter": {
+            "num_fabrics": 0,
+            "commissionable": false
+          },
+          "Temperature": {},
+          "Light": {},
+          "RGB": {},
+          "Cover": {},
+          "Presence": {},
+          "Illuminance": {}
+        }
+      },
+      "model": "S4SW-001P8EU",
+      "matter": {
+        "id": 4,
+        "mode": "BRIDGED",
+        "nodeID": "",
+        "fabricID": "",
+        "endpiontIDs": [],
+        "bridgeEndpiontIDs": [
+          7,
+          8,
+          9
+        ]
+      },
+      "name": "Lampada Tavolo",
+      "ip": "192.168.1.37",
+      "mac": "E4:B0:63:77:4E:2C",
+      "where": [],
+      "onMap": "",
+      "description": "",
+      "signalStatus": -54,
+      "cloud": "",
+      "firmware": "1.5.99-g4prod1",
+      "updateAvailability": {},
+      "productName": "Shelly Mini 1PM Gen4",
+      "hostName": "shelly1pmminig4-e4b063774e2c",
+      "availability": "OFFLINE",
+      "catalogItemId": "LAMP",
+      "type": {
+        "id": "METERED_SWITCH",
+        "name": "Interruttore ON/OFF con misura",
+        "description": "Comando ON/OFF e misura della potenza o energia"
+      },
+      "category": {
+        "id": "SENSOR_ACTUATOR",
+        "name": "Sensore e attuatore",
+        "description": "Produce misure e riceve comandi funzionali"
+      },
+      "svgIcon": "icon-325",
+      "emoj": "light_bulb",
+      "imgIcon": "",
+      "picture": "",
+      "channel": [
+        "output",
+        "power",
+        "energy"
+      ],
+      "status": [
+        true,
+        13.6,
+        6106.14
+      ],
+      "lastTime": [
+        1794154260002,
+        1794154260002,
+        1794154260002
+      ],
+      "battery": null,
+      "unit": [
+        "",
+        "W",
+        "Wh"
+      ],
+      "value": [
+        true,
+        13.6,
+        6106.14
+      ],
+      "minThreshold": [
+        null,
+        null,
+        null
+      ],
+      "maxThreshold": [
+        null,
+        null,
+        null
+      ]
+    }
+    -->
+
 
 
 
@@ -444,276 +1225,7 @@
 
 
     <!-- per debug e sviluppo  -->
-    @switch (device.type.id) {
 
-        <!-- --- attuatori --------------------------------------------->
-        @case ('SWITCH') {
-            <div>
-
-                <div>SWITCH</div>
-            </div>
-        }
-
-        @case ('METERED_SWITCH') {
-            <div>
-
-                <div>METERED_SWITCH</div>
-            </div>
-        }
-
-        @case ('TEMPERATURE_HUMIDITY_SENSOR') {
-            <div>
-
-                <div>TEMPERATURE_HUMIDITY_SENSOR</div>
-            </div>
-        }
-
-        @case ('METERED_DIMMER') {
-            <div>
-
-                <div>METERED_DIMMER</div>
-            </div>
-        }
-
-        @case ('POWER_METER') {
-            <div>
-
-                <div>POWER_METER</div>
-            </div>
-        }
-
-        @case ('METERED_RELAY_CURTAIN') {
-            <div>
-
-                <div>METERED_RELAY_CURTAIN</div>
-            </div>
-        }
-
-        @case ('SENSING_AIR_CONDITIONER') {
-            <div>
-
-                <div>SENSING_AIR_CONDITIONER</div>
-            </div>
-        }
-
-        @case ('BINARY_STATE_SENSOR') {
-            <div>
-
-                <div>BINARY_STATE_SENSOR</div>
-            </div>
-        }
-
-        @case ('SOLAR_SYSTEM_MONITOR') {
-            <div>
-
-                <div>SOLAR_SYSTEM_MONITOR</div>
-            </div>
-        }
-
-
-
-        @case ('DIMMER') {
-            <div>
-
-                <div>DIMMER</div>
-            </div>
-        }
-        @case ('COLOR_DIMMER') {
-            <div>
-
-                <div>COLOR_DIMMER</div>
-            </div>
-        }
-        @case ('CURTAIN') {
-            <div>
-
-                <div>CURTAIN</div>
-            </div>
-        }
-        @case ('RELAY_CURTAIN') {
-            <div>
-
-                <div>RELAY_CURTAIN</div>
-            </div>
-        }
-        @case ('AIR_CONDITIONER') {
-            <div>
-
-                <div>AIR_CONDITIONER</div>
-            </div>
-        }
-        @case ('TV') {
-            <div>
-
-                <div>TV</div>
-            </div>
-        }
-        @case ('MOTORIZED_CANOPY') {
-            <div>
-
-                <div>MOTORIZED_CANOPY</div>
-            </div>
-        }
-        @case ('MOTORIZED_DYNAMIC_CANOPY') {
-            <div>
-
-                <div>MOTORIZED_DYNAMIC_CANOPY</div>
-            </div>
-        }
-        @case ('DOOR') {
-            <div>
-
-                <div>DOOR</div>
-            </div>
-        }
-        @case ('GATE') {
-            <div>
-
-                <div>GATE</div>
-            </div>
-        }
-        @case ('GAME_CONSOLE') {
-            <div>
-
-                <div>GAME_CONSOLE</div>
-            </div>
-        }
-        @case ('PRINTER') {
-            <div>
-
-                <div>PRINTER</div>
-            </div>
-        }
-        @case ('HEADPHONES') {
-            <div>
-
-                <div>HEADPHONES</div>
-            </div>
-        }
-        @case ('SPEAKER') {
-            <div>
-
-                <div>SPEAKER</div>
-            </div>
-        }
-
-
-        @case ('METERED_CURTAIN') {
-            <div>
-
-                <div>METERED_CURTAIN</div>
-            </div>
-        }
-
-
-        @case ('THERMOSTAT') {
-            <div>
-
-                <div>THERMOSTAT</div>
-            </div>
-        }
-
-        @case ('MOVEMENT_SENSOR_SWITCH') {
-            <div>
-
-                <div>MOVEMENT_SENSOR_SWITCH</div>
-            </div>
-        }
-        @case ('LIGHT_SENSOR_SWITCH') {
-            <div>
-
-                <div>LIGHT_SENSOR_SWITCH</div>
-            </div>
-        }
-        @case ('THREE_D_PRINTER') {
-            <div>
-
-                <div>THREE_D_PRINTER</div>
-            </div>
-        }
-        @case ('SMART_WATCH') {
-            <div>
-
-                <div>SMART_WATCH</div>
-            </div>
-        }
-        @case ('CAR') {
-            <div>
-
-                <div>CAR</div>
-            </div>
-        }
-        @case ('ELECTRIC_CAR') {
-            <div>
-
-                <div>ELECTRIC_CAR</div>
-            </div>
-        }
-        @case ('ELECTRIC_BICYCLE') {
-            <div>
-
-                <div>ELECTRIC_BICYCLE</div>
-            </div>
-        }
-        @case ('ELECTRIC_SCOOTER') {
-            <div>
-
-                <div>ELECTRIC_SCOOTER</div>
-            </div>
-        }
-        @case ('MOTORCYCLE') {
-            <div>
-
-                <div>MOTORCYCLE</div>
-            </div>
-        }
-
-        @case ('LIGHT_SENSOR') {
-            <div>
-
-                <div>LIGHT_SENSOR</div>
-            </div>
-        }
-        @case ('MOVEMENT_SENSOR') {
-            <div>
-
-                <div>MOVEMENT_SENSOR</div>
-            </div>
-        }
-        @case ('WATER_LEVEL_SENSOR') {
-            <div>
-
-                <div>WATER_LEVEL_SENSOR</div>
-            </div>
-        }
-
-        @case ('FIRE_SENSOR') {
-            <div>
-
-                <div>FIRE_SENSOR</div>
-            </div>
-        }
-        @case ('ENERGY_METER') {
-            <div>
-
-                <div>ENERGY_METER</div>
-            </div>
-        }
-
-        @case ('GPS_TAG') {
-            <div>
-
-                <div>GPS_TAG</div>
-            </div>
-        }
-        @default {
-            <div>Dispositivo non catalogato</div>
-        }
-
-
-
-
-    }
 
 
 

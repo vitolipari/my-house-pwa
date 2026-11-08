@@ -1,7 +1,7 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {DeviceType, GroupType, ZoneType} from '../devices/devices.models';
-import {DecimalPipe, JsonPipe} from '@angular/common';
+import {DeviceSmallType, DeviceType, GroupType, ZoneType} from '../devices/devices.models';
+import {DecimalPipe, JsonPipe, KeyValuePipe} from '@angular/common';
 import {Drawer} from 'primeng/drawer';
 import {PageTitleComponent} from '../../components/page-title.component/page-title.component';
 import {DeleteConfirmComponent} from '../../components/delete-confirm-component/delete-confirm-component';
@@ -18,7 +18,8 @@ import moment from 'moment/moment';
 import {firstValueFrom} from 'rxjs';
 import {ScenarioApiService} from '../scenario/scenario-api';
 import {ScenarioType} from '../scenario/scenario.models';
-import {getLastElementOr} from '../../utils/array-util';
+import {flattenToKeyValue, getLastElementOr} from '../../utils/array-util';
+import {Accordion, AccordionContent, AccordionHeader, AccordionPanel} from 'primeng/accordion';
 
 @Component({
     selector: 'app-device-details.page',
@@ -32,6 +33,11 @@ import {getLastElementOr} from '../../utils/array-util';
         Checkbox,
         DecimalPipe,
         SwitcherComponent,
+        KeyValuePipe,
+        Accordion,
+        AccordionContent,
+        AccordionHeader,
+        AccordionPanel,
         // Checkbox,
         // SwitcherComponent
     ],
@@ -85,11 +91,13 @@ export class DeviceDetailsPage implements OnInit {
 
         if(!!this.device) {
             // device presente
+            console.log(this.device);
             this.deviceWaiting.set(false);
         }
         else {
             if ( !!this.router.currentNavigation()?.extras.state?.['device'] ) {
                 // device passato da navigazione
+                console.log(this.device);
                 this.deviceWaiting.set(false);
             }
             else {
@@ -100,6 +108,7 @@ export class DeviceDetailsPage implements OnInit {
                     firstValueFrom(this.deviceApi.search({ids: [parseInt(''+ this.deviceId)] }))
                         .then((device: DeviceType[]) => {
                             this.device = device.reduce(getLastElementOr, null as unknown as DeviceType);
+                            console.log(this.device);
                             this.deviceWaiting.set(false);
                         })
 
@@ -300,4 +309,38 @@ export class DeviceDetailsPage implements OnInit {
     protected onSlideValueEnd() {
 
     }
+
+    protected isRunning(device: DeviceType) {
+        let runningStatus: boolean = false;
+        try {
+            runningStatus = !!device.status[ device.channel.indexOf('output') ];
+        }
+        catch (e) {
+
+        }
+        return runningStatus;
+    }
+
+    protected wifiSignalInOpacityRange(device: DeviceSmallType) {
+
+
+        if (!!device.signalStatus) {
+            const wifiSignal: number = device.signalStatus;
+            let wifiSignalPercent: number = Math.max(0, Math.min(100, 2 * (wifiSignal + 100)));
+            if (wifiSignalPercent < 20) {
+                wifiSignalPercent = 20;
+            }
+            if (wifiSignalPercent > 80) {
+                wifiSignalPercent = 80;
+            }
+            return wifiSignalPercent / 100;
+        }
+
+        // RSSI non letto: il Core usa 0, valore impossibile per una misura in
+        // dBm. L'indicatore resta invisibile invece di mostrare un segnale
+        // intermedio mai misurato.
+        return 0;
+    }
+
+    protected readonly flattenToKeyValue = flattenToKeyValue;
 }
