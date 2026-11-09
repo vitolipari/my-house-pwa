@@ -377,7 +377,7 @@ export class DeviceGridComponent implements OnInit {
                 }
             }
 
-            console.log(`channel di ${ d.name }: ${ power }`);
+            // console.log(`channel di ${ d.name }: ${ power }`);
 
         }
 

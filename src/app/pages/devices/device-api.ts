@@ -89,7 +89,7 @@ export class DeviceApiService {
     }
 
     loadDeviceStatus(deviceId: number | string): Observable<DeviceType> {
-        return this.http.get<DeviceType>(`${this.baseUrl}/device/status/${deviceId}`);
+        return this.http.get<DeviceType>(`${this.baseUrl}/device/${deviceId}/status`);
     }
 
     // azione TIPO:VALORE su un canale dell'attuatore; il canale è la chiave del DeviceType (es. output)
@@ -102,18 +102,24 @@ export class DeviceApiService {
     }
 
     getAllTimersByDeviceId(deviceId: number): Observable<FullTimerType[]> {
-        return this.http.get<FullTimerType[]>(`${this.baseUrl}/device/timers/${deviceId}`);
+        return this.http.get<FullTimerType[]>(`${this.baseUrl}/device/${deviceId}/timers`);
     }
 
     getAllScenarioByDeviceId(deviceId: number): Observable<ScenarioType[]> {
-        return this.http.get<ScenarioType[]>(`${this.baseUrl}/device/scenarios/${deviceId}`);
+        return this.http.get<ScenarioType[]>(`${this.baseUrl}/device/${deviceId}/scenarios`);
     }
 
     getAllGroupByDeviceId(deviceId: number): Observable<GroupType[]> {
-        return this.http.get<GroupType[]>(`${this.baseUrl}/device/groups/${deviceId}`);
+        return this.http.get<GroupType[]>(`${this.baseUrl}/device/${deviceId}/groups`);
     }
 
     getRoomDeviceId(deviceId: number): Observable<ZoneType> {
-        return this.http.get<ZoneType>(`${this.baseUrl}/device/rooms/${deviceId}`);
+        return this.http.get<ZoneType>(`${this.baseUrl}/device/${deviceId}/rooms`);
     }
+
+    // TODO parametri di ricerca
+    getStoricalData(deviceId: number): Observable<any[]> {
+        return this.http.get<any[]>(`${this.baseUrl}/device/${deviceId}/data`);
+    }
+
 }

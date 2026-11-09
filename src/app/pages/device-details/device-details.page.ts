@@ -129,6 +129,111 @@ export class DeviceDetailsPage implements OnInit {
             }
         }
 
+        firstValueFrom(this.deviceApi.getStoricalData(parseInt(''+ this.deviceId)))
+            .then((storicalData: any[]) => {
+                console.log('dato storici arrivati');
+                console.log(storicalData);
+                /*
+                [
+                  {
+                    "id": 1326533,
+                    "timestamp": 1794072767016,
+                    "channel_key": "close",
+                    "kind": "STATE",
+                    "unit": null,
+                    "value_type": "BOOLEAN",
+                    "value": "false",
+                    "origin": null,
+                    "action": null,
+                    "timer": null,
+                    "scenario": null
+                  },
+
+                  ...
+
+                  {
+                    "id": 1462724,
+                    "timestamp": 1794178799127,
+                    "channel_key": "energy_0",
+                    "kind": "MEASUREMENT",
+                    "unit": "Wh",
+                    "value_type": "NUMBER",
+                    "value": "0",
+                    "origin": null,
+                    "action": null,
+                    "timer": null,
+                    "scenario": null
+                  },
+
+                  ...
+
+                  {
+                    "id": 1462722,
+                    "timestamp": 1794178799125,
+                    "channel_key": "energy_1",
+                    "kind": "MEASUREMENT",
+                    "unit": "Wh",
+                    "value_type": "NUMBER",
+                    "value": "0.001",
+                    "origin": null,
+                    "action": null,
+                    "timer": null,
+                    "scenario": null
+                  },
+
+                  ...
+
+                  {
+                    "id": 1007097,
+                    "timestamp": 1793824763905,
+                    "channel_key": "open",
+                    "kind": "STATE",
+                    "unit": null,
+                    "value_type": "BOOLEAN",
+                    "value": "false",
+                    "origin": null,
+                    "action": null,
+                    "timer": null,
+                    "scenario": null
+                  },
+
+                  ...
+
+                  {
+                    "id": 1462723,
+                    "timestamp": 1794178799127,
+                    "channel_key": "power_0",
+                    "kind": "MEASUREMENT",
+                    "unit": "W",
+                    "value_type": "NUMBER",
+                    "value": "0",
+                    "origin": null,
+                    "action": null,
+                    "timer": null,
+                    "scenario": null
+                  },
+
+                  ...
+
+                  {
+                    "id": 1462721,
+                    "timestamp": 1794178799125,
+                    "channel_key": "power_1",
+                    "kind": "MEASUREMENT",
+                    "unit": "W",
+                    "value_type": "NUMBER",
+                    "value": "0",
+                    "origin": null,
+                    "action": null,
+                    "timer": null,
+                    "scenario": null
+                  }
+                ]
+                 */
+
+
+            })
+
         firstValueFrom(this.deviceApi.getAllGroupByDeviceId(parseInt(''+ this.deviceId)))
             .then((groups: GroupType[]) => {
                 this.groups = groups;
@@ -177,11 +282,6 @@ export class DeviceDetailsPage implements OnInit {
 
         this.deviceApi.getAllTimersByDeviceId(parseInt(''+ this.deviceId))
             .subscribe((timers: FullTimerType[]) => {
-
-
-
-
-
                 const list = timers as (FullTimerType & { sectors: number[][]; arcs: string[]; })[];
                 this.timers =
                 list
@@ -434,4 +534,65 @@ export class DeviceDetailsPage implements OnInit {
         }
 
     }
+
+
+
+    protected openCurtain(device: DeviceType, event: PointerEvent) {
+        event.stopImmediatePropagation();
+        this.isDeviceActionInWaiting.set(true);
+
+        const channelIndex: number = this.device().channel.indexOf('open');
+        if (channelIndex === -1) {
+            console.log(`switchAction: il dispositivo ${this.device().id} non ha il canale open`);
+            return;
+        }
+        const previousStatus: DeviceType['status'][number] = this.device().status[channelIndex] ?? null;
+
+
+        firstValueFrom(this.deviceApi.deviceAction(this.device().id, 'open', 'POWER:ON'))
+            .then((result: unknown) => {
+                this.isDeviceActionInWaiting.set(false);
+                return result;
+            })
+            .catch((error: unknown) => {
+                console.log(`errore in open: azione sul dispositivo ${this.device().id}`);
+                console.log(error);
+                // this.device = this.withChannelStatus(this.device, channelIndex, previousStatus);
+                // this.isSwitchInError.set(true);
+                this.isDeviceActionInWaiting.set(false);
+                return null;
+            });
+
+
+    }
+
+    protected closeCurtain(device: DeviceType, event: PointerEvent) {
+        event.stopImmediatePropagation();
+        this.isDeviceActionInWaiting.set(true);
+
+        const channelIndex: number = this.device().channel.indexOf('close');
+        if (channelIndex === -1) {
+            console.log(`switchAction: il dispositivo ${this.device().id} non ha il canale close`);
+            return;
+        }
+        const previousStatus: DeviceType['status'][number] = this.device().status[channelIndex] ?? null;
+
+
+        firstValueFrom(this.deviceApi.deviceAction(this.device().id, 'close', 'POWER:ON'))
+            .then((result: unknown) => {
+                this.isDeviceActionInWaiting.set(false);
+                return result;
+            })
+            .catch((error: unknown) => {
+                console.log(`errore in close: azione sul dispositivo ${this.device().id}`);
+                console.log(error);
+                // this.device = this.withChannelStatus(this.device, channelIndex, previousStatus);
+                // this.isSwitchInError.set(true);
+                this.isDeviceActionInWaiting.set(false);
+                return null;
+            });
+
+    }
+
+
 }

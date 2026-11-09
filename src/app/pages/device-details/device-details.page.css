@@ -175,11 +175,11 @@ H4 {
 
 
 ::ng-deep .p-accordioncontent-content {
-    width: 100cqw;
+    width: 100%;
     background: var(--color-background-3) !important;
 }
 .p-accordioncontent-content {
-    width: 100cqw;
+    width: 100%;
 }
 p-accordion,
 p-accordion-panel,
@@ -219,6 +219,23 @@ p-accordion-content > DIV,
     padding: 0rem 1rem;
     color: var(--color-text-0);
     border: solid 1px var(--color-text-0);
+}
+
+
+
+.double-comand-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin: 2rem auto;
+    height: 4rem;
+}
+
+
+.double-comand-container > SVG
+, .double-comand-container > svg
+{
+    height: 100%;
 }
 
 

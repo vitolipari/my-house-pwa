@@ -205,8 +205,8 @@ export class DevicesPage implements OnInit, OnDestroy {
         // dal Core arriva il DeviceType di un dispositivo che ha cambiato lo stato o il valore di un canale: prende il
         // posto di quello con lo stesso id, e le liste derivate da `devices` (stanze) si ricalcolano da sole
         channel.onmessage = (msg: any) => {
-            console.log('dati ricevuti');
-            console.log( JSON.parse(msg.data) );
+            // console.log('dati ricevuti');
+            // console.log( JSON.parse(msg.data) );
 
             try {
                 let updatedDevice: DeviceType = JSON.parse(msg.data);

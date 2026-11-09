@@ -37,159 +37,7 @@
     <div class="top-part">
         <div class="icon">
             {{ itemEmojIcon(device().emoj) }}
-
-            @switch (device().type.id) {
-
-                <!-- --- attuatori --------------------------------------------->
-                @case ('SWITCH') {
-                    <div class="rounded-tag">SWITCH</div>
-                }
-
-                @case ('METERED_SWITCH') {
-                    <div class="rounded-tag">METERED_SWITCH</div>
-                }
-
-                @case ('TEMPERATURE_HUMIDITY_SENSOR') {
-                    <div class="rounded-tag">TEMPERATURE_HUMIDITY_SENSOR</div>
-                }
-
-                @case ('METERED_DIMMER') {
-                    <div class="rounded-tag">METERED_DIMMER</div>
-                }
-
-                @case ('POWER_METER') {
-                    <div class="rounded-tag">POWER_METER</div>
-                }
-
-                @case ('METERED_RELAY_CURTAIN') {
-                    <div class="rounded-tag">METERED_RELAY_CURTAIN</div>
-                }
-
-                @case ('SENSING_AIR_CONDITIONER') {
-                    <div class="rounded-tag">SENSING_AIR_CONDITIONER</div>
-                }
-
-                @case ('BINARY_STATE_SENSOR') {
-                    <div class="rounded-tag">BINARY_STATE_SENSOR</div>
-                }
-
-                @case ('SOLAR_SYSTEM_MONITOR') {
-                    <div class="rounded-tag">SOLAR_SYSTEM_MONITOR</div>
-                }
-
-
-
-                @case ('DIMMER') {
-                    <div class="rounded-tag">DIMMER</div>
-                }
-                @case ('COLOR_DIMMER') {
-                    <div class="rounded-tag">COLOR_DIMMER</div>
-                }
-                @case ('CURTAIN') {
-                    <div class="rounded-tag">CURTAIN</div>
-                }
-                @case ('RELAY_CURTAIN') {
-                    <div class="rounded-tag">RELAY_CURTAIN</div>
-                }
-                @case ('AIR_CONDITIONER') {
-                    <div class="rounded-tag">AIR_CONDITIONER</div>
-                }
-                @case ('TV') {
-                    <div class="rounded-tag">TV</div>
-                }
-                @case ('MOTORIZED_CANOPY') {
-                    <div class="rounded-tag">MOTORIZED_CANOPY</div>
-                }
-                @case ('MOTORIZED_DYNAMIC_CANOPY') {
-                    <div class="rounded-tag">MOTORIZED_DYNAMIC_CANOPY</div>
-                }
-                @case ('DOOR') {
-                    <div class="rounded-tag">DOOR</div>
-                }
-                @case ('GATE') {
-                    <div class="rounded-tag">GATE</div>
-                }
-                @case ('GAME_CONSOLE') {
-                    <div class="rounded-tag">GAME_CONSOLE</div>
-                }
-                @case ('PRINTER') {
-                    <div class="rounded-tag">PRINTER</div>
-                }
-                @case ('HEADPHONES') {
-                    <div class="rounded-tag">HEADPHONES</div>
-                }
-                @case ('SPEAKER') {
-                    <div class="rounded-tag">SPEAKER</div>
-                }
-
-
-                @case ('METERED_CURTAIN') {
-                    <div class="rounded-tag">METERED_CURTAIN</div>
-                }
-
-
-                @case ('THERMOSTAT') {
-                    <div class="rounded-tag">THERMOSTAT</div>
-                }
-
-                @case ('MOVEMENT_SENSOR_SWITCH') {
-                    <div class="rounded-tag">MOVEMENT_SENSOR_SWITCH</div>
-                }
-                @case ('LIGHT_SENSOR_SWITCH') {
-                    <div class="rounded-tag">LIGHT_SENSOR_SWITCH</div>
-                }
-                @case ('THREE_D_PRINTER') {
-                    <div class="rounded-tag">THREE_D_PRINTER</div>
-                }
-                @case ('SMART_WATCH') {
-                    <div class="rounded-tag">SMART_WATCH</div>
-                }
-                @case ('CAR') {
-                    <div class="rounded-tag">CAR</div>
-                }
-                @case ('ELECTRIC_CAR') {
-                    <div class="rounded-tag">ELECTRIC_CAR</div>
-                }
-                @case ('ELECTRIC_BICYCLE') {
-                    <div class="rounded-tag">ELECTRIC_BICYCLE</div>
-                }
-                @case ('ELECTRIC_SCOOTER') {
-                    <div class="rounded-tag">ELECTRIC_SCOOTER</div>
-                }
-                @case ('MOTORCYCLE') {
-                    <div class="rounded-tag">MOTORCYCLE</div>
-                }
-
-                @case ('LIGHT_SENSOR') {
-                    <div class="rounded-tag">LIGHT_SENSOR</div>
-                }
-                @case ('MOVEMENT_SENSOR') {
-                    <div class="rounded-tag">MOVEMENT_SENSOR</div>
-                }
-                @case ('WATER_LEVEL_SENSOR') {
-                    <div class="rounded-tag">WATER_LEVEL_SENSOR</div>
-                }
-
-                @case ('FIRE_SENSOR') {
-                    <div class="rounded-tag">FIRE_SENSOR</div>
-                }
-                @case ('ENERGY_METER') {
-                    <div class="rounded-tag">ENERGY_METER</div>
-                }
-
-                @case ('GPS_TAG') {
-                    <div class="rounded-tag">GPS_TAG</div>
-                }
-                @default {
-                    <div>Dispositivo non catalogato</div>
-                }
-
-
-
-
-            }
-
-
+            <div class="rounded-tag">{{ device().type.id }}</div>
         </div>
         <div>
             <div class="device-name">{{ device().name }}</div>
@@ -299,6 +147,50 @@
             </div>
         }
     }
+
+
+    @switch ( device().type.id ) {
+        @case ('METERED_RELAY_CURTAIN')
+        @case ('CURTAIN')
+        @case ('RELAY_CURTAIN')
+        @case ('METERED_CURTAIN')
+        {
+            <div class="double-comand-container">
+                @if( !!isDeviceActionInWaiting() ) {
+                    <svg class="svg-icon inside-device-list-status" style="position: static; top: 1.1rem; left: 3.8rem;">
+                        <use href="#orologio-1-1"></use>
+                    </svg>
+                }
+                @else {
+
+                    <!-- APRE -->
+                    <svg
+                        (click)="openCurtain(device(), $event)"
+                    >
+                        <use
+                            [attr.href]="'#icon-136'"
+                            [attr.xlink:href]="'#icon-136'"
+                        >
+                        </use>
+                    </svg>
+
+                    <!-- CHIUDE -->
+                    <svg
+                        style="transform: rotate(180deg); "
+                        (click)="closeCurtain(device(), $event)"
+                    >
+                        <use
+                            [attr.href]="'#icon-136'"
+                            [attr.xlink:href]="'#icon-136'"
+                        >
+                        </use>
+                    </svg>
+
+                }
+            </div>
+        }
+    }
+
 
     <h4>Stanza</h4>
     @if( !!roomWaiting() ) {
