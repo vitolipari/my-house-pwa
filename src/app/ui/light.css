@@ -6,16 +6,16 @@
     /*  Header  */
 
     /* Colori */
-    --color-background-1: rgb(244, 244, 244);
-    --color-background-2: rgb(220, 220, 220); /* da cambiare */
-    --color-background-3: rgb(230, 230, 230); /* da cambiare */
+    --color-background-1: #0b1722;
+    --color-background-2: rgba(4, 12, 20, 0.42);
+    --color-background-3: rgba(20, 36, 52, 0.55);
 
     --color-ambient-1: rgb(50, 50, 50);
     --color-ambient-2: rgb(82, 82, 82);
 
-    --color-text-1: rgb(99, 99, 99);
-    --color-text-2: rgb(64, 64, 64);
-    --color-text-0: rgb(120, 120, 120);
+    --color-text-1: #b3c5d4;
+    --color-text-2: #eaf2f9;
+    --color-text-0: #8296a8;
 
     --color-evident-1: #080;  /* todo */
     --color-evident-2: #0aff97;  /* todo */
@@ -37,8 +37,8 @@
 
     --big-opacity-theme-color: #000c;
     --middle-opacity-theme-color: #fff7;
-    --small-opacity-theme-color: #fff1;
-    --middle-opacity-inverse-theme-color: #0002;
+    --small-opacity-theme-color: rgba(20, 36, 52, 0.72);
+    --middle-opacity-inverse-theme-color: rgba(2, 8, 14, 0.50);
     --small-black-color: #0003;
 
 
