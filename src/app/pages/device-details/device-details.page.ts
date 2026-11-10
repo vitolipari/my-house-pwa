@@ -21,6 +21,21 @@ import {ScenarioType} from '../scenario/scenario.models';
 import {flattenToKeyValue, getLastElementOr} from '../../utils/array-util';
 import {Accordion, AccordionContent, AccordionHeader, AccordionPanel} from 'primeng/accordion';
 
+
+export type HistoricDataType = {
+    "id": number;
+    "timestamp": number;
+    "channel_key": string;
+    "kind": string;
+    "unit": string | null;
+    "value_type": string;
+    "value": string;
+    "origin": string;
+    "action": string | null;
+    "timer": number | null;
+    "scenario": number | null;
+};
+
 @Component({
     selector: 'app-device-details.page',
     imports: [
@@ -77,7 +92,8 @@ export class DeviceDetailsPage implements OnInit {
     protected readonly deviceWaiting = signal<boolean>(true);
     protected readonly isDeviceActionInWaiting = signal<boolean>(false);
     protected device = signal(VOID_DEVICE);
-
+    protected measurements = signal<HistoricDataType[]>([]);
+    protected historicData = signal<HistoricDataType[]>([]);
 
     constructor() {
         // controllo se device é stato passato oppure si proviene da url
@@ -132,104 +148,22 @@ export class DeviceDetailsPage implements OnInit {
         firstValueFrom(this.deviceApi.getStoricalData(parseInt(''+ this.deviceId)))
             .then((storicalData: any[]) => {
                 console.log('dato storici arrivati');
-                console.log(storicalData);
-                /*
-                [
-                  {
-                    "id": 1326533,
-                    "timestamp": 1794072767016,
-                    "channel_key": "close",
-                    "kind": "STATE",
-                    "unit": null,
-                    "value_type": "BOOLEAN",
-                    "value": "false",
-                    "origin": null,
-                    "action": null,
-                    "timer": null,
-                    "scenario": null
-                  },
+                // console.log(storicalData);
+                console.log(storicalData.filter((strData) => ((strData.kind === 'STATE') && !!strData.value && !!strData.origin)));
+                console.log(storicalData.filter((strData) => strData.kind === 'MEASUREMENT'));
 
-                  ...
 
-                  {
-                    "id": 1462724,
-                    "timestamp": 1794178799127,
-                    "channel_key": "energy_0",
-                    "kind": "MEASUREMENT",
-                    "unit": "Wh",
-                    "value_type": "NUMBER",
-                    "value": "0",
-                    "origin": null,
-                    "action": null,
-                    "timer": null,
-                    "scenario": null
-                  },
+                this.historicData.set(
+                    storicalData
+                        .filter((strData) => (
+                            (strData.kind === 'STATE')
+                            && !!strData.value
+                            && !!strData.origin)
+                        )
+                );
 
-                  ...
+                this.measurements.set( storicalData.filter((strData) => (strData.kind === 'MEASUREMENT')) );
 
-                  {
-                    "id": 1462722,
-                    "timestamp": 1794178799125,
-                    "channel_key": "energy_1",
-                    "kind": "MEASUREMENT",
-                    "unit": "Wh",
-                    "value_type": "NUMBER",
-                    "value": "0.001",
-                    "origin": null,
-                    "action": null,
-                    "timer": null,
-                    "scenario": null
-                  },
-
-                  ...
-
-                  {
-                    "id": 1007097,
-                    "timestamp": 1793824763905,
-                    "channel_key": "open",
-                    "kind": "STATE",
-                    "unit": null,
-                    "value_type": "BOOLEAN",
-                    "value": "false",
-                    "origin": null,
-                    "action": null,
-                    "timer": null,
-                    "scenario": null
-                  },
-
-                  ...
-
-                  {
-                    "id": 1462723,
-                    "timestamp": 1794178799127,
-                    "channel_key": "power_0",
-                    "kind": "MEASUREMENT",
-                    "unit": "W",
-                    "value_type": "NUMBER",
-                    "value": "0",
-                    "origin": null,
-                    "action": null,
-                    "timer": null,
-                    "scenario": null
-                  },
-
-                  ...
-
-                  {
-                    "id": 1462721,
-                    "timestamp": 1794178799125,
-                    "channel_key": "power_1",
-                    "kind": "MEASUREMENT",
-                    "unit": "W",
-                    "value_type": "NUMBER",
-                    "value": "0",
-                    "origin": null,
-                    "action": null,
-                    "timer": null,
-                    "scenario": null
-                  }
-                ]
-                 */
 
 
             })

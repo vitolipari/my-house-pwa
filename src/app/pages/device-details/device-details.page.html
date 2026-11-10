@@ -402,6 +402,50 @@
             </p-accordion-content>
         </p-accordion-panel>
 
+        <p-accordion-panel [value]="'storico'">
+            <p-accordion-header>
+                Storico
+            </p-accordion-header>
+            <p-accordion-content>
+                <div class="device-data-row">
+                    <div class="">
+                        <div class="">da</div>
+                        <div class=""></div>
+                    </div>
+                    <div class="">
+                        <div class="">da</div>
+                        <div class=""></div>
+                    </div>
+                    <div class="">
+                        <div class="">da</div>
+                        <div class=""></div>
+                    </div>
+                    <div class="">
+                        <div class="">da</div>
+                        <div class=""></div>
+                    </div>
+                </div>
+                <div class="device-data-row">
+                    <div class="device-data-row-field">time</div>
+                    <div class="device-data-row-field">channel</div>
+<!--                    <div class="device-data-row-field">origin</div>-->
+                    <div class="device-data-row-field">action</div>
+                    <div class="device-data-row-field">T</div>
+                    <div class="device-data-row-field">S</div>
+                </div>
+                @for( data of historicData(); track data.id ) {
+
+                    <div class="device-data-row">
+                        <div class="device-data-row-field">{{ data.timestamp }}</div>
+<!--                        <div class="device-data-row-field">{{ data.channel_key }}</div>-->
+                        <div class="device-data-row-field">{{ data.origin }}</div>
+                        <div class="device-data-row-field">{{ (!!data.action) ? data.action.split(':')[1] : '' }}</div>
+                        <div class="device-data-row-field">{{ data.timer }}</div>
+                        <div class="device-data-row-field">{{ data.scenario }}</div>
+                    </div>
+                }
+            </p-accordion-content>
+        </p-accordion-panel>
 
         <p-accordion-panel [value]="'log'">
             <p-accordion-header>
@@ -415,17 +459,6 @@
             </p-accordion-content>
         </p-accordion-panel>
 
-        <p-accordion-panel [value]="'storico'">
-            <p-accordion-header>
-                Storico
-            </p-accordion-header>
-            <p-accordion-content>
-                <div class="device-data-row">
-                    <div class="device-data-row-field">riga di storico eventi</div>
-                    <div class="device-data-row-field">riga</div>
-                </div>
-            </p-accordion-content>
-        </p-accordion-panel>
     </p-accordion>
 
 
