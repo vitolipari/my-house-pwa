@@ -140,6 +140,15 @@ H4 {
 }
 
 
+.device-data-comand-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.device-data-comand-row > DIV {
+    max-width: 45%;
+}
 
 .device-data-row {
     background: var(--color-ambient-3);

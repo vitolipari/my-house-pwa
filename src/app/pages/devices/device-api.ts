@@ -13,6 +13,7 @@ import {
 } from './devices.models';
 import {FullTimerType} from '../timer/timer.models';
 import {ScenarioType} from '../scenario/scenario.models';
+import {HistoricDataType, SearchHistoricDataType} from '../device-details/device-details.page';
 
 @Injectable({providedIn: 'root'})
 export class DeviceApiService {
@@ -117,9 +118,9 @@ export class DeviceApiService {
         return this.http.get<ZoneType>(`${this.baseUrl}/device/${deviceId}/rooms`);
     }
 
-    // TODO parametri di ricerca
-    getStoricalData(deviceId: number): Observable<any[]> {
-        return this.http.get<any[]>(`${this.baseUrl}/device/${deviceId}/data`);
+    getStoricalData(search: SearchHistoricDataType): Observable<HistoricDataType[]> {
+        let queryString: string = Object.keys( search ).map( (key: string) => `${ key }=${ ''+ search[key as keyof SearchHistoricDataType] }` ).join('&');
+        return this.http.get<HistoricDataType[]>(`${this.baseUrl}/device/${ search.device }/data?${ queryString }`);
     }
 
 }

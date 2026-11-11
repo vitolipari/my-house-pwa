@@ -20,6 +20,9 @@ import {ScenarioApiService} from '../scenario/scenario-api';
 import {ScenarioType} from '../scenario/scenario.models';
 import {flattenToKeyValue, getLastElementOr} from '../../utils/array-util';
 import {Accordion, AccordionContent, AccordionHeader, AccordionPanel} from 'primeng/accordion';
+import {DatePicker} from 'primeng/datepicker';
+import {InputText} from 'primeng/inputtext';
+import {DarkModeService} from '../../services/dark-mode-service';
 
 
 export type HistoricDataType = {
@@ -36,6 +39,14 @@ export type HistoricDataType = {
     "scenario": number | null;
 };
 
+export type SearchHistoricDataType = {
+    "device": number;
+    "pagesize": number;
+    "pagenumber": number;
+    "from": string | number | Date;
+    "to": string | number | Date;
+}
+
 @Component({
     selector: 'app-device-details.page',
     imports: [
@@ -45,15 +56,17 @@ export type HistoricDataType = {
         PageMenu,
         Slider,
         FormsModule,
-        Checkbox,
-        DecimalPipe,
-        SwitcherComponent,
+        // Checkbox,
+        // DecimalPipe,
+        // SwitcherComponent,
         KeyValuePipe,
         Accordion,
         AccordionContent,
         AccordionHeader,
         AccordionPanel,
         DatePipe,
+        DatePicker,
+        InputText,
         // Checkbox,
         // SwitcherComponent
     ],
@@ -77,12 +90,21 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
     protected room: ZoneType = null as unknown as ZoneType;
     private webSocketChannel!: WebSocket;
 
+    protected search: SearchHistoricDataType = {
+        device: 0,
+        pagesize: 100,
+        pagenumber: 1,
+        from: '2000-01-01',
+        to: moment().endOf('day').format('YYYY-MM-DD'),
+    };
+
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     private readonly deviceApi = inject(DeviceApiService);
     readonly scenarioApi: ScenarioApiService = inject(ScenarioApiService);
     // `scenarios` non è un signal: dopo la rilettura degli scenari attivi la pagina va ridisegnata a mano
     private readonly cdr = inject(ChangeDetectorRef);
+    protected readonly darkModeService = inject(DarkModeService);
 
     readonly data = this.router.currentNavigation()?.extras.state as { from: string; device?: DeviceType; } | undefined;
     readonly deviceId = this.route.snapshot.paramMap.get('id');
@@ -97,6 +119,7 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
     protected device = signal(VOID_DEVICE);
     protected measurements = signal<HistoricDataType[]>([]);
     protected historicData = signal<HistoricDataType[]>([]);
+    protected searchingData = signal<boolean>(false);
 
     constructor() {
         // controllo se device é stato passato oppure si proviene da url
@@ -107,48 +130,10 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
 
     }
 
-    ngOnInit() {
 
-
-        if(!!this.device().id) {
-            // device presente
-            this.setUpSetValueStatus();
-            this.openWebSocketComunication();
-            console.log(this.device());
-            this.deviceWaiting.set(false);
-        }
-        else {
-            if ( !!this.router.currentNavigation()?.extras.state?.['device'] ) {
-                // device passato da navigazione
-                this.device.set( this.router.currentNavigation()?.extras.state?.['device'] as DeviceType );
-                this.openWebSocketComunication();
-                this.setUpSetValueStatus();
-                console.log(this.device());
-                this.deviceWaiting.set(false);
-            }
-            else {
-                // device non passato da navigazione
-
-                if( !!this.route.snapshot.params['id'] ) {
-
-                    firstValueFrom(this.deviceApi.search({ids: [parseInt(''+ this.deviceId)] }))
-                        .then((device: DeviceType[]) => {
-                            this.device.set( device.reduce(getLastElementOr, null as unknown as DeviceType) );
-                            this.openWebSocketComunication();
-                            this.setUpSetValueStatus();
-                            console.log(this.device());
-                            this.deviceWaiting.set(false);
-                        })
-
-                }
-                else {
-                    // anomalia
-                }
-
-            }
-        }
-
-        firstValueFrom(this.deviceApi.getStoricalData(parseInt(''+ this.deviceId)))
+    searchStoricalData() {
+        this.searchingData.set(true);
+        firstValueFrom(this.deviceApi.getStoricalData(this.search))
             .then((storicalData: any[]) => {
                 console.log('dato storici arrivati');
                 // console.log(storicalData);
@@ -167,9 +152,61 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
 
                 this.measurements.set( storicalData.filter((strData) => (strData.kind === 'MEASUREMENT')) );
 
-
+                this.searchingData.set(false);
 
             })
+    }
+
+
+    ngOnInit() {
+
+
+        if(!!this.device().id) {
+            // device presente
+            this.setUpSetValueStatus();
+            this.openWebSocketComunication();
+            this.searchStoricalData();
+            console.log(this.device());
+            this.deviceWaiting.set(false);
+        }
+        else {
+            if ( !!this.router.currentNavigation()?.extras.state?.['device'] ) {
+                // device passato da navigazione
+                this.device.set( this.router.currentNavigation()?.extras.state?.['device'] as DeviceType );
+                this.search.device = parseInt(''+ ( this.router.currentNavigation()?.extras.state?.['device'] as DeviceType ).id);
+                this.openWebSocketComunication();
+                this.setUpSetValueStatus();
+
+                this.searchStoricalData();
+
+                console.log(this.device());
+                this.deviceWaiting.set(false);
+            }
+            else {
+                // device non passato da navigazione
+
+                if( !!this.route.snapshot.params['id'] ) {
+
+                    firstValueFrom(this.deviceApi.search({ids: [parseInt(''+ this.deviceId)] }))
+                        .then((device: DeviceType[]) => {
+                            this.device.set( device.reduce(getLastElementOr, null as unknown as DeviceType) );
+                            this.search.device = parseInt(''+ this.device().id);
+                            this.openWebSocketComunication();
+                            this.setUpSetValueStatus();
+                            this.searchStoricalData();
+                            console.log(this.device());
+                            this.deviceWaiting.set(false);
+                        })
+
+                }
+                else {
+                    // anomalia
+                }
+
+            }
+        }
+
+
 
         firstValueFrom(this.deviceApi.getAllGroupByDeviceId(parseInt(''+ this.deviceId)))
             .then((groups: GroupType[]) => {
@@ -494,6 +531,7 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
 
     // uscendo dalla pagina la WebSocket si chiude: aperta, a ogni aggiornamento del dispositivo continuerebbe a
     // rileggere gli scenari attivi
+
     ngOnDestroy(): void {
         if( !!this.webSocketChannel ) {
             this.webSocketChannel.close();

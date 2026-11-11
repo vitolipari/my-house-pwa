@@ -407,91 +407,150 @@
                 Storico
             </p-accordion-header>
             <p-accordion-content>
-                <div class="device-data-row">
-                    <div class="">
-                        <div class="">da</div>
-                        <div class=""></div>
-                    </div>
-                    <div class="">
-                        <div class="">da</div>
-                        <div class=""></div>
-                    </div>
-                    <div class="">
-                        <div class="">da</div>
-                        <div class=""></div>
-                    </div>
-                    <div class="">
-                        <div class="">da</div>
-                        <div class=""></div>
-                    </div>
-                </div>
-                @for( data of historicData(); track data.id ) {
 
-                    <div class="device-data-row">
-                        <div class="device-data-row-field">{{ data.timestamp | date: 'd MMM HH:mm' }}</div>
-                        <div class="device-data-row-field">
-                            @if ( !!data.timer ) {
-                                <svg
-                                    style="display: flex; margin: 0rem auto;"
-                                    [style.--color-ambient-2]="'#d00'"
-                                >
-                                    <use
-                                        [attr.href]="'#timer_icon_1'"
-                                        [attr.xlink:href]="'#timer_icon_1'"
-                                        >
-                                    </use>
-                                </svg>
-                            }
-                            @else if ( !!data.scenario ) {
-                                <svg
-                                    style="display: flex; margin: 0rem auto;"
-                                    [style.--color-ambient-2]="'#d0d'"
-                                >
-                                    <use
-                                        [attr.href]="'#icon-540'"
-                                        [attr.xlink:href]="'#icon-540'"
-                                        >
-                                    </use>
-                                </svg>
-                            }
-                            @else {
-                                @switch ( data.origin ) {
-                                    @case('switch') {
-                                        <svg
-                                            style="display: flex; margin: 0rem auto;"
-                                            [style.--color-ambient-2]="'#0d0'"
-                                        >
-                                            <use
-                                                [attr.href]="'#icon-546'"
-                                                [attr.xlink:href]="'#icon-546'"
-                                                >
-                                            </use>
-                                        </svg>
-                                    }
-                                    @case('HTTP_in') {
-                                        <svg
-                                            style="display: flex; margin: 0rem auto;"
-                                            [style.--color-ambient-2]="'#00d'"
-                                        >
-                                            <use
-                                                [attr.href]="'#icon-209'"
-                                                [attr.xlink:href]="'#icon-209'"
-                                                >
-                                            </use>
-                                        </svg>
-                                    }
-                                    @default() {
-                                        {{ data.origin }}
+                @if(!!searchingData()) {
+                    <svg
+                        class="svg-icon"
+                        style="
+                            width: 10rem;
+                            height: 10rem;
+                            margin: 0rem auto;
+                            display: block;
+                            position: relative;
+                            top: 1rem;"
+                    >
+                        <use href="#orologio-1-1"></use>
+                    </svg>
+                }
+                @else {
+                    <div class="device-data-comand-row">
+                        <div class="">
+                            <div class="">da</div>
+                            <div class="">
+                                <p-datepicker
+                                    [(ngModel)]="search.from"
+                                    (ngModelChange)="searchStoricalData()"
+                                    dateFormat="dd/mm"
+                                    placeholder="dd/mm"
+                                    pInputMask="99/99"
+                                    [showIcon]="true"
+                                    inputId="icondisplay"
+                                    [showOnFocus]="true"
+                                    [iconDisplay]="'input'"
+                                    class="fixed-value-input input-like"
+                                />
+                            </div>
+                        </div>
+                        <div class="">
+                            <div class="">a</div>
+                            <div class="">
+                                <p-datepicker
+                                    [(ngModel)]="search.to"
+                                    (ngModelChange)="searchStoricalData()"
+                                    dateFormat="dd/mm"
+                                    placeholder="dd/mm"
+                                    pInputMask="99/99"
+                                    [showIcon]="true"
+                                    inputId="icondisplay"
+                                    [showOnFocus]="true"
+                                    [iconDisplay]="'input'"
+                                    class="fixed-value-input input-like"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="device-data-comand-row">
+                        <div class="">
+                            <div class="">righe</div>
+                            <div class="">
+                                <input
+                                    pInputText
+                                    id="name"
+                                    aria-describedby="name-help"
+                                    placeholder="100"
+                                    class="fixed-value-input"
+                                    type="number"
+                                    [(ngModel)]="search.pagesize"
+                                    (ngModelChange)="searchStoricalData()"
+                                />
+                            </div>
+                        </div>
+                        <div class="">
+                            <div class="">pagina</div>
+                            <div class="">
+                                <input
+                                    pInputText
+                                    id="name"
+                                    aria-describedby="name-help"
+                                    placeholder="1"
+                                    class="fixed-value-input"
+                                    type="number"
+                                    [(ngModel)]="search.pagenumber"
+                                    (ngModelChange)="searchStoricalData()"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    @for( data of historicData(); track data.id ) {
+
+                        <div class="device-data-row">
+                            <div class="device-data-row-field">{{ data.timestamp | date: 'd MMM HH:mm' }}</div>
+                            <div class="device-data-row-field">
+                                @if ( !!data.timer ) {
+                                    <svg
+                                        style="display: flex; margin: 0rem auto;"
+                                        [style.--color-ambient-2]="'#d58'"
+                                    >
+                                        <use [attr.href]="'#timer_icon_1'" >
+                                        </use>
+                                    </svg>
+                                }
+                                @else if ( !!data.scenario ) {
+                                    <svg
+                                        style="display: flex; margin: 0rem auto;"
+                                        [style.--color-ambient-2]="'#a2f'"
+                                    >
+                                        <use [attr.href]="'#icon-540'" >
+                                        </use>
+                                    </svg>
+                                }
+                                @else {
+                                    @switch ( data.origin ) {
+                                        @case('switch') {
+                                            <!-- #0f8 -->
+                                            <svg
+                                                style="display: flex; margin: 0rem auto;"
+                                                [style.--color-ambient-2]="!!this.darkModeService.isDarkMode() ? '#0ca' : '#0b8'"
+                                            >
+                                                <use [attr.href]="'#icon-546'" >
+                                                </use>
+                                            </svg>
+                                        }
+                                        @case('HTTP_in') {
+                                            <svg
+                                                style="display: flex; margin: 0rem auto;"
+                                                [style.--color-ambient-2]="'#18f'"
+                                            >
+                                                <use [attr.href]="'#icon-209'" >
+                                                </use>
+                                            </svg>
+                                        }
+                                        @default() {
+                                            {{ data.origin }}
+                                        }
                                     }
                                 }
-                            }
+                            </div>
+                            <div class="device-data-row-field" style="text-align: right; padding-right: 0.5rem;">{{ (!!data.action) ? data.action.split(':')[1] : '' }}</div>
                         </div>
-                        <div class="device-data-row-field" style="text-align: right; padding-right: 0.5rem;">{{ (!!data.action) ? data.action.split(':')[1] : '' }}</div>
-                    </div>
+                    }
                 }
+
+
             </p-accordion-content>
         </p-accordion-panel>
 
+        <!--
         <p-accordion-panel [value]="'log'">
             <p-accordion-header>
                 Logs
@@ -503,6 +562,7 @@
                 </div>
             </p-accordion-content>
         </p-accordion-panel>
+        -->
 
     </p-accordion>
 
