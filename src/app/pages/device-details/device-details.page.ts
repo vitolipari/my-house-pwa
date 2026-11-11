@@ -133,6 +133,12 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
 
     searchStoricalData() {
         this.searchingData.set(true);
+
+        this.search.from = moment(this.search.from).format('YYYY-MM-DD');
+        this.search.to = moment(this.search.to).format('YYYY-MM-DD');
+
+        console.log(this.search);
+        // debugger;
         firstValueFrom(this.deviceApi.getStoricalData(this.search))
             .then((storicalData: any[]) => {
                 console.log('dato storici arrivati');
