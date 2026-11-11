@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit, signal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {DeviceSmallType, DeviceType, GroupType, VOID_DEVICE, ZoneType} from '../devices/devices.models';
 import {DecimalPipe, JsonPipe, KeyValuePipe} from '@angular/common';
@@ -60,7 +60,7 @@ export type HistoricDataType = {
     styleUrl: './device-details.page.css',
     standalone: true
 })
-export class DeviceDetailsPage implements OnInit {
+export class DeviceDetailsPage implements OnInit, OnDestroy {
 
 
     timers: (FullTimerType & { sectors: number[][]; arcs: string[]; })[] = [];
@@ -80,6 +80,8 @@ export class DeviceDetailsPage implements OnInit {
     private readonly route = inject(ActivatedRoute);
     private readonly deviceApi = inject(DeviceApiService);
     readonly scenarioApi: ScenarioApiService = inject(ScenarioApiService);
+    // `scenarios` non è un signal: dopo la rilettura degli scenari attivi la pagina va ridisegnata a mano
+    private readonly cdr = inject(ChangeDetectorRef);
 
     readonly data = this.router.currentNavigation()?.extras.state as { from: string; device?: DeviceType; } | undefined;
     readonly deviceId = this.route.snapshot.paramMap.get('id');
@@ -205,7 +207,7 @@ export class DeviceDetailsPage implements OnInit {
 
                     })
                     .catch((error) => {
-                        console.log('errore in getRunningScenarios');
+                        console.log('errore in ngOnInit di DeviceDetailsPage: lettura degli scenari attivi');
                         console.error(error);
                         return null;
                     })
@@ -459,14 +461,42 @@ export class DeviceDetailsPage implements OnInit {
                     console.log( device.status[ device.channel.indexOf('brightness') ] );
                     console.log( JSON.parse(msg.data) );
                     this.device.set( device );
+
+                    // l'ingresso e l'uscita di uno scenario cambiano sempre un dispositivo che ne fa parte: a ogni
+                    // aggiornamento gli scenari attivi si rileggono, altrimenti resterebbero quelli dell'apertura
+                    if( this.scenarios.length > 0 ) {
+                        firstValueFrom(this.scenarioApi.getRunningScenarios())
+                            .then((runningScenariosIDs: number[]) => {
+
+                                this.scenarios =
+                                    this.scenarios
+                                        .map((sc: ScenarioType & { running: boolean; }) => ({...sc, running: runningScenariosIDs.includes(sc.id)}))
+                                ;
+
+                                this.cdr.markForCheck();
+                            })
+                            .catch((error: any) => {
+                                console.log('errore in onmessage di DeviceDetailsPage: lettura degli scenari attivi');
+                                console.log(error);
+                            })
+                        ;
+                    }
                 }
             }
             catch (e: any) {
-                console.log('errore in onmessage di DevicesPage: messaggio della WebSocket non valido');
+                console.log('errore in onmessage di DeviceDetailsPage: messaggio della WebSocket non valido');
                 console.log(e);
             }
         }
 
+    }
+
+    // uscendo dalla pagina la WebSocket si chiude: aperta, a ogni aggiornamento del dispositivo continuerebbe a
+    // rileggere gli scenari attivi
+    ngOnDestroy(): void {
+        if( !!this.webSocketChannel ) {
+            this.webSocketChannel.close();
+        }
     }
 
 

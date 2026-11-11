@@ -1,11 +1,18 @@
-import {Component, inject, OnInit, signal, WritableSignal} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, signal, WritableSignal} from '@angular/core';
 import {PageTitleComponent} from "../../../components/page-title.component/page-title.component";
 import {Button} from 'primeng/button';
 import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
 import {FormsModule} from '@angular/forms';
 import {InputText} from 'primeng/inputtext';
 import {SwitcherComponent} from '../../../components/switcher/switcher.component';
-import {ScenarioActionValuesType, ScenarioDTOType, ScenarioType} from '../scenario.models';
+import {
+    ActionChannelDeviceType,
+    EventTriggerChannelDeviceType,
+    ScenarioActionValuesType,
+    ScenarioDTOType,
+    ScenarioType
+} from '../scenario.models';
+import {DeviceType} from '../../devices/devices.models';
 import {readScenarioAction} from '../scenario/scenario.page';
 import {LongPressDirective} from '../../../directives/long-press.directive';
 import {Router} from '@angular/router';
@@ -28,7 +35,7 @@ import {FullTimerType} from '../../timer/timer.models';
   templateUrl: './scenarios.page.html',
   styleUrl: './scenarios.page.css',
 })
-export class ScenariosPage implements OnInit {
+export class ScenariosPage implements OnInit, OnDestroy {
 
     searchName: string = ''
 
@@ -44,25 +51,79 @@ export class ScenariosPage implements OnInit {
     readonly router = inject(Router);
     readonly scenarioApi: ScenarioApiService = inject(ScenarioApiService);
     selectedScenarios: number[] = [];
-    runningScenarios: number[] = [];
+    // signal: arriva dopo la lista e cambia con la WebSocket, quindi la pagina si deve ridisegnare
+    protected readonly runningScenarios = signal<number[]>([]);
+    private channel: WebSocket | null = null;     // WebSocket con il Core, aperta in ngOnInit e chiusa in ngOnDestroy
 
 
     ngOnInit(): void {
 
         this.isInWaiting.update(() => true);
         this.searchScenarios();
+        this.loadRunningScenarios();
 
+        // dal Core arriva il DeviceType di un dispositivo che ha cambiato lo stato o il valore di un canale. L'ingresso e
+        // l'uscita di uno scenario cambiano sempre un dispositivo che ne fa parte: se il dispositivo è in un evento o in
+        // un'azione di uno scenario della lista, gli scenari attivi si rileggono
+        let protocol: string = (location.protocol === 'https:') ? 'wss://' : 'ws://';
+        let channel: WebSocket = new WebSocket(protocol + location.host + '/api/core/');
+        this.channel = channel;
 
-        firstValueFrom(this.scenarioApi.getRunningScenarios())
-            .then((runningScenariosIDs: number[]) => {
-                this.runningScenarios = runningScenariosIDs;
-            })
-            .catch((error) => {
-                console.log('errore in getRunningScenarios');
-                console.error(error);
-                return null;
-            })
+        channel.onmessage = (msg: MessageEvent) => {
 
+            let deviceID: number = 0;
+            try {
+                deviceID = parseInt(''+ (JSON.parse(msg.data) as DeviceType).id);
+            }
+            catch (e: any) {
+                console.log('errore in onmessage di ScenariosPage: messaggio della WebSocket non valido');
+                console.log(e);
+                return;
+            }
+
+            // dispositivi di eventi e azioni: dal Core arrivano come DeviceType
+            let scenarioDeviceIDs: number[] = [];
+            this.scenarios()
+                .forEach((scenario: ScenarioType) => {
+                    scenario.triggers
+                        .forEach((trigger: EventTriggerChannelDeviceType) => scenarioDeviceIDs.push(parseInt(''+ (trigger.device as unknown as DeviceType)?.id)))
+                    ;
+                    scenario.actions
+                        .forEach((action: ActionChannelDeviceType) => scenarioDeviceIDs.push(parseInt(''+ (action.device as unknown as DeviceType)?.id)))
+                    ;
+                })
+            ;
+
+            if( !scenarioDeviceIDs.includes(deviceID) ) {
+                return;
+            }
+
+            this.loadRunningScenarios();
+        }
+
+    }
+
+    // uscendo dalla pagina la WebSocket si chiude, altrimenti a ogni nuova apertura se ne aggiungerebbe un'altra
+    ngOnDestroy(): void {
+        if( !!this.channel ) {
+            this.channel.close();
+        }
+    }
+
+    // scenari attivi nel Core (GET /running-scenario): all'apertura e quando cambia un dispositivo degli scenari
+    private loadRunningScenarios() {
+        return (
+            firstValueFrom(this.scenarioApi.getRunningScenarios())
+                .then((runningScenariosIDs: number[]) => {
+                    this.runningScenarios.set(runningScenariosIDs);
+                    return runningScenariosIDs;
+                })
+                .catch((error) => {
+                    console.log('errore in loadRunningScenarios di ScenariosPage');
+                    console.error(error);
+                    return [];
+                })
+        );
     }
 
 
@@ -234,7 +295,7 @@ export class ScenariosPage implements OnInit {
 
 
     isRunning(scen: ScenarioType) {
-        return (this.runningScenarios.includes(scen.id));
+        return (this.runningScenarios().includes(scen.id));
     }
 
 
