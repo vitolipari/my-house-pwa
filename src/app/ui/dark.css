@@ -7,27 +7,36 @@
     /*  Header  */
 
     /* Colori */
-    --color-background-1: #eef2f6;
-    --color-background-2: rgba(30, 50, 75, 0.09);
-    --color-background-3: rgba(255, 255, 255, 0.60);
+    --color-background-1: #0b1722;                  /* base sotto l'immagine */
+    --color-background-2: rgba(4, 12, 20, 0.42);    /* incassi: sidebar, card, campi */
+    --color-background-3: rgba(20, 36, 52, 0.55);   /* pannelli di vetro */
 
 
-    --color-ambient-1: rgb(50, 50, 50);
-    --color-ambient-2: rgb(140, 200, 250);
+    --color-ambient-1: rgba(2, 8, 14, 0.65);
+    --color-ambient-2: #9ccfff;
 
-    --color-text-1: #3f5165;
-    --color-text-2: #1b2733;
-    --color-text-0: #526579;
+    --color-text-1: #b3c5d4;
+    --color-text-2: #eaf2f9;
+    --color-text-0: #8296a8;
 
 
     --color-evident-1: #138;  /* todo */
-    --color-evident-2: #18f;  /* todo */
+    --color-evident-2: #2e90ff;
 
+
+    /* Stati: prima erano in :root di styles.css con un solo valore */
+    --color-outer-glow: #3ddc84;        /* acceso */
+    --medium-gray: #7d8b98;             /* spento */
+    --sky-color: #5aa9ff;               /* link */
+    --color-red-outer-glow: #ff4d5e;    /* allarme, conferma eliminazione */
+    --dark-red-color: #d93645;          /* pulsanti Elimina */
+    --medium-red-color: #ff6b78;        /* messaggi di errore */
+    --color-error: #ff6b78;
 
 
     --light-color: #fff;  /* todo */
     --dark-color: #000;  /* todo */
-    --theme-color: #000;  /* todo */
+    --theme-color: #04101a;
 
     --theme-color-for-gradient-0: rgba(0, 0, 0, 0);
     --theme-color-for-gradient-50: rgba(0, 0, 0, 0.2);
@@ -37,12 +46,20 @@
     --theme-color-inverse-for-gradient-50: rgba(255, 255, 255, 0.2);
     --theme-color-inverse-for-gradient-70: rgba(255, 255, 255, 0.7);
 
-    --different-blur-for-theme: 2px;  /* todo */
+
+    /* Vetro */
+    --bg-image: url('/imgs/sfondo-scuro.jpg');
+    --bg-image-blur: 10px;                              /* sfocatura leggera dello sfondo */
+    --bg-veil: rgba(8, 18, 28, 0.62);                   /* velo fra immagine e contenuto */
+    --panel-blur: 28px;                                 /* sfocatura forte dei pannelli */
+    --panel-border: rgba(190, 220, 255, 0.14);          /* filo chiaro sul bordo */
+    --panel-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+
 
     --big-opacity-theme-color: #fffc;
-    --middle-opacity-theme-color: #fff7;
-    --small-opacity-theme-color: rgba(255, 255, 255, 0.72);
-    --middle-opacity-inverse-theme-color: rgba(20, 40, 60, 0.25);
+    --middle-opacity-theme-color: rgba(20, 36, 52, 0.72);       /* pannello flottante */
+    --small-opacity-theme-color: #0006;
+    --middle-opacity-inverse-theme-color: rgba(2, 8, 14, 0.50); /* fondo dietro al pannello flottante */
     --small-black-color: #0003;
 
 

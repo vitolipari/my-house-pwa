@@ -32,9 +32,12 @@
 
 
     /* Font */
-    --page-font: 'Prompt', 'Montserrat', 'Calisto MT', 'Calisto', 'Trebuchet MS', sans-serif;
-    --main-font: 'Prompt', 'Montserrat', 'Calisto MT', 'Calisto', 'Trebuchet MS', 'Segoe UI', 'Candara', 'Trebuchet MS', 'Varela Round', Verdana, "Open Sans Regular", "Arial Unicode MS Regular", sans-serif;
-    --reading-font: 'Lora', 'Libre Baskerville', 'Adobe Caslon', Georgia;
+    /*
+    'Prompt', 'Montserrat', 'Segoe UI', 'Calisto MT', 'Calisto', 'Trebuchet MS',  'Candara', 'Trebuchet MS', 'Varela Round', Verdana, "Open Sans Regular", "Arial Unicode MS Regular", sans-serif
+     */
+    --page-font: Montserrat, Prompt, Candara, Varela Round, 'Trebuchet MS', 'Segoe UI', Calisto, Verdana, 'Open Sans', 'Arial Unicode MS';
+    --main-font: Prompt, Montserrat, Candara, Varela Round, 'Trebuchet MS', 'Segoe UI', Calisto, Verdana, 'Open Sans', 'Arial Unicode MS';
+    --reading-font: Lora, 'Adobe Caslon', Georgia, Baskerville, 'Libre Baskerville', 'Times New Roman';
     --mono-font: 'Ubuntu', -apple-system, 'Helvetica Neue', 'Roboto', BlinkMacSystemFont, 'Oxygen', 'Cantarell', 'Fira Sans', 'Droid Sans', sans-serif;
     --orbitron-font: Orbitron, sans-serif;
 
@@ -61,35 +64,26 @@
     /* common */
     --light-sky-color: #61dafb;
     --lightBlue: #2196f3;
-    --sky-color: #38f;
     --dark-sky-color: #215ac5;
     --celestino: #18f2;
     --darkGreen: #183;
     --very-light-gray-green: #4fa13e33;
     --good-green: #1fa;
     --gray: #c3c3c3;
-    --medium-gray: #888;
     --full-white: #fff;
 
     --color-inner-glow: #385; /* todo */
-    --color-outer-glow: #0f0; /* todo */
 
     --color-red-inner-glow: #f88a; /* todo */
-    --color-red-outer-glow: #f13; /* todo */
 
-
-    --dark-red-color: #d00;
-    --medium-red-color: #f35;
     --red-opacity: #f353;
     --soft-blue-gray: #525f77;
 
-
-    --header-height: 3rem;
-
-    --max-panel-width: 1024px;
-
-
-    --sidebar-width: 5rem;
+    /*
+     * Spostati in light.css e dark.css, con un valore per tema:
+     * --sky-color, --medium-gray, --color-outer-glow, --color-red-outer-glow,
+     * --dark-red-color, --medium-red-color
+     */
 
 
 }
@@ -120,6 +114,67 @@ BODY {
 
     min-height: 100vh;
     background: var(--color-background-1);
+}
+
+
+/*
+ * Sfondo: l'immagine del tema appena sfocata, ferma dietro a tutto, e sopra un
+ * velo del colore del tema che la attenua. Sono due livelli fissi e non
+ * background-attachment: fixed, che su iOS non è affidabile.
+ */
+BODY::before,
+BODY::after {
+    content: '';
+    position: fixed;
+    pointer-events: none;
+}
+
+BODY::before {
+    /* più grande dello schermo, così i bordi sfocati restano fuori */
+    inset: calc(var(--bg-image-blur) * -2);
+    z-index: -2;
+    background: var(--bg-image) center / cover no-repeat;
+    filter: blur(var(--bg-image-blur));
+}
+
+BODY::after {
+    inset: 0;
+    z-index: -1;
+    background: var(--bg-veil);
+}
+
+
+/*
+ * Pannelli di vetro: il colore arriva dal tema (--color-background-3), qui si
+ * aggiungono la sfocatura forte di ciò che sta dietro e il filo chiaro sul bordo.
+ * Il filo è un'ombra interna e non un border, per non cambiare le misure.
+ */
+.timer-card,
+.timer-block,
+.scenario-block,
+.registered-device,
+.back-panel,
+.row-field,
+.slot-row,
+.device-row,
+user-block,
+room-list-block,
+device-ip-block,
+sidebar-menu {
+    -webkit-backdrop-filter: blur(var(--panel-blur)) saturate(160%);
+    backdrop-filter: blur(var(--panel-blur)) saturate(160%);
+    box-shadow: inset 0 0 0 1px var(--panel-border);
+}
+
+/* L'ombra esterna solo sui pannelli isolati, non sulle righe in lista */
+.timer-card,
+.timer-block,
+.scenario-block,
+.registered-device,
+user-block,
+room-list-block,
+device-ip-block {
+    box-shadow: inset 0 0 0 1px var(--panel-border), var(--panel-shadow);
 }
 
 H1, H2, H3, H4, H5, H6 {

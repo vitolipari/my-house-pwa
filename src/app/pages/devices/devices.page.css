@@ -183,7 +183,8 @@ p-tab > DIV > SPAN, B {
 }
 
 .description {
-    font-family: var(--page-font);
+    /*font-family: var(--page-font);*/
+    font-family: var(--reading-font);
     /*font-size: var(--micro-font-size) !important;*/   /* ereditato */
     color: var(--color-text-2);
     width: 100%;

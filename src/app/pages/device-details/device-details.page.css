@@ -610,8 +610,9 @@ and (max-width: 1023.98px)
 }
 
 .scenario-description {
-    font-size: var(--tiny-font-size);
-    font-family: var(--page-font);
+    font-size: var(--small-font-size);
+    /*font-family: var(--page-font);*/
+    font-family: var(--reading-font);
     color: var(--color-text-2);
     width: 100%;
     white-space: wrap;
@@ -682,7 +683,8 @@ SVG, svg {
 }
 
 .device-row-data > DIV {
-    font-size: var(--tiny-font-size);
+    /*font-size: var(--tiny-font-size);*/
+    font-size: var(--small-font-size) !important;
 }
 
 .device-mac {
@@ -690,7 +692,8 @@ SVG, svg {
 }
 
 .description {
-    font-family: var(--page-font);
+    font-family: var(--reading-font);
+    /*font-family: var(--page-font);*/
     /*font-size: var(--micro-font-size) !important;*/   /* ereditato */
     color: var(--color-text-2);
     width: 100%;

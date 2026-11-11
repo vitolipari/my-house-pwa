@@ -84,8 +84,10 @@ and (max-width: 1023.98px)
 }
 
 .scenario-description {
-    font-size: var(--tiny-font-size);
-    font-family: var(--page-font);
+    /*font-size: var(--tiny-font-size);*/
+    font-size: var(--small-font-size);
+    /*font-family: var(--page-font);*/
+    font-family: var(--reading-font);
     color: var(--color-text-2);
     width: 100%;
     white-space: wrap;
