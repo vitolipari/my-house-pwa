@@ -142,7 +142,7 @@ H4 {
 
 
 .device-data-row {
-    background: var(--color-ambient-1);
+    background: var(--color-ambient-3);
     padding: 0.8rem;
     margin: 0.3rem;
     border-radius: 0.3rem;
@@ -150,6 +150,8 @@ H4 {
     flex-direction: row;
     justify-content: space-between;
     gap: 1rem;      /* spazio fra chiave e valore quando vanno a capo */
+    height: 2.5rem;
+    align-items: center;
 }
 
 .device-data-row-field {
@@ -157,7 +159,8 @@ H4 {
     color: var(--color-text-2);
     text-shadow: var(--theme-color) 0px 0px 0px;
     text-align: left;
-    max-width: 70%;
+    /*max-width: 70%;*/
+    width: 33%;
     overflow-wrap: anywhere;
     /*flex: 2;*/
 }
@@ -610,8 +613,9 @@ and (max-width: 1023.98px)
 }
 
 .scenario-description {
-    font-size: var(--tiny-font-size);
-    font-family: var(--page-font);
+    font-size: var(--small-font-size);
+    /*font-family: var(--page-font);*/
+    font-family: var(--reading-font);
     color: var(--color-text-2);
     width: 100%;
     white-space: wrap;
@@ -682,7 +686,8 @@ SVG, svg {
 }
 
 .device-row-data > DIV {
-    font-size: var(--tiny-font-size);
+    /*font-size: var(--tiny-font-size);*/
+    font-size: var(--small-font-size) !important;
 }
 
 .device-mac {
@@ -690,7 +695,8 @@ SVG, svg {
 }
 
 .description {
-    font-family: var(--page-font);
+    font-family: var(--reading-font);
+    /*font-family: var(--page-font);*/
     /*font-size: var(--micro-font-size) !important;*/   /* ereditato */
     color: var(--color-text-2);
     width: 100%;

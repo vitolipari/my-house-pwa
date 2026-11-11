@@ -425,23 +425,68 @@
                         <div class=""></div>
                     </div>
                 </div>
-                <div class="device-data-row">
-                    <div class="device-data-row-field">time</div>
-                    <div class="device-data-row-field">channel</div>
-<!--                    <div class="device-data-row-field">origin</div>-->
-                    <div class="device-data-row-field">action</div>
-                    <div class="device-data-row-field">T</div>
-                    <div class="device-data-row-field">S</div>
-                </div>
                 @for( data of historicData(); track data.id ) {
 
                     <div class="device-data-row">
-                        <div class="device-data-row-field">{{ data.timestamp }}</div>
-<!--                        <div class="device-data-row-field">{{ data.channel_key }}</div>-->
-                        <div class="device-data-row-field">{{ data.origin }}</div>
-                        <div class="device-data-row-field">{{ (!!data.action) ? data.action.split(':')[1] : '' }}</div>
-                        <div class="device-data-row-field">{{ data.timer }}</div>
-                        <div class="device-data-row-field">{{ data.scenario }}</div>
+                        <div class="device-data-row-field">{{ data.timestamp | date: 'd MMM HH:mm' }}</div>
+                        <div class="device-data-row-field">
+                            @if ( !!data.timer ) {
+                                <svg
+                                    style="display: flex; margin: 0rem auto;"
+                                    [style.--color-ambient-2]="'#d00'"
+                                >
+                                    <use
+                                        [attr.href]="'#timer_icon_1'"
+                                        [attr.xlink:href]="'#timer_icon_1'"
+                                        >
+                                    </use>
+                                </svg>
+                            }
+                            @else if ( !!data.scenario ) {
+                                <svg
+                                    style="display: flex; margin: 0rem auto;"
+                                    [style.--color-ambient-2]="'#d0d'"
+                                >
+                                    <use
+                                        [attr.href]="'#icon-540'"
+                                        [attr.xlink:href]="'#icon-540'"
+                                        >
+                                    </use>
+                                </svg>
+                            }
+                            @else {
+                                @switch ( data.origin ) {
+                                    @case('switch') {
+                                        <svg
+                                            style="display: flex; margin: 0rem auto;"
+                                            [style.--color-ambient-2]="'#0d0'"
+                                        >
+                                            <use
+                                                [attr.href]="'#icon-546'"
+                                                [attr.xlink:href]="'#icon-546'"
+                                                >
+                                            </use>
+                                        </svg>
+                                    }
+                                    @case('HTTP_in') {
+                                        <svg
+                                            style="display: flex; margin: 0rem auto;"
+                                            [style.--color-ambient-2]="'#00d'"
+                                        >
+                                            <use
+                                                [attr.href]="'#icon-209'"
+                                                [attr.xlink:href]="'#icon-209'"
+                                                >
+                                            </use>
+                                        </svg>
+                                    }
+                                    @default() {
+                                        {{ data.origin }}
+                                    }
+                                }
+                            }
+                        </div>
+                        <div class="device-data-row-field" style="text-align: right; padding-right: 0.5rem;">{{ (!!data.action) ? data.action.split(':')[1] : '' }}</div>
                     </div>
                 }
             </p-accordion-content>

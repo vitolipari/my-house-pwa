@@ -10,8 +10,9 @@
     --color-background-2: rgb(220, 220, 220); /* da cambiare */
     --color-background-3: rgb(230, 230, 230); /* da cambiare */
 
-    --color-ambient-1: rgb(50, 50, 50);
+    --color-ambient-1: rgb(230, 230, 230);
     --color-ambient-2: rgb(82, 82, 82);
+    --color-ambient-3: rgb(250, 250, 250);
 
     --color-text-1: rgb(99, 99, 99);
     --color-text-2: rgb(64, 64, 64);

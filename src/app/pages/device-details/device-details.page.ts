@@ -1,7 +1,7 @@
 import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit, signal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {DeviceSmallType, DeviceType, GroupType, VOID_DEVICE, ZoneType} from '../devices/devices.models';
-import {DecimalPipe, JsonPipe, KeyValuePipe} from '@angular/common';
+import {DatePipe, DecimalPipe, JsonPipe, KeyValuePipe} from '@angular/common';
 import {Drawer} from 'primeng/drawer';
 import {PageTitleComponent} from '../../components/page-title.component/page-title.component';
 import {DeleteConfirmComponent} from '../../components/delete-confirm-component/delete-confirm-component';
@@ -53,6 +53,7 @@ export type HistoricDataType = {
         AccordionContent,
         AccordionHeader,
         AccordionPanel,
+        DatePipe,
         // Checkbox,
         // SwitcherComponent
     ],
