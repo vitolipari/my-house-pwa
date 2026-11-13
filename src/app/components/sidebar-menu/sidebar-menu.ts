@@ -13,12 +13,13 @@ import {DarkModeService} from '../../services/dark-mode-service';
 })
 export class SidebarMenu {
 
-    private router = inject(Router);
+    protected router = inject(Router);
     @Input() user!: LoggedUser | null;
     @Output() menuClose = new EventEmitter<void>();
     coffe: string = emoj('hot_beverage');
     private readonly permissionService = inject(PermissionService);
     private readonly darkModeService = inject(DarkModeService);
+    // currentSection: string = '/';
 
     readonly lipariStudiosImage = computed(() =>
         this.darkModeService.isDarkMode()
@@ -35,6 +36,7 @@ export class SidebarMenu {
 
         this.menuClose.emit();
 
+        // this.currentSection = path;
 
         this.router.navigate(
             [path],

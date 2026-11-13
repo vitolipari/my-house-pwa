@@ -1,0 +1,45 @@
+@if(chartType === CHART_TYPES.gauge) {
+    <data-current-chart
+        [data]="liveDataOptions.values"
+        [wideRay]="liveDataOptions.wideRay"
+        [mainFont]="liveDataOptions.mainFont"
+        [measureUnit]="liveDataOptions.measureUnit"
+        [activeColor]="liveDataOptions.activeColor"
+        [antiActiveColor]="liveDataOptions.antiActiveColor"
+        [width]="options.width"
+        [height]="options.height"
+        [ths]="liveDataOptions.ths"
+    />
+}
+@if(chartType === CHART_TYPES.gaugeBars) {
+    <data-trend-chart
+        [data]="liveDataOptions.values"
+        [ths]="liveDataOptions.ths"
+        [activeColor]="liveDataOptions.activeColor"
+        [placeholderColor]="liveDataOptions.placeholderColor"
+        [wideRay]="liveDataOptions.wideRay"
+        [previousActiveColor]="liveDataOptions.previousActiveColor"
+        [previousPaceholderColor]="liveDataOptions.previousPaceholderColor"
+        [previousRay]="liveDataOptions.previousRay"
+        [previousWideRay]="liveDataOptions.previousWideRay"
+        [minFont]="liveDataOptions.minFont"
+        [mainFont]="liveDataOptions.mainFont"
+        [measureUnit]="liveDataOptions.measureUnit"
+        [avgFont]="liveDataOptions.avgFont"
+        [avgColor]="liveDataOptions.avgColor"
+        [width]="options.width"
+        [height]="options.height"
+    />
+}
+@if(!!hasHistoric) {
+    <progressive-average-chart-component
+        [data]="liveDataOptions.values"
+        [ths]="liveDataOptions.ths"
+        [thsColor]="liveDataOptions.thsColor"
+        [thsGradient]="options.colorGradient"
+        [color]="options.color"
+        [width]="options.trendWidth"
+        [height]="options.trendHeight"
+        [averageAreaColor]="liveDataOptions.averageAreaColor"
+    />
+}

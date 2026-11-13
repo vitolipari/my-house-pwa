@@ -1,0 +1,34 @@
+<div class="inputs">
+
+    @for( channel of device.channel; track $index ) {
+
+        @if( channel.startsWith('input_') ) {
+
+            <section
+                class="card"
+                [class.active]="device.status[$index] === true"
+            >
+
+                <div class="title">ingresso {{ +( ''+ channel.split('_')[1] ) + 1 }}</div>
+
+                @if( device.status[$index] === true ) {
+                    <div class="state">attivo</div>
+                }
+                @else if( device.status[$index] === false ) {
+                    <div class="state">a riposo</div>
+                }
+                @else {
+                    <div class="state">—</div>
+                }
+
+                <!-- stato mai letto: niente data, la card mostra solo — -->
+                @if( ( device.status[$index] ?? null ) !== null ) {
+                    <div class="since">
+                        dal {{ device.lastTime[$index] ? ( device.lastTime[$index] | date: 'd MMM HH:mm' ) : '—' }}
+                    </div>
+                }
+
+            </section>
+        }
+    }
+</div>

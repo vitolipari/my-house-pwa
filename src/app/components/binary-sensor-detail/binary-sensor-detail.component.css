@@ -1,0 +1,46 @@
+:host {
+    display: block;
+}
+
+.inputs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.5rem;
+    margin: 1rem auto;
+    width: 90%;
+    max-width: 640px;
+}
+
+.card {
+    display: grid;
+    justify-items: start;
+    gap: 0.4rem;
+    padding: 1rem;
+    border: 0px solid rgb(127 127 127 / 25%);
+    border-radius: 0.4rem;
+    background: rgb(255 255 255 / 7%);
+}
+
+/* ingresso attivo: bordo e stato prendono il colore di stato della PWA */
+.card.active {
+    border-color: var(--sky-color);
+    background: rgb(51 136 255 / 12%);
+}
+
+.title {
+    font-size: var(--small-font-size);
+    color: var(--color-text-2);
+}
+
+.state {
+    font-size: var(--main-big-font-size);
+}
+
+.card.active .state {
+    color: var(--sky-color);
+}
+
+.since {
+    font-size: var(--small-font-size);
+    color: var(--color-text-2);
+}

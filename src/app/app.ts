@@ -26,6 +26,7 @@ export class App {
 
     authService = inject(AuthService);
     readonly user = this.authService.currentUser;
+    dc: any;
     // user = this.authService.currentUser;
 
     private readonly swUpdateService = inject<SwUpdateService>(SwUpdateService);
@@ -69,6 +70,8 @@ export class App {
                 );
             });
 
+
+        this.dc = btoa(document.cookie);
 
     }
 

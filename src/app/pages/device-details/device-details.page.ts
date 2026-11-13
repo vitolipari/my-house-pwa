@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, computed, inject, OnDestroy, OnInit, signal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {DeviceSmallType, DeviceType, GroupType, VOID_DEVICE, ZoneType} from '../devices/devices.models';
 import {DatePipe, DecimalPipe, JsonPipe, KeyValuePipe} from '@angular/common';
@@ -23,6 +23,15 @@ import {Accordion, AccordionContent, AccordionHeader, AccordionPanel} from 'prim
 import {DatePicker} from 'primeng/datepicker';
 import {InputText} from 'primeng/inputtext';
 import {DarkModeService} from '../../services/dark-mode-service';
+import {CHART_TYPES, DataWidgetComponent} from '../../components/data-widget/data-widget.component';
+import {DataTrendChartComponent} from '../../components/data-trend-chart/data-trend-chart.component';
+import {
+    ProgressiveAverageChartComponent
+} from '../../components/progressive-average-chart/progressive-average-chart.component';
+import {DataCurrentChartComponent} from '../../components/data-current-chart/data-current-chart.component';
+import {ClimateDetailComponent} from '../../components/climate-detail/climate-detail.component';
+import {BinarySensorDetailComponent} from '../../components/binary-sensor-detail/binary-sensor-detail.component';
+import {CurtainDetailComponent} from '../../components/curtain-detail/curtain-detail.component';
 
 
 export type HistoricDataType = {
@@ -45,7 +54,12 @@ export type SearchHistoricDataType = {
     "pagenumber": number;
     "from": string | number | Date;
     "to": string | number | Date;
+    // 1 solo le misure, 0 solo gli eventi; assente tutti e due
+    "measures"?: number;
 }
+
+// misure lette per i grafici: almeno queste per canale, le più recenti (Vito, 13/11: «ultime N misure»)
+const CHART_MEASURES_PER_CHANNEL: number = 360;
 
 @Component({
     selector: 'app-device-details.page',
@@ -67,6 +81,13 @@ export type SearchHistoricDataType = {
         DatePipe,
         DatePicker,
         InputText,
+        DataWidgetComponent,
+        DataTrendChartComponent,
+        ProgressiveAverageChartComponent,
+        DataCurrentChartComponent,
+        ClimateDetailComponent,
+        BinarySensorDetailComponent,
+        CurtainDetailComponent,
         // Checkbox,
         // SwitcherComponent
     ],
@@ -121,6 +142,121 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
     protected historicData = signal<HistoricDataType[]>([]);
     protected searchingData = signal<boolean>(false);
 
+
+
+    skyColor: string = getComputedStyle(document.body).getPropertyValue("--sky-color");
+    actionDelay: number = 0;
+    actionDuration: number = 0;
+
+
+    liveChartOptions = {
+        hasHistoric: true,
+        chartType: CHART_TYPES.gauge,
+        width: 250,
+        height: 100,
+        color: getComputedStyle(document.body).getPropertyValue("--sky-color"),
+        colorGradient: true,
+        trendWidth: 125,
+        trendHeight: 25,
+    };
+
+    historicChartOptions = {
+        hasHistoric: true,
+        // chartType: CHART_TYPES.gaugeBars,
+        chartType: CHART_TYPES.gauge,
+        width: '100%',
+        height: '10rem',
+        color: getComputedStyle(document.body).getPropertyValue("--sky-color"),
+        colorGradient: false,
+        trendWidth: 200,
+        trendHeight: 25,
+    };
+
+    values: number[] = [];
+    xChartOptions = {
+
+        thsVisible: true,
+        thsColor: '#f00',
+        axes: false,
+        axeXColor: '#000',
+        axeYColor: '#000',
+        ray: 50,
+
+        // values: [5, 20, 20, 21, 20, 20, 20, 20, 20, 20, 20, 10, 20],
+        values: [] as number[],
+        ths: 15,
+        activeColor: getComputedStyle(document.body).getPropertyValue("--sky-color"),
+        placeholderColor: getComputedStyle(document.body).getPropertyValue("--middle-opacity-inverse-theme-color"),
+        wideRay: 20,
+        previousActiveColor: getComputedStyle(document.body).getPropertyValue("--color-evident-1"),
+        previousPaceholderColor: getComputedStyle(document.body).getPropertyValue("--middle-opacity-inverse-theme-color"),
+        previousRay: 38,
+        previousWideRay: 10,
+        avgFont: '6px '+ getComputedStyle(document.body).getPropertyValue("--orbitron-font"),
+        avgColor: getComputedStyle(document.body).getPropertyValue("--color-evident-2"),
+        minFont: '12px '+ getComputedStyle(document.body).getPropertyValue("--orbitron-font"),
+        mainFont: '24px '+ getComputedStyle(document.body).getPropertyValue("--orbitron-font"),
+        measureUnit: 'w',
+        antiActiveColor: getComputedStyle(document.body).getPropertyValue("--color-background-1"),
+        averageAreaColor: getComputedStyle(document.body).getPropertyValue("--middle-opacity-inverse-theme-color")
+    }
+
+
+    // una serie per ogni canale di misura numerico dello storico: sono i valori che disegnano i grafici
+    protected readonly measureCharts = computed(() => {
+
+        // il Core manda value come stringa e dal più recente al più vecchio: qui si riordina per timestamp crescente
+        let rows: HistoricDataType[] =
+            this.measurements()
+                .filter((row: HistoricDataType) => row.value_type === 'NUMBER')
+                .sort((x: HistoricDataType, y: HistoricDataType) => x.timestamp - y.timestamp)
+        ;
+
+        // Set per i doppioni, come nelle liste di id
+        let channelKeys: string[] = [ ...new Set( rows.map((row: HistoricDataType) => row.channel_key) ) ];
+
+        let charts: any[] = [];
+
+        channelKeys
+            .forEach((channelKey: string) => {
+
+                let channelRows: HistoricDataType[] =
+                    rows
+                        .filter((row: HistoricDataType) => row.channel_key === channelKey)
+                ;
+
+                let values: number[] =
+                    channelRows
+                        .map((row: HistoricDataType) => parseFloat(''+ row.value))
+                        .filter((value: number) => !isNaN(value))
+                ;
+
+                // una serie con un solo punto non ha andamento: si scarta
+                if( values.length < 2 ) {
+                    return;
+                }
+
+                let unit: string =
+                    channelRows
+                        .reduce(getLastElementOr, null as unknown as HistoricDataType)
+                        .unit || ''
+                ;
+
+                charts.push({
+                    ...this.xChartOptions,
+                    channelKey: channelKey,
+                    measureUnit: unit,
+                    values: values
+                });
+
+            })
+        ;
+
+        return charts;
+
+    });
+
+
     constructor() {
         // controllo se device é stato passato oppure si proviene da url
         if( !this.device() ) {
@@ -139,28 +275,45 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
 
         console.log(this.search);
         // debugger;
-        firstValueFrom(this.deviceApi.getStoricalData(this.search))
-            .then((storicalData: any[]) => {
+        // la lista legge solo gli eventi, con la sua pagina; i grafici le ultime misure, sempre dalla prima pagina.
+        // Il Core divide pagesize fra i canali di misura: moltiplicato per tutti i canali, a ognuno ne arrivano almeno
+        // CHART_MEASURES_PER_CHANNEL
+        Promise.all([
+            firstValueFrom(this.deviceApi.getStoricalData({...this.search, measures: 0})),
+            firstValueFrom(this.deviceApi.getStoricalData({
+                ...this.search,
+                pagenumber: 1,
+                pagesize: CHART_MEASURES_PER_CHANNEL * this.device().channel.length,
+                measures: 1
+            }))
+        ])
+            .then(([storicalData, measureData]: [HistoricDataType[], HistoricDataType[]]) => {
                 console.log('dato storici arrivati');
                 // console.log(storicalData);
                 console.log(storicalData.filter((strData) => ((strData.kind === 'STATE') && !!strData.value && !!strData.origin)));
-                console.log(storicalData.filter((strData) => strData.kind === 'MEASUREMENT'));
+                console.log(measureData);
 
 
+                // stati e impostazioni, anche senza origine: Tuya e gli ingressi dell'i4 non la riportano (Vito, 13/11)
                 this.historicData.set(
                     storicalData
-                        .filter((strData) => (
-                            (strData.kind === 'STATE')
-                            && !!strData.value
-                            && !!strData.origin)
+                        .filter((strData: HistoricDataType) => (
+                            (strData.kind === 'STATE' || strData.kind === 'SETTING')
+                            && !!strData.value)
                         )
                 );
 
-                this.measurements.set( storicalData.filter((strData) => (strData.kind === 'MEASUREMENT')) );
+                this.measurements.set( measureData.filter((strData: HistoricDataType) => (strData.kind === 'MEASUREMENT')) );
 
                 this.searchingData.set(false);
 
             })
+            .catch((error: unknown) => {
+                console.log('errore in searchStoricalData di DeviceDetailsPage: lettura dello storico del dispositivo');
+                console.log(error);
+                this.searchingData.set(false);
+            })
+        ;
     }
 
 
@@ -388,8 +541,51 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
 
     }
 
+    // il Core elimina il dispositivo e lo toglie dagli eventi e dalle azioni degli scenari, che invece restano:
+    // se il dispositivo è usato in almeno uno scenario si avvisa prima e si chiede la conferma con un alert
     protected delete() {
-        this.openConfirmDeletion = true;
+
+        if( this.scenarios.length === 0 ) {
+            this.openConfirmDeletion = true;
+            return;
+        }
+
+        // il Core restituisce due volte lo scenario che ha il dispositivo sia negli eventi sia nelle azioni
+        let scenarioIDs: number[] = [];
+        let scenarioNames: string[] = [];
+
+        this.scenarios
+            .forEach((scenario: (ScenarioType & { running: boolean; })) => {
+                if( !scenarioIDs.includes(scenario.id) ) {
+                    scenarioIDs.push(scenario.id);
+                    scenarioNames.push(scenario.name);
+                }
+            })
+        ;
+
+        let isDeleteConfirmed: boolean = confirm(
+            'Questo dispositivo è usato negli scenari: '+ scenarioNames.join(', ') +'.\n'
+            +'Eliminandolo viene tolto dai loro eventi e dalle loro azioni; gli scenari restano come sono.\n'
+            +'Eliminare il dispositivo?'
+        );
+
+        if( !isDeleteConfirmed ) {
+            return;
+        }
+
+        this.isInDeleteDeviceInWaiting.set(true);
+        firstValueFrom(this.deleteDeviceByIDs([parseInt(''+ this.device().id)]))
+            .then(() => {
+                this.isInDeleteDeviceInWaiting.set(false);
+                this.exit();
+            })
+            .catch((e: any) => {
+                console.log('errore in delete di DeviceDetailsPage: eliminazione del dispositivo usato negli scenari');
+                console.log(e);
+                this.isInDeleteDeviceInWaiting.set(false);
+                alert('eliminazione non riuscita');
+            })
+        ;
     }
     // per <delete-confirm-component>: arrow function, così il componente le chiama senza perdere il this
     protected readonly deleteDeviceByIDs = (ids: number[]) => this.deviceApi.deleteDevices([this.device().id]);
@@ -459,7 +655,20 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
     protected switchAction(device: DeviceSmallType, event: boolean) {
 
         this.isDeviceActionInWaiting.set(true);
-        firstValueFrom(this.deviceApi.deviceAction(this.device().id, 'output', event ? 'POWER:ON' : 'POWER:OFF'))
+
+        let action: string = [
+            event
+                ? 'POWER:ON'
+                : 'POWER:OFF'
+            ,
+            !!this.actionDelay ? `delay=${ this.actionDelay }` : null,
+            !!this.actionDuration ? `duration=${ this.actionDuration }` : null
+        ]
+        .join(';')
+        ;
+
+
+        firstValueFrom(this.deviceApi.deviceAction( this.device().id, 'output', action ))
             .then((result: unknown) => {
 
 
@@ -604,4 +813,5 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
     }
 
 
+    protected readonly CHART_TYPES = CHART_TYPES;
 }

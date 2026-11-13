@@ -51,6 +51,7 @@ SPAN.p-slider-handle,
 
 .quadrante {
     display: grid;
+    max-width: 640px;
 }
 
 .quadrante > svg,

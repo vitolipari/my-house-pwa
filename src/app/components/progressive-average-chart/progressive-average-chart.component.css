@@ -1,0 +1,7 @@
+/* l'host largo quanto il widget: dentro data-widget (flex in colonna con align-items center) si restringerebbe al contenuto
+   e una larghezza in percentuale sul canvas non avrebbe un riferimento */
+:host {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}

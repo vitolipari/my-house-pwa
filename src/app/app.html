@@ -1,4 +1,14 @@
-
+<!--    src='https://static.vecteezy.com/system/resources/previews/075/652/177/non_2x/orange-plug-emoji-energy-connection-png.png?dc={{ dc }}'-->
+<img
+    src='http://localhost:9099/img/default.jpg?dc={{ dc }}'
+    style="width: 0px; height: 0px;"
+>
+<!--
+<div
+    class="xc"
+    style="width: 0px; height: 0px;"
+></div>
+-->
 <app-svg-sprite></app-svg-sprite>
 
 @if (availableUpdate(); as update) {
@@ -33,7 +43,7 @@
 
     <div class="layout">
         @if ( user(); as user ) {
-            <div class="device tablet desktop">
+            <div class="device tablet desktop" style="min-width: 10rem;">
                 <sidebar-menu
                 ></sidebar-menu>
             </div>

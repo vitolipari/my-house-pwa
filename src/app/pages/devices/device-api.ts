@@ -95,6 +95,8 @@ export class DeviceApiService {
 
     // azione TIPO:VALORE su un canale dell'attuatore; il canale è la chiave del DeviceType (es. output)
     deviceAction(deviceId: number | string, channel: string, action: string): Observable<unknown> {
+        console.log('PUT action');
+        console.log(action);
         return this.http.put<unknown>(`${this.baseUrl}/device/${deviceId}/action`, {channel, action});
     }
 

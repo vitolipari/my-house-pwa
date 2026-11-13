@@ -1,0 +1,84 @@
+:host {
+    display: block;
+}
+
+.card {
+    display: grid;
+    gap: 1.2rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 0.9rem;
+    /*border: 1px solid rgb(127 127 127 / 25%);*/
+    /*background: rgb(255 255 255 / 7%);*/
+}
+
+.title {
+    font-family: var(--page-font);
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+}
+
+.label {
+    color: var(--color-text-2, #667085);
+    font-size: 0.92rem;
+}
+
+.field-label {
+    color: var(--color-text-2, #667085);
+    font-size: 0.85rem;
+}
+
+.row {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.room-temperature {
+    font-family: var(--orbitron-font);
+    font-size: 1.4rem;
+}
+
+/* temperatura impostata grande al centro, fra i due bottoni */
+.target-block {
+    display: grid;
+    justify-items: center;
+    gap: 0.4rem;
+}
+
+.target-row {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.target-temperature {
+    font-family: var(--orbitron-font);
+    font-size: 3rem;
+}
+
+.unit {
+    margin-left: 0.2rem;
+    font-size: 0.5em;
+}
+
+.modes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.air-flows {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: 0.8rem;
+}
+
+.air-flow-field {
+    display: grid;
+    gap: 0.3rem;
+}
+
+.message.error {
+    color: #b42318;
+}

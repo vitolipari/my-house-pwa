@@ -117,6 +117,30 @@
                     }
 
                 </div>
+                <div class="actionTimed-container">
+                    <label for="actionDelayInput">fra</label>
+                    <input
+                        #actionDelayInput
+                        pInputText
+                        id="actionDelay"
+                        type="number"
+                        class="fixed-value-input"
+                        [(ngModel)]="actionDelay"
+                    />
+                    <div>sec.</div>
+                </div>
+                <div class="actionTimed-container">
+                    <label for="actionDurationInput">durata</label>
+                    <input
+                        #actionDurationInput
+                        pInputText
+                        id="actionDuration"
+                        type="number"
+                        class="fixed-value-input"
+                        [(ngModel)]="actionDuration"
+                    />
+                    <div>sec.</div>
+                </div>
             </div>
         }
 
@@ -132,7 +156,7 @@
         @case ('MOTORIZED_DYNAMIC_CANOPY')
         @case ('METERED_CURTAIN')
         {
-            <div class="comand-slider-container">
+            <div class="comand-slider-container" style="margin-top: 2rem;">
                 <p-slider
                     [(ngModel)]="device().status[ device().channel.indexOf('brightness') ]"
                     [step]="1"
@@ -188,6 +212,25 @@
 
                 }
             </div>
+        }
+    }
+
+
+    <!-- dettagli dedicati (Vito, 13/11): clima, ingressi dell'i4 e tapparelle a relè -->
+    @switch ( device().type.id ) {
+        @case ('AIR_CONDITIONER')
+        @case ('SENSING_AIR_CONDITIONER')
+        {
+            <climate-detail-component [device]="device()" />
+        }
+        @case ('BINARY_STATE_SENSOR')
+        {
+            <binary-sensor-detail-component [device]="device()" />
+        }
+        @case ('METERED_RELAY_CURTAIN')
+        @case ('RELAY_CURTAIN')
+        {
+<!--            <curtain-detail-component [device]="device()" [history]="historicData()" />-->
         }
     }
 
@@ -380,7 +423,84 @@
 
 
 
-    <div>grafici per canale</div>
+    <div>
+
+        @for( chart of measureCharts(); track chart.channelKey ) {
+            <h4>{{ chart.channelKey }}</h4>
+
+            @switch ( chart.channelKey ) {
+                @case('temperature') {
+                    <!-- TODO da cambiare con un svg -->
+                    <data-current-chart
+                        [data]="chart.values"
+                        [wideRay]="chart.wideRay"
+                        [mainFont]="chart.mainFont"
+                        [measureUnit]="chart.measureUnit"
+                        [activeColor]="chart.activeColor"
+                        [antiActiveColor]="chart.antiActiveColor"
+                        [width]="historicChartOptions.width"
+                        [height]="historicChartOptions.height"
+                        [ths]="chart.ths"
+                    />
+                }
+                @case('humidity') {
+                    <!-- TODO unico colore -->
+                    <data-current-chart
+                        [data]="chart.values"
+                        [wideRay]="chart.wideRay"
+                        [mainFont]="chart.mainFont"
+                        [measureUnit]="chart.measureUnit"
+                        [activeColor]="chart.activeColor"
+                        [antiActiveColor]="chart.antiActiveColor"
+                        [width]="historicChartOptions.width"
+                        [height]="historicChartOptions.height"
+                        [ths]="chart.ths"
+                    />
+                }
+                @default() {
+                    <data-trend-chart
+                        [data]="chart.values"
+                        [ths]="chart.ths"
+                        [activeColor]="chart.activeColor"
+                        [placeholderColor]="chart.placeholderColor"
+                        [wideRay]="chart.wideRay"
+                        [previousActiveColor]="chart.previousActiveColor"
+                        [previousPaceholderColor]="chart.previousPaceholderColor"
+                        [previousRay]="chart.previousRay"
+                        [previousWideRay]="chart.previousWideRay"
+                        [minFont]="chart.minFont"
+                        [mainFont]="chart.mainFont"
+                        [measureUnit]="chart.measureUnit"
+                        [avgFont]="chart.avgFont"
+                        [avgColor]="chart.avgColor"
+                        [width]="historicChartOptions.width"
+                        [height]="historicChartOptions.height"
+                    />
+                }
+            }
+
+            <progressive-average-chart-component
+                [data]="chart.values"
+                [ths]="chart.ths"
+                [thsColor]="chart.thsColor"
+                [thsGradient]="historicChartOptions.colorGradient"
+                [color]="historicChartOptions.color"
+                [width]="historicChartOptions.trendWidth"
+                [height]="historicChartOptions.trendHeight"
+                [averageAreaColor]="chart.averageAreaColor"
+            />
+
+            <!--
+            <data-widget
+                [liveDataOptions]="chart"
+                [hasHistoric]="historicChartOptions.hasHistoric"
+                [chartType]="(chart.channelKey === 'temperature') ? CHART_TYPES.gaugeBars : CHART_TYPES.gauge"
+                [options]="historicChartOptions"
+            ></data-widget>
+            -->
+        }
+
+    </div>
 
 
 
@@ -541,7 +661,13 @@
                                     }
                                 }
                             </div>
-                            <div class="device-data-row-field" style="text-align: right; padding-right: 0.5rem;">{{ (!!data.action) ? data.action.split(':')[1] : '' }}</div>
+                            <div class="device-data-row-field" style="text-align: right; padding-right: 0.5rem;">
+                                <!-- con più canali (tapparella, clima, ingressi dell'i4) la riga dice quale -->
+                                @if( data.channel_key !== 'output' ) {
+                                    <span class="historic-channel">{{ data.channel_key }}</span>
+                                }
+                                {{ (!!data.action) ? data.action.split(':')[1] : data.value }}
+                            </div>
                         </div>
                     }
                 }

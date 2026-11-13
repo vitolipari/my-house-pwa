@@ -1,0 +1,73 @@
+<section class="card">
+
+    <!-- consumi mai letti: il movimento non è noto, e non si inventa una tapparella ferma -->
+    <div class="movement">
+        @if(
+            ( device.status[ device.channel.indexOf('power_0') ] ?? null ) === null
+            && ( device.status[ device.channel.indexOf('power_1') ] ?? null ) === null
+        ) {
+            —
+        }
+        @else if( +( ''+ device.status[ device.channel.indexOf('power_0') ] ) > CURTAIN_MOVING_WATT ) {
+            in apertura
+        }
+        @else if( +( ''+ device.status[ device.channel.indexOf('power_1') ] ) > CURTAIN_MOVING_WATT ) {
+            in chiusura
+        }
+        @else {
+            ferma
+        }
+    </div>
+
+    <div class="powers">
+        <div class="power">apertura {{ device.status[ device.channel.indexOf('power_0') ] ?? '—' }} W</div>
+        <div class="power">chiusura {{ device.status[ device.channel.indexOf('power_1') ] ?? '—' }} W</div>
+    </div>
+
+    <div class="pulses">
+
+        <div class="pulse">
+            <div class="label">ultima apertura</div>
+            @if( lastPulse('open'); as opening ) {
+                <div class="value">{{ opening.timestamp | date: 'd MMM HH:mm' }}</div>
+                <div class="origin">
+                    @if( !!opening.timer ) {
+                        timer
+                    }
+                    @else if( !!opening.scenario ) {
+                        scenario
+                    }
+                    @else {
+                        {{ opening.origin }}
+                    }
+                </div>
+            }
+            @else {
+                <div class="value">—</div>
+            }
+        </div>
+
+        <div class="pulse">
+            <div class="label">ultima chiusura</div>
+            @if( lastPulse('close'); as closing ) {
+                <div class="value">{{ closing.timestamp | date: 'd MMM HH:mm' }}</div>
+                <div class="origin">
+                    @if( !!closing.timer ) {
+                        timer
+                    }
+                    @else if( !!closing.scenario ) {
+                        scenario
+                    }
+                    @else {
+                        {{ closing.origin }}
+                    }
+                </div>
+            }
+            @else {
+                <div class="value">—</div>
+            }
+        </div>
+
+    </div>
+
+</section>

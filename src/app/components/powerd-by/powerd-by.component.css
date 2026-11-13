@@ -1,0 +1,33 @@
+
+
+:host {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    margin: 2% 0px;
+}
+
+:host > DIV {
+    color: var(--color-anti-level-3);
+    font-size: 10px;
+    font-weight: 700;
+    font-family: var(--orbitron-font);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+}
+
+:host > IMG {
+    width: calc(50% - 1rem);
+    margin: 2rem 0.5rem 5rem 0.5rem;
+}
+
+.lipariStudiosLogo {
+    width: 30%;
+    margin-top: 0.5rem;
+    max-width: 150px;
+    min-width: 100px;
+}

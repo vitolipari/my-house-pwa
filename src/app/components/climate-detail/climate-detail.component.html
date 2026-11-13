@@ -1,0 +1,149 @@
+<section class="card">
+
+<!--    <div class="title">Clima</div>-->
+
+    <!-- temperatura ambiente -->
+    <div class="row">
+        <div class="label">temperatura ambiente</div>
+
+        @if( device.status[ device.channel.indexOf('temperature') ] === null ) {
+            <div class="room-temperature">—</div>
+        }
+        @else {
+            <div class="room-temperature">
+                {{ device.status[ device.channel.indexOf('temperature') ] }}<span class="unit">°C</span>
+            </div>
+        }
+    </div>
+
+    <!-- temperatura impostata: i bottoni si disabilitano ai limiti, in attesa e quando il valore manca -->
+    <div class="target-block">
+        <div class="label">temperatura impostata</div>
+
+        <div class="target-row">
+
+            <p-button
+                label="−"
+                [rounded]="true"
+                [disabled]="!!inWaiting() || device.status[ device.channel.indexOf('target_temperature') ] === null || +( device.status[ device.channel.indexOf('target_temperature') ] ?? TARGET_TEMPERATURE_MIN ) <= TARGET_TEMPERATURE_MIN"
+                (click)="setValue('target_temperature', +( device.status[ device.channel.indexOf('target_temperature') ] ?? TARGET_TEMPERATURE_MIN ) - 1)"
+            ></p-button>
+
+            @if( device.status[ device.channel.indexOf('target_temperature') ] === null ) {
+                <div class="target-temperature">—</div>
+            }
+            @else {
+                <div class="target-temperature">
+                    {{ device.status[ device.channel.indexOf('target_temperature') ] }}<span class="unit">°C</span>
+                </div>
+            }
+
+            <p-button
+                label="+"
+                [rounded]="true"
+                [disabled]="!!inWaiting() || device.status[ device.channel.indexOf('target_temperature') ] === null || +( device.status[ device.channel.indexOf('target_temperature') ] ?? TARGET_TEMPERATURE_MAX ) >= TARGET_TEMPERATURE_MAX"
+                (click)="setValue('target_temperature', +( device.status[ device.channel.indexOf('target_temperature') ] ?? TARGET_TEMPERATURE_MAX ) + 1)"
+            ></p-button>
+
+        </div>
+    </div>
+
+    <!-- modo: quello attuale è il bottone pieno -->
+    <div class="row">
+        <div class="label">modo</div>
+
+        <div class="modes">
+            @for( mode of MODE_OPTIONS; track mode.value ) {
+                <p-button
+                    [label]="mode.label"
+                    [size]="'small'"
+                    [rounded]="true"
+                    [outlined]="device.status[ device.channel.indexOf('mode') ] !== mode.value"
+                    [disabled]="!!inWaiting()"
+                    (click)="setValue('mode', mode.value)"
+                ></p-button>
+            }
+        </div>
+    </div>
+
+    <!-- ventola -->
+    <div class="row">
+        <div class="label">ventola</div>
+
+        <p-select
+            [options]="FAN_OPTIONS"
+            [ngModel]="device.status[ device.channel.indexOf('fan') ]"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="—"
+            [disabled]="!!inWaiting()"
+            (onChange)="setValue('fan', $event.value)"
+        ></p-select>
+    </div>
+
+    <!-- alette -->
+    <div class="row">
+        <div class="label">alette</div>
+
+        <div class="air-flows">
+
+            <div class="air-flow-field">
+                <div class="field-label">oscillazione verticale</div>
+                <p-select
+                    [options]="VERTICAL_SWING_OPTIONS"
+                    [ngModel]="device.status[ device.channel.indexOf('air_flow_vertical') ]"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="—"
+                    [disabled]="!!inWaiting()"
+                    (onChange)="setValue('air_flow_vertical', $event.value)"
+                ></p-select>
+            </div>
+
+            <div class="air-flow-field">
+                <div class="field-label">oscillazione orizzontale</div>
+                <p-select
+                    [options]="HORIZONTAL_SWING_OPTIONS"
+                    [ngModel]="device.status[ device.channel.indexOf('air_flow_horizontal') ]"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="—"
+                    [disabled]="!!inWaiting()"
+                    (onChange)="setValue('air_flow_horizontal', $event.value)"
+                ></p-select>
+            </div>
+
+            <div class="air-flow-field">
+                <div class="field-label">posizione verticale</div>
+                <p-select
+                    [options]="VERTICAL_POSITION_OPTIONS"
+                    [ngModel]="device.status[ device.channel.indexOf('air_flow_vertical_position') ]"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="—"
+                    [disabled]="!!inWaiting()"
+                    (onChange)="setValue('air_flow_vertical_position', $event.value)"
+                ></p-select>
+            </div>
+
+            <div class="air-flow-field">
+                <div class="field-label">posizione orizzontale</div>
+                <p-select
+                    [options]="HORIZONTAL_POSITION_OPTIONS"
+                    [ngModel]="device.status[ device.channel.indexOf('air_flow_horizontal_position') ]"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="—"
+                    [disabled]="!!inWaiting()"
+                    (onChange)="setValue('air_flow_horizontal_position', $event.value)"
+                ></p-select>
+            </div>
+
+        </div>
+    </div>
+
+    @if( !!errorMessage() ) {
+        <div class="message error" role="alert">{{ errorMessage() }}</div>
+    }
+
+</section>
