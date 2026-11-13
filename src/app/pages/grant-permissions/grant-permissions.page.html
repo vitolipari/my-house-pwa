@@ -1,0 +1,64 @@
+<page-title
+    [title]="'Richiesta di permessi'"
+    [hasPlusButton]="false"
+    [iconID]="'camera-scan-1'"
+></page-title>
+
+<main class="grant-permissions-page">
+
+    @if( !!errorMessage() ) {
+        <p class="message error" role="alert">{{ errorMessage() }}</p>
+    }
+
+    @if( !!loading() ) {
+        <p class="message">Caricamento della richiesta…</p>
+    }
+
+    @if( request(); as grantRequest ) {
+
+        <section class="card">
+            <p>Richiesta di <strong>{{ grantRequest.subscriberName }}</strong></p>
+            <p class="hint">Scadenza: {{ grantRequest.exp | date: 'dd/MM/yyyy' }}</p>
+        </section>
+
+        <section class="card">
+            <strong>Permessi richiesti</strong>
+
+            @for( permission of grantRequest.permissions; track permission.name ) {
+                <div class="permission-row" [class.not-owned]="!permissionService.hasPermission(permission.name)">
+                    <strong>{{ permission.name }}</strong>
+                    <p class="description">{{ permission.description }}</p>
+
+                    @if( !permissionService.hasPermission(permission.name) ) {
+                        <p class="note">non lo hai: non verrà concesso</p>
+                    }
+                </div>
+            }
+        </section>
+    }
+
+    @if( !!message() ) {
+        <p class="message">{{ message() }}</p>
+    }
+
+    @if( !!request() && !message() ) {
+        <div class="buttons">
+            <p-button
+                label="{{ !!inWaiting() ? 'in attesa' : 'conferma' }}"
+                [disabled]="!!inWaiting() || !canConfirm()"
+                [rounded]="true"
+                [size]="'small'"
+                (click)="confirm()"
+            ></p-button>
+
+            <p-button
+                label="nega"
+                [rounded]="true"
+                [size]="'small'"
+                [style]="{background: 'var(--dark-red-color)', border: 'none'}"
+                (click)="deny()"
+            ></p-button>
+        </div>
+    }
+
+</main>

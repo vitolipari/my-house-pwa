@@ -272,4 +272,230 @@
     <p *ngIf="errorMessage()" style="color: var(--medium-red-color);">{{ errorMessage() }}</p>
 
 
+    <!-- permessi: fuori dal form di modifica, visibili anche quando la pagina non è in modifica -->
+    <div class="card flex justify-center">
+        <div class="flex flex-col gap-2">
+            <div class="bottom-button-container">
+                <p-button
+                    label="{{ 'richiedi permesso' }}"
+                    type="button"
+                    [rounded]="true"
+                    [size]="'small'"
+                    [style]="{padding: '0px 20px 0px 20px' }"
+                    (click)="openRequestPermissionDrawer()"
+                ></p-button>
+            </div>
+        </div>
+    </div>
+
+    @if( !!permissionService.hasPermission('GIVE_AUTHORIZATIONS') ) {
+        <div class="card flex justify-center">
+            <div class="flex flex-col gap-2">
+                <div class="bottom-button-container">
+                    <p-button
+                        label="{{ 'concedi permessi' }}"
+                        type="button"
+                        [rounded]="true"
+                        [size]="'small'"
+                        [style]="{padding: '0px 20px 0px 20px' }"
+                        (click)="openDelegatePermissionDrawer()"
+                    ></p-button>
+                </div>
+            </div>
+        </div>
+    }
+
+
 </div>
+
+
+<p-drawer
+    [(visible)]="isRequestPermissionPanel"
+    position="bottom"
+    [modal]="true"
+    [dismissible]="true"
+    [showCloseIcon]="false"
+    [style]="{
+        height: '55vh',
+        borderTopLeftRadius: '24px',
+        borderTopRightRadius: '24px'
+      }"
+>
+    <div class="permission-drawer">
+
+        <div class="permission-drawer-title">Richiedi permesso</div>
+
+        @if( !!requestQRUrl() ) {
+
+            <div class="permission-qr">
+                <qrcode
+                    [qrdata]="requestQRUrl()"
+                    [width]="220"
+                    [errorCorrectionLevel]="'M'"
+                ></qrcode>
+                <p>Fai inquadrare il codice a chi può concederti i permessi</p>
+                <p class="permission-qr-address">{{ requestQRUrl() }}</p>
+            </div>
+
+        } @else {
+
+            @if( !!requestInWaiting() ) {
+                <div>
+                    <svg class="svg-icon inside-button" style="position: static; top: 1rem; left: 1.5rem;">
+                        <use href="#orologio-1-1"></use>
+                    </svg>
+                    <div class="heartbeat-flash">in attesa</div>
+                </div>
+            } @else {
+                <div class="permission-list">
+                    @for( permission of requestablePermissions(); track permission.name ) {
+                        <div class="permission-row">
+                            <div class="permission-row-check">
+                                <p-checkbox
+                                    [(ngModel)]="selectedRequestPermissions"
+                                    [value]="permission.name"
+                                    size="small"
+                                    style="margin: 1rem;"
+                                />
+                            </div>
+                            <div class="permission-row-text">
+                                <div>
+                                    <strong>{{ permission.name }}</strong>
+                                </div>
+                                <div class="permission-description">{{ permission.description }}</div>
+                            </div>
+                        </div>
+                    } @empty {
+                        <div class="permission-description">nessun permesso da richiedere: li hai già tutti</div>
+                    }
+                </div>
+            }
+
+            <div class="permission-exp">scade il</div>
+
+            <p-datepicker
+                [(ngModel)]="requestExpDate"
+                dateFormat="dd/mm/yy"
+                placeholder="dd/mm/aaaa"
+                [showIcon]="true"
+                [showOnFocus]="true"
+                [iconDisplay]="'input'"
+                [minDate]="minExpDate"
+                appendTo="body"
+            />
+
+            @if( !!requestMessage() ) {
+                <p class="permission-message">{{ requestMessage() }}</p>
+            }
+
+            <div class="permission-send">
+                <p-button
+                    label="{{ 'richiedi' }}"
+                    type="button"
+                    [rounded]="true"
+                    [size]="'small'"
+                    [disabled]="!!requestInWaiting() || selectedRequestPermissions.length === 0 || !requestExpDate"
+                    (click)="requestPermissions()"
+                ></p-button>
+            </div>
+
+        }
+
+    </div>
+</p-drawer>
+
+
+<p-drawer
+    [(visible)]="isDelegatePermissionPanel"
+    position="bottom"
+    [modal]="true"
+    [dismissible]="true"
+    [showCloseIcon]="false"
+    [style]="{
+        height: '55vh',
+        borderTopLeftRadius: '24px',
+        borderTopRightRadius: '24px'
+      }"
+>
+    <div class="permission-drawer">
+
+        <div class="permission-drawer-title">Concedi permessi</div>
+
+        @if( !!delegateQRUrl() ) {
+
+            <div class="permission-qr">
+                <qrcode
+                    [qrdata]="delegateQRUrl()"
+                    [width]="220"
+                    [errorCorrectionLevel]="'M'"
+                ></qrcode>
+                <p>Fai inquadrare il codice a chi riceve i permessi</p>
+                <p class="permission-qr-address">{{ delegateQRUrl() }}</p>
+            </div>
+
+        } @else {
+
+            @if( !!delegateInWaiting() ) {
+                <div>
+                    <svg class="svg-icon inside-button" style="position: static; top: 1rem; left: 1.5rem;">
+                        <use href="#orologio-1-1"></use>
+                    </svg>
+                    <div class="heartbeat-flash">in attesa</div>
+                </div>
+            } @else {
+                <div class="permission-list">
+                    @for( permission of delegablePermissions(); track permission.name ) {
+                        <div class="permission-row">
+                            <div class="permission-row-check">
+                                <p-checkbox
+                                    [(ngModel)]="selectedDelegatePermissions"
+                                    [value]="permission.name"
+                                    size="small"
+                                    style="margin: 1rem;"
+                                />
+                            </div>
+                            <div class="permission-row-text">
+                                <div>
+                                    <strong>{{ permission.name }}</strong>
+                                </div>
+                                <div class="permission-description">{{ permission.description }}</div>
+                            </div>
+                        </div>
+                    } @empty {
+                        <div class="permission-description">nessun permesso da concedere</div>
+                    }
+                </div>
+            }
+
+            <div class="permission-exp">scade il</div>
+
+            <p-datepicker
+                [(ngModel)]="delegateExpDate"
+                dateFormat="dd/mm/yy"
+                placeholder="dd/mm/aaaa"
+                [showIcon]="true"
+                [showOnFocus]="true"
+                [iconDisplay]="'input'"
+                [minDate]="minExpDate"
+                appendTo="body"
+            />
+
+            @if( !!delegateMessage() ) {
+                <p class="permission-message">{{ delegateMessage() }}</p>
+            }
+
+            <div class="permission-send">
+                <p-button
+                    label="{{ 'concedi' }}"
+                    type="button"
+                    [rounded]="true"
+                    [size]="'small'"
+                    [disabled]="!!delegateInWaiting() || selectedDelegatePermissions.length === 0 || !delegateExpDate"
+                    (click)="delegatePermissions()"
+                ></p-button>
+            </div>
+
+        }
+
+    </div>
+</p-drawer>

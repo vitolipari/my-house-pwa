@@ -19,3 +19,90 @@
     /*background: var(--color-background-1) !important;*/
     /*border-color: var(--color-background-1) !important;*/
 /*}*/
+
+
+/* drawer «Richiedi permesso» e «Concedi permessi» */
+.permission-drawer {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+}
+
+.permission-drawer-title {
+    font-family: var(--page-font);
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+    margin-bottom: 1rem;
+}
+
+.permission-list {
+    width: 100%;
+    max-height: 24vh;
+    overflow-y: auto;
+}
+
+/* la riga di un permesso: stesso aspetto delle righe dei dispositivi di new-timer */
+.permission-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    max-width: 100%;
+    width: 100%;
+    background: var(--color-background-3);
+    border-radius: 0.4rem;
+    margin-bottom: 0.2rem;
+    padding: 0.4rem 1rem;
+}
+
+.permission-row-check {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.permission-row-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.permission-description {
+    font-size: var(--tiny-font-size) !important;
+    color: var(--color-text-2);
+}
+
+.permission-exp {
+    font-family: var(--page-font);
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+    margin-top: 1rem;
+}
+
+.permission-send {
+    margin-top: 1rem;
+}
+
+.permission-message {
+    margin-top: 1rem;
+    color: var(--medium-red-color);
+}
+
+.permission-qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.permission-qr-address {
+    font-size: var(--tiny-font-size) !important;
+    color: var(--color-text-2);
+    text-align: center;
+    word-break: break-all;
+}

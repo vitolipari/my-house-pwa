@@ -6,12 +6,24 @@ import {AuthService} from '../../services/auth';
 import {Button, ButtonModule} from 'primeng/button';
 import {InputText, InputTextModule} from 'primeng/inputtext';
 import {HttpClient} from '@angular/common/http';
+import {FormsModule} from '@angular/forms';
+import {Drawer} from 'primeng/drawer';
+import {Checkbox} from 'primeng/checkbox';
+import {DatePickerModule} from 'primeng/datepicker';
+import {QRCodeComponent} from 'angularx-qrcode';
+import {firstValueFrom} from 'rxjs';
+import moment from 'moment';
+import {LoggedUser} from '../../models/auth.models';
+import {PermissionService} from '../../services/permission.service';
+import {getLastElementOr} from '../../utils/array-util';
+import {PermissionApiService} from './permission-api';
+import {PermissionType} from './permission.models';
 
 
 @Component({
     selector: 'app-profile',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, RouterLink, Button, InputTextModule],
+    imports: [CommonModule, ReactiveFormsModule, RouterLink, Button, InputTextModule, FormsModule, Drawer, Checkbox, DatePickerModule, QRCodeComponent],
     templateUrl: './profile.page.html',
     styleUrls: [
         '../../../page.css',
@@ -55,6 +67,30 @@ export class ProfilePage {
 
     profileImageFile: File | null = null;
     isInChangePassword: boolean = false;
+
+    readonly permissionApi = inject(PermissionApiService);
+    readonly permissionService = inject(PermissionService);
+
+    // sezione «Richiedi permesso»: drawer, permessi ancora da ottenere, scelta, scadenza, indirizzo del QR e messaggio
+    isRequestPermissionPanel: boolean = false;
+    readonly requestInWaiting = signal(false);
+    readonly requestablePermissions = signal<PermissionType[]>([]);
+    selectedRequestPermissions: string[] = [];
+    requestExpDate: Date | null = null;
+    readonly requestQRUrl = signal('');
+    readonly requestMessage = signal('');
+
+    // sezione «Concedi permessi»: gli stessi campi, per i permessi che l'utente ha già
+    isDelegatePermissionPanel: boolean = false;
+    readonly delegateInWaiting = signal(false);
+    readonly delegablePermissions = signal<PermissionType[]>([]);
+    selectedDelegatePermissions: string[] = [];
+    delegateExpDate: Date | null = null;
+    readonly delegateQRUrl = signal('');
+    readonly delegateMessage = signal('');
+
+    // il Core rifiuta una scadenza già passata: il calendario non mostra i giorni prima di oggi
+    readonly minExpDate: Date = new Date();
 
 
     constructor(
@@ -236,5 +272,158 @@ export class ProfilePage {
 
     edit() {
         this.isInEdit = true;
+    }
+
+    // apre il drawer «Richiedi permesso»: azzera la scelta precedente e legge il catalogo, togliendo i permessi che l'utente ha già
+    openRequestPermissionDrawer(): void {
+
+        this.isRequestPermissionPanel = true;
+        this.selectedRequestPermissions = [];
+        this.requestExpDate = null;
+        this.requestQRUrl.set('');
+        this.requestMessage.set('');
+        this.requestInWaiting.set(true);
+
+        let user: LoggedUser = this.user()!;
+
+        let userPermissions: string[] = Array.isArray(user.permissions) ? user.permissions : [user.permissions];
+
+        let userAuthorizations: string[] = Array.isArray(user.authorizations) ? user.authorizations : [user.authorizations];
+
+        firstValueFrom(this.permissionApi.searchPermissions())
+            .then((catalog: PermissionType[]) => {
+
+                // per le autorizzazioni conta la parte prima di @AAAAMMGG
+                let alreadyOwned: string[] = userPermissions.concat(
+                    userAuthorizations
+                        .map((authorization: string) => authorization.split('@')[0])
+                );
+
+                this.requestablePermissions.set(
+                    catalog
+                        .filter((permission: PermissionType) => !alreadyOwned.includes(permission.name))
+                );
+
+                this.requestInWaiting.set(false);
+            })
+            .catch((e: any) => {
+                console.log('errore in openRequestPermissionDrawer di ProfilePage: lettura del catalogo dei permessi');
+                console.log(e);
+                this.requestInWaiting.set(false);
+                this.requestMessage.set(e?.note || 'catalogo dei permessi non letto');
+            })
+        ;
+    }
+
+    // invia la richiesta al Core: nel drawer il QR sostituisce la lista e porta l'indirizzo per chi può concedere
+    requestPermissions(): void {
+
+        let user: LoggedUser = this.user()!;
+
+        let exp: string = moment(this.requestExpDate).format('YYYY-MM-DD');
+
+        this.requestInWaiting.set(true);
+        this.requestMessage.set('');
+
+        firstValueFrom(this.permissionApi.requestPermissions(user.id, this.selectedRequestPermissions, exp))
+            .then((response: { requestID: number; }) => {
+                this.requestQRUrl.set(window.location.origin + '/grant-permission-request/' + response.requestID);
+                this.requestInWaiting.set(false);
+            })
+            .catch((e: any) => {
+                console.log('errore in requestPermissions di ProfilePage: invio della richiesta di permessi');
+                console.log(e);
+                this.requestInWaiting.set(false);
+                this.requestMessage.set(e?.note || 'richiesta non riuscita');
+            })
+        ;
+    }
+
+    // apre il drawer «Concedi permessi»: i permessi effettivi dell'utente, senza doppioni e con la descrizione del catalogo
+    openDelegatePermissionDrawer(): void {
+
+        this.isDelegatePermissionPanel = true;
+        this.selectedDelegatePermissions = [];
+        this.delegateExpDate = null;
+        this.delegateQRUrl.set('');
+        this.delegateMessage.set('');
+        this.delegateInWaiting.set(true);
+
+        let user: LoggedUser = this.user()!;
+
+        let userPermissions: string[] = Array.isArray(user.permissions) ? user.permissions : [user.permissions];
+
+        let userAuthorizations: string[] = Array.isArray(user.authorizations) ? user.authorizations : [user.authorizations];
+
+        let ownedNames: string[] = [];
+
+        userPermissions
+            .forEach((permission: string) => {
+                if( !!permission && !ownedNames.includes(permission) ) {
+                    ownedNames.push(permission);
+                }
+            })
+        ;
+
+        // per le autorizzazioni conta la parte prima di @AAAAMMGG
+        userAuthorizations
+            .forEach((authorization: string) => {
+                let name: string = authorization.split('@')[0];
+                if( !!name && !ownedNames.includes(name) ) {
+                    ownedNames.push(name);
+                }
+            })
+        ;
+
+        firstValueFrom(this.permissionApi.searchPermissions())
+            .then((catalog: PermissionType[]) => {
+
+                let delegable: PermissionType[] = [];
+
+                // un permesso assente dal catalogo si mostra con il solo nome
+                ownedNames
+                    .forEach((name: string) => {
+                        let permission: PermissionType | null = catalog
+                            .filter((element: PermissionType) => element.name === name)
+                            .reduce(getLastElementOr, null)
+                        ;
+                        delegable.push(!!permission ? permission : {name: name, description: ''});
+                    })
+                ;
+
+                this.delegablePermissions.set(delegable);
+                this.delegateInWaiting.set(false);
+            })
+            .catch((e: any) => {
+                console.log('errore in openDelegatePermissionDrawer di ProfilePage: lettura del catalogo per la concessione');
+                console.log(e);
+                this.delegateInWaiting.set(false);
+                this.delegateMessage.set(e?.note || 'catalogo dei permessi non letto per la concessione');
+            })
+        ;
+    }
+
+    // invia la concessione al Core: nel drawer il QR sostituisce la lista e porta l'indirizzo per chi riceve
+    delegatePermissions(): void {
+
+        let user: LoggedUser = this.user()!;
+
+        let exp: string = moment(this.delegateExpDate).format('YYYY-MM-DD');
+
+        this.delegateInWaiting.set(true);
+        this.delegateMessage.set('');
+
+        firstValueFrom(this.permissionApi.delegatePermissions(user.id, this.selectedDelegatePermissions, exp))
+            .then((response: { delegationID: number; }) => {
+                this.delegateQRUrl.set(window.location.origin + '/delegate-permission/' + response.delegationID);
+                this.delegateInWaiting.set(false);
+            })
+            .catch((e: any) => {
+                console.log('errore in delegatePermissions di ProfilePage: invio della concessione dei permessi');
+                console.log(e);
+                this.delegateInWaiting.set(false);
+                this.delegateMessage.set(e?.note || 'concessione non riuscita');
+            })
+        ;
     }
 }

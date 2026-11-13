@@ -1,7 +1,7 @@
 import {Component, computed, effect, inject, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Router, RouterLink} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {AuthService} from '../../services/auth';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -24,6 +24,7 @@ export class SignInPage {
     private readonly fb = inject(FormBuilder);
     private readonly authService = inject<AuthService>(AuthService);
     private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
     protected readonly darkModeService = inject(DarkModeService);
 
     readonly loading = signal(false);
@@ -72,8 +73,12 @@ export class SignInPage {
 
 
                     this.inWaiting.set(false);
-                    console.log('avvio navigazione verso dashboard');
-                    this.router.navigate(['/dashboard']);
+
+                    // dopo il login si torna alla pagina chiesta prima (from, scritto dal guard), per esempio il link
+                    // di un QR dei permessi; senza from si va alla dashboard
+                    let from: string = this.route.snapshot.queryParamMap.get('from') || '/dashboard';
+                    console.log('avvio navigazione dopo il login verso '+ from);
+                    this.router.navigateByUrl(from);
 
                 })
                 .catch((e: any) => {

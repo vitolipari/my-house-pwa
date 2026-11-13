@@ -32,9 +32,9 @@ export class PermissionService {
             ? user.permissions
             : [user.permissions];
 
-        const authorizations = Array.isArray(user.authorizations)
-            ? user.authorizations
-            : [user.authorizations];
+        // le autorizzazioni arrivano dal Core come PERMESSO@AAAAMMGG, già senza quelle scadute
+        const authorizations = (Array.isArray(user.authorizations) ? user.authorizations : [user.authorizations])
+            .map((authorization: string) => authorization.split('@')[0]);
 
         return permissions.includes(permission)
             || authorizations.includes(permission);

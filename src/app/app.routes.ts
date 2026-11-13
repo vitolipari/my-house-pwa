@@ -79,6 +79,36 @@ export const routes: Routes = [
             import('./pages/users-page/users.page').then(m => m.UsersPage)
     },
 
+    // percorsi corti scritti nei QR dei permessi: rimandano alle pagine sotto users-page
+    {
+        path: 'grant-permission-request/:requestID',
+        redirectTo: 'users-page/grant-permissions/:requestID'
+    },
+
+    {
+        path: 'delegate-permission/:delegationID',
+        redirectTo: 'users-page/acquire-permissions/:delegationID'
+    },
+
+    {
+        path: 'users-page/grant-permissions/:requestID',
+        canActivate: [routeAccessGuard],
+        data: {
+            accessControl: {
+                permission: 'GIVE_AUTHORIZATIONS'
+            }
+        },
+        loadComponent: () =>
+            import('./pages/grant-permissions/grant-permissions.page').then(m => m.GrantPermissionsPage)
+    },
+
+    {
+        path: 'users-page/acquire-permissions/:delegationID',
+        canActivate: [routeAccessGuard],
+        loadComponent: () =>
+            import('./pages/acquire-permissions/acquire-permissions.page').then(m => m.AcquirePermissionsPage)
+    },
+
 
 
 

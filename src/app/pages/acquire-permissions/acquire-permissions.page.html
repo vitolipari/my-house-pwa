@@ -1,0 +1,45 @@
+<page-title
+    [title]="'Permessi ricevuti'"
+    [hasPlusButton]="false"
+    [iconID]="'user-round-filled'"
+></page-title>
+
+<main class="acquire-permissions-page">
+
+    @if( !!errorMessage() ) {
+        <p class="message error" role="alert">{{ errorMessage() }}</p>
+    }
+
+    @if( !!loading() ) {
+        <p class="message">Ricezione dei permessi…</p>
+    }
+
+    @if( delegation(); as received ) {
+
+        <section class="card">
+            <p>Concessi da <strong>{{ received.delegatorName }}</strong></p>
+            <p class="hint">Scadenza: {{ received.exp | date: 'dd/MM/yyyy' }}</p>
+        </section>
+
+        <section class="card">
+            <strong>Permessi ricevuti</strong>
+
+            @for( permission of received.permissions; track permission.name ) {
+                <div class="permission-row">
+                    <strong>{{ permission.name }}</strong>
+                    <p class="description">{{ permission.description }}</p>
+                </div>
+            }
+        </section>
+    }
+
+    <div class="buttons">
+        <p-button
+            label="vai alla dashboard"
+            [rounded]="true"
+            [size]="'small'"
+            (click)="gotoDashboard()"
+        ></p-button>
+    </div>
+
+</main>

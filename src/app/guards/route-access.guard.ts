@@ -56,9 +56,16 @@ export const routeAccessGuard: CanActivateFn = (
                         // return router.createUrlTree(['/dashboard', {permissionAccessType: 'role or persmission'}]);
                         return true;
                     }
+                    // le autorizzazioni arrivano dal Core come PERMESSO@AAAAMMGG, già senza quelle scadute
+                    let authorizations: string[] =
+                        ([] as string[])
+                            .concat(user.authorizations ?? [])
+                            .map((authorization: string) => authorization.split('@')[0])
+                    ;
+
                     if(
                         permissions.every((permission: string) =>
-                            user.permissions.includes(permission) || user.authorizations.includes(permission)
+                            user.permissions.includes(permission) || authorizations.includes(permission)
                         )
                     ) {
                         console.log('route-access.guard accesso per autorizzazione');
@@ -77,8 +84,11 @@ export const routeAccessGuard: CanActivateFn = (
                 console.log('errore di route-access.guard');
                 console.log(e);
 
+                // come per l'utente assente: from riporta alla pagina chiesta dopo il login
                 if(e === 'no-token') {
-                    return router.createUrlTree(['/access/sign-in']);
+                    return router.createUrlTree(['/access/sign-in'], {
+                        queryParams: {from: state.url}
+                    });
                 }
 
                 return router.createUrlTree(['/error'], e);
