@@ -6,6 +6,7 @@ import {catchError, firstValueFrom, of, timeout} from 'rxjs';
 import {environment} from '../../environments';
 import {DeviceType, ZoneType} from '../pages/devices/devices.models';
 import {NetworkIdentity} from '../components/device-ip-block.component/device-ip-block.component';
+import {ProfileType} from '../pages/user/profile.models';
 
 @Injectable({ providedIn: 'root' })
 export class ApiUrlService {
@@ -16,8 +17,8 @@ export class ApiUrlService {
         return Promise.resolve(environment.apiBaseUrl);
     }
 
-    getUsers(): Observable<any[]> {
-        return this.http.get<any[]>('/api/core/users')
+    getUsers(): Observable<ProfileType[]> {
+        return this.http.get<ProfileType[]>('/api/core/users')
     }
 
     netScan(): Observable<any[]>  {

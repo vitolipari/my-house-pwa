@@ -2,8 +2,6 @@
     [title]="'Utenti'"
     [hasPlusButton]="false"
 ></page-title>
-
-
 @if(!!isInWaiting()) {
     <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
 } @else {
@@ -12,7 +10,10 @@
 
     <div>
         @for (user of users(); track user) {
-            <user-block [user]="user"></user-block>
+            <user-block
+                [user]="user"
+                (click)="gotoUserPage( user )"
+            ></user-block>
         }
     </div>
 

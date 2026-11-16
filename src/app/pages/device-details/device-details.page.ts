@@ -1,3 +1,5 @@
+
+
 import {ChangeDetectorRef, Component, computed, inject, OnDestroy, OnInit, signal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {DeviceSmallType, DeviceType, GroupType, VOID_DEVICE, ZoneType} from '../devices/devices.models';
@@ -32,6 +34,7 @@ import {DataCurrentChartComponent} from '../../components/data-current-chart/dat
 import {ClimateDetailComponent} from '../../components/climate-detail/climate-detail.component';
 import {BinarySensorDetailComponent} from '../../components/binary-sensor-detail/binary-sensor-detail.component';
 import {CurtainDetailComponent} from '../../components/curtain-detail/curtain-detail.component';
+import {ThermostatDetailComponent} from '../../components/thermostat-detail/thermostat-detail.component';
 
 
 export type HistoricDataType = {
@@ -88,6 +91,7 @@ const CHART_MEASURES_PER_CHANNEL: number = 360;
         ClimateDetailComponent,
         BinarySensorDetailComponent,
         CurtainDetailComponent,
+        ThermostatDetailComponent,
         // Checkbox,
         // SwitcherComponent
     ],

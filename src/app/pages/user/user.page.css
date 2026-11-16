@@ -1,0 +1,117 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    max-width: 640px;
+    width: 100%;
+}
+
+
+#profile-image {
+    grid-area: 1 / 1;
+    justify-self: center;
+    align-self: center;
+    pointer-events: auto;
+    cursor: pointer;
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+section
+, SECTION
+{
+    /*display: flex;*/
+    /*flex-direction: column;*/
+    /*align-items: center;*/
+    /*justify-content: center;*/
+    /*width: 100%;*/
+    align-self: flex-start;
+    display: block;
+    margin-left: 1rem;
+    font-weight: 500;
+    margin-top: 2rem;
+}
+
+
+.info-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.user-permission-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--color-background-3);
+    border-radius: 6px;
+    margin: 0.1rem auto;
+    width: calc(100% - 2rem);
+    max-width: 640px;
+    padding: 1rem;
+    height: 2.5rem;
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+}
+
+.action-comand {
+    height: 6rem;
+    width: 6rem;
+    margin: 4rem auto;
+}
+
+::ng-deep .p-drawer
+, ::ng-deep .p-component.p-drawer
+{
+    background: var(--color-ambient-1);
+}
+
+::ng-deep.p-drawer-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+
+}
+
+
+::ng-deep.p-drawer-content > DIV {
+    background: var(--color-ambient-3);
+    margin-top: 0.5rem;
+    border-radius: 6px;
+    padding: 1rem;
+    width: 100%;
+}
+
+
+::ng-deep.p-drawer-content > DIV > * {
+    font-family: var(--page-font);
+    font-size: var(--main-font-size);
+    color: var(--color-text-1);
+}
+
+.permission {
+    display: flex;
+    flex-direction: column;
+    margin-left: 1rem;
+    background: var(--color-ambient-1);
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    margin-bottom: 0.1rem;
+}
+
+.permission > LABEL {
+    font-weight: 500;
+}
+
+.permission > DIV {
+    font-size: var(--tiny-font-size);
+}

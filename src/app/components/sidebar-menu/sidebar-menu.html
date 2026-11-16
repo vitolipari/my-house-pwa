@@ -29,7 +29,7 @@
         class="{{
             (
                 (router.url.indexOf('/devices-page') !== -1)
-                || (router.url.indexOf('/device-page') !== -1)
+                || (router.url.indexOf('/device-details') !== -1)
             )
                 ? 'current'
                 : ''
@@ -126,7 +126,7 @@
 <div>
     <!--credentials-->
     <img
-        class="lipariStudiosLogo {{ (router.url === '') ? 'current': '' }}"
+        class="lipariStudiosLogo {{ ((router.url === '') || (router.url === '/')) ? 'current': '' }}"
         (click)="gotoPage('')"
         [src]="lipariStudiosImage()"
     >

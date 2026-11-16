@@ -80,6 +80,7 @@
         @case ('DIMMER')
         @case ('COLOR_DIMMER')
         @case ('AIR_CONDITIONER')
+        @case ('THERMOSTAT')
         @case ('TV')
         @case ('DOOR')
         @case ('GATE')
@@ -222,6 +223,10 @@
         @case ('SENSING_AIR_CONDITIONER')
         {
             <climate-detail-component [device]="device()" />
+        }
+        @case ('THERMOSTAT')
+        {
+            <thermostat-detail-component [device]="device()" />
         }
         @case ('BINARY_STATE_SENSOR')
         {

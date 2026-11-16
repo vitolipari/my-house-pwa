@@ -1,0 +1,141 @@
+@if(!!user() && !!user().picture) {
+    <img
+        id="profile-image"
+        [src]="user().picture"
+    />
+}
+@else {
+    <svg>
+        <use href="#user"></use>
+    </svg>
+}
+
+
+<div class="info-container">
+    <div style="font-weight: 600;">{{ user().username }}</div>
+    <div class="">{{ user().email }}</div>
+    <div class="">{{ user().mobile }}</div>
+</div>
+
+
+
+<section
+    style="
+        display: flex;
+        justify-content: space-between;
+        width: calc(100% - 2rem);
+        align-items: center;
+    "
+>
+    Ruoli
+    @if(!!hasPermission('CHANGE_USER_ROLE')) {
+        <p-button
+            label="modifica"
+            type="submit"
+            [rounded]="true"
+            [size]="'small'"
+            (click)="openPermissionDrawer()"
+        ></p-button>
+    }
+</section>
+@for( role of user().roles; track role ) {
+    <div class="user-permission-row">
+        <svg
+            style="height: 1.5rem; width: 1.5rem; margin-right: 1rem;'"
+        >
+            <use [attr.href]="'#'+ ROLE_ICON[ role ]"></use>
+        </svg>
+        <div>{{ role }}</div>
+    </div>
+}
+
+<section>Permessi</section>
+@for( perm of user().permissions; track perm ) {
+    <div class="user-permission-row">{{ perm }}</div>
+}
+
+<section>Autorizzazioni</section>
+@for( perm of user().authorizations; track perm ) {
+    <div class="user-permission-row">
+        <div>{{ perm.split('@')[0] }}</div>
+        <div class="">scad. {{ permissionDate( perm ) }}</div>
+    </div>
+}
+
+
+<p-drawer
+    [(visible)]="openDrawer"
+    position="bottom"
+    [modal]="true"
+    [dismissible]="true"
+    [showCloseIcon]="false"
+    [style]="{
+        height: '55vh',
+        borderTopLeftRadius: '24px',
+        borderTopRightRadius: '24px'
+      }"
+>
+    @if(!!isLoadPermissionInWait()) {
+        <svg class="action-comand">
+            <use href="#orologio-1-1"></use>
+        </svg>
+    }
+    @else {
+
+        <div
+            style="
+                justify-content: flex-end;
+                display: flex;
+                background: none;
+            "
+        >
+            <p-button
+                label="salva"
+                type="submit"
+                [rounded]="true"
+                [size]="'small'"
+                (click)="saveNewUserRole()"
+            ></p-button>
+        </div>
+
+        @for(role of allRoles; track role.name) {
+            <div class="">
+                <div
+                    style="
+                        display: flex;
+                        flex-direction: row;
+                        justify-content: space-between;
+                    "
+                >
+                    <div>
+                        <svg
+                            style="height: 3rem; width: 3rem; margin-right: 1rem;'"
+                        >
+                            <use [attr.href]="'#'+ ROLE_ICON[ role.name ]"></use>
+                        </svg>
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; font-size: var(--big-font-size);">{{ role.name }}</div>
+                        <div class="">{{ role.description }}</div>
+                    </div>
+                    <div>
+                        <p-checkbox
+                            (onChange)="toggleSelctedRow(role, $event)"
+                            [binary]="true"
+                            [ngModel]="isSelectedRoles(role)"
+                            size="small"
+                            style="margin: 1rem;"
+                        />
+                    </div>
+                </div>
+                <div style="font-weight: 600; margin-top: 1rem;">Permessi</div>
+                @for( perm of role.permissions; track perm.name ) {
+                    <div class="permission">
+                        <label class="">{{ perm.name }}</label>
+                        <div class="">{{ perm.description }}</div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</p-drawer>

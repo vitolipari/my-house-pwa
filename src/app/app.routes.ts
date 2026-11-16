@@ -108,7 +108,18 @@ export const routes: Routes = [
         loadComponent: () =>
             import('./pages/acquire-permissions/acquire-permissions.page').then(m => m.AcquirePermissionsPage)
     },
-
+    {
+        path: 'user-page/:id',
+        canActivate: [routeAccessGuard],
+        data: {
+            accessControl: {
+                rolesAny: [],
+                permission: ['LIST_USERS', 'READ_USERS'/*, 'EDIT_USERS', 'DELETE_USERS', 'CHANGE_USER_ROLE'*/]
+            }
+        },
+        loadComponent: () =>
+            import('./pages/user/user.page').then(m => m.UserPage)
+    },
 
 
 
