@@ -104,6 +104,11 @@ export class DeviceApiService {
         return this.http.delete<any>(`${this.baseUrl}/devices?ids=${ param.join(',') }`);
     }
 
+    // modifica di nome, stanza e voce di catalogo: il Core legge solo name, where, catalogItemId e type.id
+    editDevice(device: DeviceType): Observable<DeviceType> {
+        return this.http.put<DeviceType>(`${this.baseUrl}/device/${ device.id }`, device);
+    }
+
     getAllTimersByDeviceId(deviceId: number): Observable<FullTimerType[]> {
         return this.http.get<FullTimerType[]>(`${this.baseUrl}/device/${deviceId}/timers`);
     }

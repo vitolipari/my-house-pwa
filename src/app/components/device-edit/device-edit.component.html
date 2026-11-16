@@ -1,0 +1,42 @@
+<div class="card">
+
+    <div class="title">Modifica dispositivo</div>
+
+    <div class="row">
+        <label class="field-label" for="device-edit-name">nome</label>
+        <input id="device-edit-name" type="text" pInputText [(ngModel)]="name" [disabled]="!!inWaiting()" />
+    </div>
+
+    <div class="row">
+        <label class="field-label">stanza</label>
+        <p-select
+            [options]="rooms()"
+            [(ngModel)]="roomID"
+            optionLabel="name"
+            optionValue="id"
+            appendTo="body"
+            [disabled]="!!inWaiting()"
+        ></p-select>
+    </div>
+
+    <div class="row">
+        <label class="field-label">tipo</label>
+        <p-select
+            [options]="catalog()"
+            [(ngModel)]="catalogItemId"
+            optionLabel="name"
+            optionValue="id"
+            appendTo="body"
+            [disabled]="!!inWaiting()"
+        ></p-select>
+        <!-- il tipo funzionale non cambia (variante A): si mostra soltanto -->
+        <div class="label">{{ device.type.name }}</div>
+    </div>
+
+    <p-button label="salva" [disabled]="!!inWaiting() || name.trim() === ''" (click)="save()"></p-button>
+
+    @if( !!errorMessage() ) {
+        <div class="label" role="alert">{{ errorMessage() }}</div>
+    }
+
+</div>

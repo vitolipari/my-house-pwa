@@ -35,6 +35,7 @@ import {ClimateDetailComponent} from '../../components/climate-detail/climate-de
 import {BinarySensorDetailComponent} from '../../components/binary-sensor-detail/binary-sensor-detail.component';
 import {CurtainDetailComponent} from '../../components/curtain-detail/curtain-detail.component';
 import {ThermostatDetailComponent} from '../../components/thermostat-detail/thermostat-detail.component';
+import {DeviceEditComponent} from '../../components/device-edit/device-edit.component';
 
 
 export type HistoricDataType = {
@@ -92,6 +93,7 @@ const CHART_MEASURES_PER_CHANNEL: number = 360;
         BinarySensorDetailComponent,
         CurtainDetailComponent,
         ThermostatDetailComponent,
+        DeviceEditComponent,
         // Checkbox,
         // SwitcherComponent
     ],
@@ -134,6 +136,7 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
     readonly data = this.router.currentNavigation()?.extras.state as { from: string; device?: DeviceType; } | undefined;
     readonly deviceId = this.route.snapshot.paramMap.get('id');
     protected openConfirmDeletion: boolean = false;
+    protected openEditDevice: boolean = false;
     protected readonly isInDeleteDeviceInWaiting = signal<boolean>(false);
     protected readonly timersWaiting = signal<boolean>(true);
     protected readonly scenariosWaiting = signal<boolean>(true);
@@ -538,7 +541,7 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
 
 
     protected editData() {
-
+        this.openEditDevice = true;
     }
 
     protected duplicate() {
@@ -594,6 +597,27 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
     // per <delete-confirm-component>: arrow function, così il componente le chiama senza perdere il this
     protected readonly deleteDeviceByIDs = (ids: number[]) => this.deviceApi.deleteDevices([this.device().id]);
     protected readonly exit = () => this.router.navigate(['/devices-page']);
+
+    // per <device-edit-component>: arrow function come exit. Il dispositivo arriva dalla cache del Core, con lo stato;
+    // la stanza si rilegge con la rotta dell'apertura della pagina, che porta anche i suoi dispositivi
+    protected readonly exitOnEdit = (device: DeviceType) => {
+
+        this.device.set(device);
+        this.openEditDevice = false;
+        this.roomWaiting.set(true);
+
+        firstValueFrom(this.deviceApi.getRoomDeviceId(parseInt(''+ device.id)))
+            .then((room: ZoneType) => {
+                this.room = room;
+                this.roomWaiting.set(false);
+            })
+            .catch((e: any) => {
+                console.log('errore in exitOnEdit di DeviceDetailsPage: rilettura della stanza');
+                console.log(e);
+                this.roomWaiting.set(false);
+            })
+        ;
+    };
     protected sliderValue: number = 0;
 
 

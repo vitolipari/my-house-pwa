@@ -30,6 +30,25 @@
         [exitOnDelete]="exit"
     ></delete-confirm-component>
 </p-drawer>
+<p-drawer
+    [(visible)]="openEditDevice"
+    position="bottom"
+    [modal]="true"
+    [dismissible]="true"
+    [showCloseIcon]="false"
+    [style]="{
+        height: '70vh',
+        borderTopLeftRadius: '24px',
+        borderTopRightRadius: '24px'
+      }"
+>
+    @if( openEditDevice ) {
+        <device-edit-component
+            [device]="device()"
+            [exitOnSave]="exitOnEdit"
+        ></device-edit-component>
+    }
+</p-drawer>
 
 @if( !deviceWaiting() ) {
 
