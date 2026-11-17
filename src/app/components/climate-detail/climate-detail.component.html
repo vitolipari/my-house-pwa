@@ -96,7 +96,7 @@
                     optionValue="value"
                     placeholder="—"
                     [disabled]="!!inWaiting()"
-                    (onChange)="setValue('air_flow_vertical', $event.value)"
+                    (onChange)="setValue('air_flow_vertical', $event.value, 'air_flow_vertical_position')"
                 ></p-select>
             </div>
 
@@ -109,7 +109,7 @@
                     optionValue="value"
                     placeholder="—"
                     [disabled]="!!inWaiting()"
-                    (onChange)="setValue('air_flow_horizontal', $event.value)"
+                    (onChange)="setValue('air_flow_horizontal', $event.value, 'air_flow_horizontal_position')"
                 ></p-select>
             </div>
 
@@ -122,7 +122,7 @@
                     optionValue="value"
                     placeholder="—"
                     [disabled]="!!inWaiting()"
-                    (onChange)="setValue('air_flow_vertical_position', $event.value)"
+                    (onChange)="setValue('air_flow_vertical_position', $event.value, 'air_flow_vertical')"
                 ></p-select>
             </div>
 
@@ -135,7 +135,7 @@
                     optionValue="value"
                     placeholder="—"
                     [disabled]="!!inWaiting()"
-                    (onChange)="setValue('air_flow_horizontal_position', $event.value)"
+                    (onChange)="setValue('air_flow_horizontal_position', $event.value, 'air_flow_horizontal')"
                 ></p-select>
             </div>
 

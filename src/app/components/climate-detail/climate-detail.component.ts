@@ -27,7 +27,9 @@ const FAN_OPTIONS: {value: string, label: string}[] = [
     {value: 'strong', label: 'turbo'}
 ];
 
-// alette: il modello Tuya usa stringhe numeriche, l'etichetta è il valore stesso
+// alette: il modello Tuya usa stringhe numeriche, l'etichetta è il valore stesso.
+// Elencati solo i valori usati dall'app del climatizzatore (prova del 24/10); oscillazione e posizione
+// della stessa direzione si escludono: quando una vale più di '0', l'altra vale '0'
 const VERTICAL_SWING_OPTIONS: {value: string, label: string}[] = [
     {value: '0', label: '0'},
     {value: '1', label: '1'},
@@ -40,10 +42,7 @@ const HORIZONTAL_SWING_OPTIONS: {value: string, label: string}[] = [
     {value: '1', label: '1'},
     {value: '2', label: '2'},
     {value: '3', label: '3'},
-    {value: '4', label: '4'},
-    {value: '5', label: '5'},
-    {value: '6', label: '6'},
-    {value: '7', label: '7'}
+    {value: '4', label: '4'}
 ];
 
 const VERTICAL_POSITION_OPTIONS: {value: string, label: string}[] = [
@@ -61,10 +60,7 @@ const HORIZONTAL_POSITION_OPTIONS: {value: string, label: string}[] = [
     {value: '2', label: '2'},
     {value: '3', label: '3'},
     {value: '4', label: '4'},
-    {value: '5', label: '5'},
-    {value: '6', label: '6'},
-    {value: '7', label: '7'},
-    {value: '8', label: '8'}
+    {value: '5', label: '5'}
 ];
 
 // limiti di temp_set nel modello del climatizzatore
@@ -101,13 +97,29 @@ export class ClimateDetailComponent {
     protected readonly TARGET_TEMPERATURE_MAX = TARGET_TEMPERATURE_MAX;
 
 
-    // unico metodo dei comandi: SET:<valore> sul canale; il componente non aggiorna status da solo
-    protected setValue(channelKey: string, value: string | number): void {
+    // unico metodo dei comandi: SET:<valore> sul canale, preceduto da SET:0 su otherChannelKey quando
+    // oscillazione e posizione della stessa direzione si escludono; il componente non aggiorna status da solo
+    protected setValue(channelKey: string, value: string | number, otherChannelKey: string = ''): void {
 
         this.inWaiting.set(true);
         this.errorMessage.set('');
 
-        firstValueFrom(this.deviceApi.deviceAction(this.device.id, channelKey, 'SET:'+ value))
+        // il primo passo resta vuoto quando non serve azzerare l'altro canale della stessa direzione
+        let firstStep: Promise<any> = Promise.resolve(null);
+
+        if( otherChannelKey !== '' ) {
+
+            let chosenValue: string = ''+ value;
+            let otherChannelValue: string = ''+ this.device.status[ this.device.channel.indexOf(otherChannelKey) ];
+
+            if( chosenValue !== '0' && otherChannelValue !== '0' ) {
+
+                firstStep = firstValueFrom(this.deviceApi.deviceAction(this.device.id, otherChannelKey, 'SET:0'));
+            }
+        }
+
+        firstStep
+            .then(() => firstValueFrom(this.deviceApi.deviceAction(this.device.id, channelKey, 'SET:'+ value)))
             .then(() => {
                 this.inWaiting.set(false);
             })
