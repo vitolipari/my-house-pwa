@@ -1,4 +1,4 @@
-import {Component, inject, Input, signal} from '@angular/core';
+import {Component, inject, Input, OnInit, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {firstValueFrom} from 'rxjs';
 import {Button} from 'primeng/button';
@@ -77,7 +77,7 @@ const TARGET_TEMPERATURE_MAX: number = 31;
     templateUrl: './climate-detail.component.html',
     styleUrl: './climate-detail.component.css'
 })
-export class ClimateDetailComponent {
+export class ClimateDetailComponent implements OnInit {
 
     @Input({ required: true }) device!: DeviceType;
 
@@ -95,6 +95,21 @@ export class ClimateDetailComponent {
     protected readonly HORIZONTAL_POSITION_OPTIONS = HORIZONTAL_POSITION_OPTIONS;
     protected readonly TARGET_TEMPERATURE_MIN = TARGET_TEMPERATURE_MIN;
     protected readonly TARGET_TEMPERATURE_MAX = TARGET_TEMPERATURE_MAX;
+
+
+    // all'apertura il Core rilegge il climatizzatore dal cloud, che altrimenti legge ogni 5 minuti: così si vedono
+    // subito anche i cambi fatti dal telecomando o dall'app. Il dispositivo aggiornato arriva dalla WebSocket della pagina
+    ngOnInit(): void {
+
+        firstValueFrom(this.deviceApi.loadDeviceStatus(this.device.id))
+            .then((device: DeviceType) => device)
+            .catch((e: any) => {
+                console.log('errore in ngOnInit di ClimateDetailComponent: rilettura dello stato dal cloud');
+                console.log(e);
+                return null;
+            })
+        ;
+    }
 
 
     // unico metodo dei comandi: SET:<valore> sul canale, preceduto da SET:0 su otherChannelKey quando
