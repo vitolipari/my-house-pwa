@@ -1,0 +1,86 @@
+
+/* charts *****************************************************************************/
+
+:host {
+    --gauge-width: 20rem;
+    --lancetta-height: 1rem;
+}
+
+:host {
+    /*border: solid 1px var(--color-ambient-1);*/
+    width: var(--gauge-width);
+    height: calc( var(--gauge-width) / 2 );
+    margin: 1rem auto;
+    display: grid;
+    grid-template-columns: 100% 100%;
+    grid-template-rows: 100% 100%;
+    column-gap: 0rem;
+    row-gap: 0rem;
+}
+
+.gauge-circle {
+    /*background: #0f03;*/
+    grid-area: 1 / 1;
+    width: var(--gauge-width);
+    height: calc( var(--gauge-width) / 2 );
+}
+
+.gauge {
+    /*background: #f003;*/
+    grid-area: 1 / 1;
+    width: var(--gauge-width);
+    height: calc( var(--gauge-width) / 2 );
+    position: relative;
+}
+
+.gauge > DIV {
+    font-family: var(--page-font);
+    font-size: var(--main-huge-font-size);
+    color: var(--color-text-2);
+    font-weight: 600;
+    margin-top: 40%;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lancetta {
+    background: var(--color-ambient-2);
+    border-radius: 100rem;
+    width: calc((var(--gauge-width) / 2) + 1rem);
+    height: calc(var(--lancetta-height) + 0.4rem);
+    text-align: right;
+    transform-origin: calc(var(--lancetta-height) / 2) calc(100% - calc(var(--lancetta-height) / 2));
+    transition: transform 0.6s cubic-bezier(0.34, 1.4, 0.64, 1);
+    will-change: transform;
+    position: absolute;
+    left: calc(50% - 0rem);
+    bottom: calc(var(--lancetta-height) / 4);
+    padding: 0.2rem;
+}
+
+.valore-lancetta {
+    background: var(--color-ambient-1);
+    display: inline-block;
+    padding: 0.1rem 1rem;
+    border-radius: 100rem;
+    font-family: var(--page-font);
+    font-size: var(--tiny-font-size);
+    color: var(--color-text-2);
+    font-weight: bold;
+    text-shadow: none;
+    height: var(--lancetta-height);
+    position: relative;
+    top: -0.15rem;
+}
+
+.gauge-text {
+    font-family: var(--page-font);
+    font-size: var(--tiny-font-size);
+    color: var(--color-text-2);
+    /*stroke: var(--color-text-2);*/
+    fill: var(--color-text-2);
+}
+
+/***************************************************************************** charts */

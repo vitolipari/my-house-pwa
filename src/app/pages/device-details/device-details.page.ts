@@ -36,6 +36,10 @@ import {BinarySensorDetailComponent} from '../../components/binary-sensor-detail
 import {CurtainDetailComponent} from '../../components/curtain-detail/curtain-detail.component';
 import {ThermostatDetailComponent} from '../../components/thermostat-detail/thermostat-detail.component';
 import {DeviceEditComponent} from '../../components/device-edit/device-edit.component';
+import {GaugeMeteredComponent} from '../../components/gauge-metered.component/gauge-metered.component';
+import {GaugeComponent} from '../../components/gauge.component/gauge.component';
+import {Select} from 'primeng/select';
+import {CHANNEL_MAPPING} from '../scenario/scenario/scenario.page';
 
 
 export type HistoricDataType = {
@@ -94,6 +98,9 @@ const CHART_MEASURES_PER_CHANNEL: number = 360;
         CurtainDetailComponent,
         ThermostatDetailComponent,
         DeviceEditComponent,
+        GaugeMeteredComponent,
+        GaugeComponent,
+        Select,
         // Checkbox,
         // SwitcherComponent
     ],
@@ -103,6 +110,31 @@ const CHART_MEASURES_PER_CHANNEL: number = 360;
 })
 export class DeviceDetailsPage implements OnInit, OnDestroy {
 
+
+    CHANNEL_NAME_MAPPING = {
+        power: 'potenza',
+        power_0: 'Rete',
+        power_1: 'Consumo',
+        output: 'azione ON/OFF',
+        temperature: 'Temperatura',
+        humidity: 'Umidita',
+        battery: 'Batteria',
+        open: 'apertura',
+        close: 'chiusura',
+        pv_power: 'Potenza Prodotta',
+        battery_power: 'Potenza Batteria',
+        battery_soc: 'Carica Batteria',
+        load_power: 'Potenza Consumata',
+        grid_power: 'Potenza di Rete',
+        fan: 'Aria',
+        air_flow_vertical: 'Alette Verticali',
+        air_flow_horizontal: 'Alette Orizzontali',
+        air_flow_vertical_position: 'Posizione fissa alette verticali',
+        air_flow_horizontal_position: 'Posizione fissa alette verticali',
+        target_temperature: 'Temperatura Scelta',
+        brightness: 'Luminosità',
+        mode: 'Modalità'
+    };
 
     timers: (FullTimerType & { sectors: number[][]; arcs: string[]; })[] = [];
     circle = {
@@ -175,7 +207,7 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
         height: '10rem',
         color: getComputedStyle(document.body).getPropertyValue("--sky-color"),
         colorGradient: false,
-        trendWidth: 200,
+        trendWidth: '80%',
         trendHeight: 25,
     };
 
@@ -207,6 +239,26 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
         antiActiveColor: getComputedStyle(document.body).getPropertyValue("--color-background-1"),
         averageAreaColor: getComputedStyle(document.body).getPropertyValue("--middle-opacity-inverse-theme-color")
     }
+
+
+    minimo: any = {};
+    massimo: any = {};
+    angolo: any = {};
+    media: any = {};
+
+    protected readonly CHART_TYPES = CHART_TYPES;
+
+
+    protected chartRanges: {value: string; label: string;}[] = [
+        {label: '24 ore', value: '24h'},
+        {label: '7 giorni', value: '7d'},
+        {label: '30 giorni', value: '30d'},
+        {label: '1 anno', value: '1y'},
+        {label: 'da sempre', value: 'inf'},
+    ];
+
+    // range scelto per il grafico di ogni canale: è un signal perché measureCharts si ricalcoli quando cambia
+    protected readonly chartRange = signal<{ [key: string]: string }>({});
 
 
     // una serie per ogni canale di misura numerico dello storico: sono i valori che disegnano i grafici
@@ -247,6 +299,22 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
                     channelRows
                         .reduce(getLastElementOr, null as unknown as HistoricDataType)
                         .unit || ''
+                ;
+
+                // misure nel range scelto per il canale: '24h', '7d', '30d', '1y' sono numero e unità di moment;
+                // 'inf' o nessuna scelta, tutte. Il controllo qui sopra resta sul totale: il grafico e la sua
+                // scelta del range non spariscono quando nel range ci sono meno di due misure
+                let range: string = this.chartRange()[channelKey] || 'inf';
+                let from: number = 0;
+                if( range !== 'inf' ) {
+                    from = moment().subtract(parseInt(range), range.slice(-1) as moment.unitOfTime.DurationConstructor).valueOf();
+                }
+
+                values =
+                    channelRows
+                        .filter((row: HistoricDataType) => row.timestamp >= from)
+                        .map((row: HistoricDataType) => parseFloat(''+ row.value))
+                        .filter((value: number) => !isNaN(value))
                 ;
 
                 charts.push({
@@ -311,6 +379,54 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
                 );
 
                 this.measurements.set( measureData.filter((strData: HistoricDataType) => (strData.kind === 'MEASUREMENT')) );
+
+                console.log('misure arrivate');
+                console.log( measureData );
+                /*
+                {
+                  "id": 2009179,
+                  "timestamp": 1794909909490,
+                  "channel_key": "energy_0",
+                  "kind": "MEASUREMENT",
+                  "unit": "Wh",
+                  "value_type": "NUMBER",
+                  "value": "566442.7"
+                }
+                 */
+
+
+                this.device().channel
+                    .forEach((channelName: string) => {
+                        let channelIndex = this.device().channel.indexOf(channelName);
+
+                        let measures =
+                            this.measurements()
+                                .sort((a: any, b: any) => a.id - b.id)
+                                .filter((x: any) => x.channel_key === channelName)
+                                .map((x: any) => parseFloat(''+ x.value))
+                        ;
+
+
+                        // measures è in ordine di tempo: measures[0] era la prima misura, non la più bassa
+                        // this.minimo[channelName] = measures[0] || 1_000_000;
+                        this.minimo[channelName] = Math.min(...measures);
+                        if( this.minimo[channelName] >= parseFloat(''+ this.device().status[channelIndex]) ) {
+                            this.minimo[channelName] = parseFloat(''+ this.device().status[channelIndex]);
+                        }
+
+                        // l'ultima misura coincide quasi sempre con il valore attuale: il valore restava sempre al massimo
+                        // this.massimo[channelName] = measures.reduce(getLastElementOr, 0) || 0;
+                        this.massimo[channelName] = Math.max(...measures);
+                        if( this.massimo[channelName] <= parseFloat(''+ this.device().status[channelIndex]) ) {
+                            this.massimo[channelName] = parseFloat(''+ this.device().status[channelIndex]);
+                        }
+
+                        this.media[channelName] =
+                            measures.reduce((a: number, b: number) => a + b, 0) / measures.length
+                        ;
+
+                    })
+                ;
 
                 this.searchingData.set(false);
 
@@ -743,6 +859,68 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
                     console.log( JSON.parse(msg.data) );
                     this.device.set( device );
 
+
+
+
+                    device.channel
+                        .forEach((channelName: string) => {
+                            let channelIndex = this.device().channel.indexOf(channelName);
+
+
+                            /*
+                                {
+                                  "id": 2009179,
+                                  "timestamp": 1794909909490,
+                                  "channel_key": "energy_0",
+                                  "kind": "MEASUREMENT",
+                                  "unit": "Wh",
+                                  "value_type": "NUMBER",
+                                  "value": "566442.7"
+                                }
+                                 */
+                            // let measures =
+                            //     this.measurements()
+                            //         .sort((a: any, b: any) => a.id - b.id)
+                            //         .filter((x: any) => x.channel_key === channelName)
+                            //         .map((x: any) => parseFloat(''+ x.value))
+                            // ;
+                            //
+                            //
+                            if( this.minimo[channelName] >= parseFloat(''+ device.status[channelIndex]) ) {
+                                this.minimo[channelName] = parseFloat(''+ device.status[channelIndex]);
+                            }
+
+                            if( this.massimo[channelName] <= parseFloat(''+ device.status[channelIndex]) ) {
+                                this.massimo[channelName] = parseFloat(''+ device.status[channelIndex]);
+                            }
+
+
+                            this.angolo[channelName] = -1 * (
+                                Math.floor(
+                                    (
+                                        (parseFloat(''+ device.status[channelIndex]) - this.minimo[channelName])
+                                            *
+                                        (-90 / (this.massimo[channelName] - this.minimo[channelName] || 0))
+                                    ) * 100
+                                ) / 100
+                            ) -180;
+                            // this.angolo[channelName] = -180.00;
+
+                            if( channelName === 'power_0' ) {
+                                console.log(`${channelName} = ${ this.angolo[channelName] } | ${ this.minimo[channelName] } < ${ device.status[channelIndex] } < ${ this.massimo[channelName] }`);
+                            }
+                        })
+
+                    // power_0
+
+
+                    // power_1
+
+                    // da valore ad angolo: -90° (minimo) … +90° (massimo) per un gauge a semicerchio
+                    // let quota: number = (75 - this.minimo) / (this.massimo - this.minimo);
+                    // this.angolo = -90 + Math.min(1, Math.max(0, quota)) * 180;
+
+
                     // l'ingresso e l'uscita di uno scenario cambiano sempre un dispositivo che ne fa parte: a ogni
                     // aggiornamento gli scenari attivi si rileggono, altrimenti resterebbero quelli dell'apertura
                     if( this.scenarios.length > 0 ) {
@@ -774,6 +952,7 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
 
     // uscendo dalla pagina la WebSocket si chiude: aperta, a ogni aggiornamento del dispositivo continuerebbe a
     // rileggere gli scenari attivi
+
 
     ngOnDestroy(): void {
         if( !!this.webSocketChannel ) {
@@ -841,5 +1020,16 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
     }
 
 
-    protected readonly CHART_TYPES = CHART_TYPES;
+
+    // Range scelto per il grafico di un canale: measureCharts lo legge da chartRange e ridisegna il grafico
+    computeStoricData( channelName: string, range: string ) {
+        this.chartRange.set({ ...this.chartRange(), [channelName]: range });
+
+    }
+
+
+
+    channelNameMap( name: string ): string {
+        return this.CHANNEL_NAME_MAPPING[name as keyof typeof this.CHANNEL_NAME_MAPPING] || name;
+    }
 }

@@ -45,7 +45,7 @@
     --main-font: Prompt, Montserrat, Candara, Varela Round, 'Trebuchet MS', 'Segoe UI', Calisto, Verdana, 'Open Sans', 'Arial Unicode MS';
     --reading-font: Lora, 'Adobe Caslon', Georgia, Baskerville, 'Libre Baskerville', 'Times New Roman';
     --mono-font: 'Ubuntu', -apple-system, 'Helvetica Neue', 'Roboto', BlinkMacSystemFont, 'Oxygen', 'Cantarell', 'Fira Sans', 'Droid Sans', sans-serif;
-    --orbitron-font: Orbitron, sans-serif;
+    --orbitron-font: 'Orbitron', sans-serif;
 
     /* Dimensioni */
     --micro-font-size: 8px;

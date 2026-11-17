@@ -280,6 +280,18 @@ p-accordion-content > DIV,
 }
 
 
+/* charts *****************************************************************************/
+
+::ng-deep .p-select-label {
+    font-family: var(--page-font) !important;
+    font-size: var(--small-font-size) !important;
+    color: var(--color-text-2) !important;
+}
+
+/***************************************************************************** charts */
+
+
+
 /* timer *****************************************************************************/
 
 /* desktop */

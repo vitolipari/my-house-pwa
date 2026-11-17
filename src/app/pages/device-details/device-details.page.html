@@ -449,79 +449,124 @@
 
     <div>
 
-        @for( chart of measureCharts(); track chart.channelKey ) {
-            <h4>{{ chart.channelKey }}</h4>
 
-            @switch ( chart.channelKey ) {
-                @case('temperature') {
-                    <!-- TODO da cambiare con un svg -->
-                    <data-current-chart
-                        [data]="chart.values"
-                        [wideRay]="chart.wideRay"
-                        [mainFont]="chart.mainFont"
-                        [measureUnit]="chart.measureUnit"
-                        [activeColor]="chart.activeColor"
-                        [antiActiveColor]="chart.antiActiveColor"
-                        [width]="historicChartOptions.width"
-                        [height]="historicChartOptions.height"
-                        [ths]="chart.ths"
-                    />
+
+        @for( chart of measureCharts(); track chart.channelKey ) {
+
+            @if(
+                chart.channelKey !== 'energy'
+                && chart.channelKey !== 'energy_0'
+                && chart.channelKey !== 'energy_1'
+                && chart.channelKey !== 'voltage'
+            ) {
+
+                <div
+                    style="
+                        display: flex;
+                        flex-direction: row;
+                        justify-content: space-between;
+                        padding: 1rem;
+                        margin-top: 5rem;
+                    "
+                >
+                    <strong>{{ channelNameMap( chart.channelKey ) }}</strong>
+                    <div>
+                        <p-select
+                            [options]="chartRanges"
+                            [ngModel]="chartRange()[ chart.channelKey ]"
+                            optionLabel="label"
+                            optionValue="value"
+                            placeholder="da sempre"
+                            appendTo="body"
+                            (onChange)="computeStoricData( chart.channelKey, $event.value )"
+                        ></p-select>
+                    </div>
+                </div>
+
+                @switch ( chart.channelKey ) {
+                    @case('temperature') {
+                        <gauge
+                            [minimum]="minimo[chart.channelKey]"
+                            [maximum]="massimo[chart.channelKey]"
+                            [average]="media[chart.channelKey]"
+                            [angolo]="angolo[chart.channelKey]"
+                            [value]="device().status[ device().channel.indexOf(chart.channelKey) ] +' '+ chart.measureUnit"
+                            [hasColorMagnitude]="true"
+                            [colori]="['#00f', '#0f0', '#ff0', '#f00']"
+                        ></gauge>
+                    }
+                    @case('humidity') {
+                        <gauge
+                            [minimum]="minimo[chart.channelKey]"
+                            [maximum]="massimo[chart.channelKey]"
+                            [average]="media[chart.channelKey]"
+                            [angolo]="angolo[chart.channelKey]"
+                            [value]="device().status[ device().channel.indexOf(chart.channelKey) ] +' '+ chart.measureUnit"
+                            [hasColorMagnitude]="false"
+                            [colori]="['#00d8ff', '#008cff', '#0050ff', '#00f']"
+                        ></gauge>
+                    }
+                    @case('')
+                    @case('')
+                    @case('')
+                    {
+                        <data-trend-chart
+                            [data]="chart.values"
+                            [ths]="chart.ths"
+                            [activeColor]="chart.activeColor"
+                            [placeholderColor]="chart.placeholderColor"
+                            [wideRay]="chart.wideRay"
+                            [previousActiveColor]="chart.previousActiveColor"
+                            [previousPaceholderColor]="chart.previousPaceholderColor"
+                            [previousRay]="chart.previousRay"
+                            [previousWideRay]="chart.previousWideRay"
+                            [minFont]="chart.minFont"
+                            [mainFont]="chart.mainFont"
+                            [measureUnit]="chart.measureUnit"
+                            [avgFont]="chart.avgFont"
+                            [avgColor]="chart.avgColor"
+                            [width]="historicChartOptions.width"
+                            [height]="historicChartOptions.height"
+                        />
+                    }
+                    @case('voltage')
+                    @case('energy')
+                    @case('energy_0')
+                    @case('energy_1')
+                    {}
+                    @default() {
+
+                        <gauge-metered
+                            [minimum]="minimo[chart.channelKey]"
+                            [maximum]="massimo[chart.channelKey]"
+                            [average]="media[chart.channelKey]"
+                            [angolo]="angolo[chart.channelKey]"
+                            [value]="device().status[ device().channel.indexOf(chart.channelKey) ] +' '+ chart.measureUnit"
+                            [hasColorMagnitude]="
+                                (chart.channelKey === 'power')
+                                || (chart.channelKey === 'power_0')
+                                || (chart.channelKey === 'grid_power')
+                                || (chart.channelKey === 'pv_power')
+                            "
+                        ></gauge-metered>
+
+
+                    }
                 }
-                @case('humidity') {
-                    <!-- TODO unico colore -->
-                    <data-current-chart
-                        [data]="chart.values"
-                        [wideRay]="chart.wideRay"
-                        [mainFont]="chart.mainFont"
-                        [measureUnit]="chart.measureUnit"
-                        [activeColor]="chart.activeColor"
-                        [antiActiveColor]="chart.antiActiveColor"
-                        [width]="historicChartOptions.width"
-                        [height]="historicChartOptions.height"
-                        [ths]="chart.ths"
-                    />
-                }
-                @default() {
-                    <data-trend-chart
-                        [data]="chart.values"
-                        [ths]="chart.ths"
-                        [activeColor]="chart.activeColor"
-                        [placeholderColor]="chart.placeholderColor"
-                        [wideRay]="chart.wideRay"
-                        [previousActiveColor]="chart.previousActiveColor"
-                        [previousPaceholderColor]="chart.previousPaceholderColor"
-                        [previousRay]="chart.previousRay"
-                        [previousWideRay]="chart.previousWideRay"
-                        [minFont]="chart.minFont"
-                        [mainFont]="chart.mainFont"
-                        [measureUnit]="chart.measureUnit"
-                        [avgFont]="chart.avgFont"
-                        [avgColor]="chart.avgColor"
-                        [width]="historicChartOptions.width"
-                        [height]="historicChartOptions.height"
-                    />
-                }
+
+                <progressive-average-chart-component
+                    [data]="chart.values"
+                    [ths]="chart.ths"
+                    [thsColor]="chart.thsColor"
+                    [thsGradient]="historicChartOptions.colorGradient"
+                    [color]="historicChartOptions.color"
+                    [width]="historicChartOptions.trendWidth"
+                    [height]="historicChartOptions.trendHeight"
+                    [averageAreaColor]="chart.averageAreaColor"
+                />
             }
 
-            <progressive-average-chart-component
-                [data]="chart.values"
-                [ths]="chart.ths"
-                [thsColor]="chart.thsColor"
-                [thsGradient]="historicChartOptions.colorGradient"
-                [color]="historicChartOptions.color"
-                [width]="historicChartOptions.trendWidth"
-                [height]="historicChartOptions.trendHeight"
-                [averageAreaColor]="chart.averageAreaColor"
-            />
 
-            <!--
-            <data-widget
-                [liveDataOptions]="chart"
-                [hasHistoric]="historicChartOptions.hasHistoric"
-                [chartType]="(chart.channelKey === 'temperature') ? CHART_TYPES.gaugeBars : CHART_TYPES.gauge"
-                [options]="historicChartOptions"
-            ></data-widget>
-            -->
         }
 
     </div>

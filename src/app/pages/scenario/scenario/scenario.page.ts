@@ -39,7 +39,7 @@ export const CHANNEL_MAPPING = {
     power_0: 'potenza 0',
     power_1: 'potenza 1',
     output: 'azione ON/OFF',
-    tempperature: 'temperatura',
+    temperature: 'temperatura',
     humidity: 'umidita',
     battery: 'batteria',
     open: 'apertura',

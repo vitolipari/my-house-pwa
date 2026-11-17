@@ -24,8 +24,8 @@ export class ProgressiveAverageChartComponent implements OnChanges {
     @Input() axes: boolean = false;
     @Input() axeXColor: string = '#000';
     @Input() axeYColor: string = '#000';
-    @Input() width: number | string = 300;
-    @Input() height: number | string = 200;
+    @Input() width: number | string = '100%';
+    @Input() height: number | string = 100;
     @ViewChild("progressiveAverageChart", {static: true, read: ElementRef}) canvas!: ElementRef<HTMLCanvasElement>;
     area: any;
     gradient: any;
@@ -129,12 +129,14 @@ export class ProgressiveAverageChartComponent implements OnChanges {
                 .map((val: number) => val * this.canvas.nativeElement.height)
 
                 // trim
-                .filter((val: number, index: number) => (this.data.length - index) < 100)
+                // il grafico disegnava solo le ultime 99 misure: con il range della pagina si disegnano tutte
+                // .filter((val: number, index: number) => (this.data.length - index) < 100)
 
         ;
 
-        let maxLen: number = (this.values.length > 100) ? 100 : this.values.length;
-        this.dx = this.canvas.nativeElement.width / maxLen;
+        // let maxLen: number = (this.values.length > 100) ? 100 : this.values.length;
+        // this.dx = this.canvas.nativeElement.width / maxLen;
+        this.dx = this.canvas.nativeElement.width / this.values.length;
         if( this.dx > 20 ) this.dx = 20;
 
         let thsNormalized = (ths - min) / (max - min) * this.canvas.nativeElement.height;

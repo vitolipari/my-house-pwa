@@ -1,0 +1,43 @@
+<svg
+    class="gauge-circle"
+    style=""
+    viewBox="0 0 100 100"
+>
+    <defs>
+        <linearGradient [attr.id]="idGradiente">
+            <stop offset="0" stop-color="#00cc66"/>
+            <stop [attr.offset]="offsetMedia" stop-color="#ffff00"/>
+            <stop offset="1" stop-color="#ff0000"/>
+        </linearGradient>
+    </defs>
+    <circle
+        [attr.r]="'90%'"
+        [attr.cx]="'50%'"
+        [attr.cy]="'100%'"
+        fill="none"
+        [attr.stroke]="!!hasColorMagnitude ? 'url(#'+ idGradiente +')' : 'var(--middle-opacity-inverse-theme-color)'"
+        [attr.stroke-width]="'10%'"
+    ></circle>
+    <text class="gauge-text" x="-30" y="100%">{{ minimum }}</text>
+    <text class="gauge-text" x="100" y="100%">{{ maximum }}</text>
+</svg>
+<div
+    class="gauge"
+    style=""
+>
+    <div
+        class="lancetta"
+        style=""
+        [style.transform]="'rotate(' + angolo + 'deg)'"
+    >
+        <div
+            class="valore-lancetta"
+            style=""
+        >
+            {{ value }}
+        </div>
+        <!--
+        >{{ angolo[chart.channelKey] }}</div>
+        -->
+    </div>
+</div>
