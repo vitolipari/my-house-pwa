@@ -898,7 +898,7 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
                                     (
                                         (parseFloat(''+ device.status[channelIndex]) - this.minimo[channelName])
                                             *
-                                        (-90 / (this.massimo[channelName] - this.minimo[channelName] || 0))
+                                        (-180 / (this.massimo[channelName] - this.minimo[channelName] || 0))
                                     ) * 100
                                 ) / 100
                             ) -180;

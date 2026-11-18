@@ -71,7 +71,6 @@ export class App {
             });
 
 
-        this.dc = btoa(document.cookie);
 
     }
 

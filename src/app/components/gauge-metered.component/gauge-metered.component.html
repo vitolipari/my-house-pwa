@@ -5,9 +5,9 @@
 >
     <defs>
         <linearGradient [attr.id]="idGradiente">
-            <stop offset="0" stop-color="#00cc66"/>
-            <stop [attr.offset]="offsetMedia" stop-color="#ffff00"/>
-            <stop offset="1" stop-color="#ff0000"/>
+            <stop offset="0" [attr.stop-color]="colori[0]"/>
+            <stop [attr.offset]="offsetMedia" [attr.stop-color]="colori[1]"/>
+            <stop offset="1" [attr.stop-color]="colori[2]"/>
         </linearGradient>
     </defs>
     <circle

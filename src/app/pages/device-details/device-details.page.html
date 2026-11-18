@@ -476,7 +476,7 @@
                             [ngModel]="chartRange()[ chart.channelKey ]"
                             optionLabel="label"
                             optionValue="value"
-                            placeholder="da sempre"
+                            placeholder="ultime misure"
                             appendTo="body"
                             (onChange)="computeStoricData( chart.channelKey, $event.value )"
                         ></p-select>
@@ -502,7 +502,7 @@
                             [average]="media[chart.channelKey]"
                             [angolo]="angolo[chart.channelKey]"
                             [value]="device().status[ device().channel.indexOf(chart.channelKey) ] +' '+ chart.measureUnit"
-                            [hasColorMagnitude]="false"
+                            [hasColorMagnitude]="true"
                             [colori]="['#00d8ff', '#008cff', '#0050ff', '#00f']"
                         ></gauge>
                     }
@@ -534,6 +534,19 @@
                     @case('energy_0')
                     @case('energy_1')
                     {}
+                    @case('pv_power')
+                    @case('Potenza Prodotta')
+                    {
+                        <gauge-metered
+                            [minimum]="minimo[chart.channelKey]"
+                            [maximum]="massimo[chart.channelKey]"
+                            [average]="media[chart.channelKey]"
+                            [angolo]="angolo[chart.channelKey]"
+                            [value]="device().status[ device().channel.indexOf(chart.channelKey) ] +' '+ chart.measureUnit"
+                            [hasColorMagnitude]="true"
+                            [colori]="['#f00', '#ff0', '#0f0']"
+                        ></gauge-metered>
+                    }
                     @default() {
 
                         <gauge-metered
