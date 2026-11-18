@@ -13,6 +13,10 @@ import {coreOffline} from './interceptor/offline-cache.interceptor';
 import {SidebarMenu} from './components/sidebar-menu/sidebar-menu';
 
 
+// trascinamento verso il basso, in pixel, oltre il quale la pagina si ricarica
+const PULL_TO_REFRESH_DISTANCE = 150;
+
+
 @Component({
     selector: 'app-root',
     standalone: true,
@@ -69,6 +73,42 @@ export class App {
                     event.urlAfterRedirects.startsWith('/profile')
                 );
             });
+
+
+        // trascinando verso il basso con la pagina in cima si ricarica, come nel browser:
+        // l'app installata (display standalone) non ha il pull-to-refresh del telefono
+        let pullStartY: number = -1;
+
+        document.addEventListener('touchstart', (event: TouchEvent) => {
+            pullStartY = -1;
+
+            if( window.scrollY > 0 ) {
+                return;
+            }
+
+            // niente ricarica dentro un elenco già scorso o su un controllo che si trascina (slider, ruota del timer)
+            let element: Element | null = event.target as Element;
+            while( !!element && element !== document.body ) {
+                if( element.scrollTop > 0 || getComputedStyle(element).touchAction === 'none' ) {
+                    return;
+                }
+                element = element.parentElement;
+            }
+
+            pullStartY = event.touches[0].clientY;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (event: TouchEvent) => {
+            if( pullStartY < 0 ) {
+                return;
+            }
+
+            if( (event.changedTouches[0].clientY - pullStartY) > PULL_TO_REFRESH_DISTANCE ) {
+                window.location.reload();
+            }
+
+            pullStartY = -1;
+        }, { passive: true });
 
 
 

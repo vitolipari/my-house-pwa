@@ -76,9 +76,10 @@ export class SignInPage {
 
                     // dopo il login si torna alla pagina chiesta prima (from, scritto dal guard), per esempio il link
                     // di un QR dei permessi; senza from si va alla dashboard
+                    // replaceUrl: sign-in non resta nella cronologia, così lo swipe indietro non ci torna
                     let from: string = this.route.snapshot.queryParamMap.get('from') || '/dashboard';
                     console.log('avvio navigazione dopo il login verso '+ from);
-                    this.router.navigateByUrl(from);
+                    this.router.navigateByUrl(from, { replaceUrl: true });
 
                 })
                 .catch((e: any) => {

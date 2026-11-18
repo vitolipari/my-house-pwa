@@ -376,7 +376,6 @@ export const routes: Routes = [
         children: [
             {
                 path: 'page',
-                canActivate: [guestGuard],
                 loadComponent: () => import('./pages/profile/profile.page').then(m => m.ProfilePage),
             }
         ]
