@@ -865,6 +865,8 @@ export class NewDevicePage implements OnInit {
     readonly newDeviceDataTreePanelOpen = signal<boolean>(false);
     readonly isCopied = signal<boolean>(false);
     readonly inWaiting = signal<boolean>(false);
+    // messaggio del salvataggio non riuscito, mostrato sopra il pulsante conferma
+    readonly saveError = signal<string>('');
     readonly rooms = signal<ZoneType[]>([]);
     readonly isRoomsInWaiting = signal<boolean>(false);
     selectedRoom!: ZoneType;
@@ -1704,6 +1706,7 @@ export class NewDevicePage implements OnInit {
 
     addNewDevice() {
         this.inWaiting.set(true);
+        this.saveError.set('');
 
         firstValueFrom(this.api.addNewDevice(this.newDevice()))
             .then((data: any) => {
@@ -1719,7 +1722,12 @@ export class NewDevicePage implements OnInit {
                 console.log(e);
                 this.inWaiting.set(false);
 
-                // TODO messaggio di errore
+                // il Core manda {error: '...'} (già registrato, non raggiungibile, Gen1 da svegliare);
+                // senza, per esempio con la pagina di Nginx, il dispositivo potrebbe essere stato salvato lo stesso
+                this.saveError.set(
+                    e?.error
+                    ?? 'Salvataggio non riuscito: prima di riprovare controlla nell\'elenco dei dispositivi se è stato aggiunto'
+                );
             })
 
 
