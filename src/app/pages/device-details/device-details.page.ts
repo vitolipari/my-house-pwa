@@ -64,6 +64,8 @@ export type SearchHistoricDataType = {
     "to": string | number | Date;
     // 1 solo le misure, 0 solo gli eventi; assente tutti e due
     "measures"?: number;
+    // 24h, 7d, 30d, 1y, inf: misure come medie del Core a fasce di tempo
+    "range"?: string;
 }
 
 // misure lette per i grafici: almeno queste per canale, le più recenti (Vito, 13/11: «ultime N misure»)
@@ -260,6 +262,9 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
     // range scelto per il grafico di ogni canale: è un signal perché measureCharts si ricalcoli quando cambia
     protected readonly chartRange = signal<{ [key: string]: string }>({});
 
+    // medie a fasce di tempo del range scelto, lette dal Core per canale (computeStoricData)
+    protected readonly rangeMeasurements = signal<{ [key: string]: HistoricDataType[] }>({});
+
 
     // una serie per ogni canale di misura numerico dello storico: sono i valori che disegnano i grafici
     protected readonly measureCharts = computed(() => {
@@ -301,18 +306,11 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
                         .unit || ''
                 ;
 
-                // misure nel range scelto per il canale: '24h', '7d', '30d', '1y' sono numero e unità di moment;
-                // 'inf' o nessuna scelta, tutte. Il controllo qui sopra resta sul totale: il grafico e la sua
-                // scelta del range non spariscono quando nel range ci sono meno di due misure
-                let range: string = this.chartRange()[channelKey] || 'inf';
-                let from: number = 0;
-                if( range !== 'inf' ) {
-                    from = moment().subtract(parseInt(range), range.slice(-1) as moment.unitOfTime.DurationConstructor).valueOf();
-                }
-
+                // con un range scelto il grafico usa le medie a fasce di tempo lette dal Core (computeStoricData);
+                // senza scelta, le ultime misure caricate. Il controllo qui sopra resta sul totale: il grafico e la
+                // sua scelta del range non spariscono quando nel range ci sono meno di due medie
                 values =
-                    channelRows
-                        .filter((row: HistoricDataType) => row.timestamp >= from)
+                    (this.rangeMeasurements()[channelKey] || channelRows)
                         .map((row: HistoricDataType) => parseFloat(''+ row.value))
                         .filter((value: number) => !isNaN(value))
                 ;
@@ -1021,10 +1019,24 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
 
 
 
-    // Range scelto per il grafico di un canale: measureCharts lo legge da chartRange e ridisegna il grafico
+    // Range scelto per il grafico di un canale: il Core manda le medie a fasce di tempo del range e measureCharts
+    // ridisegna il grafico con quelle del canale
     computeStoricData( channelName: string, range: string ) {
+
         this.chartRange.set({ ...this.chartRange(), [channelName]: range });
 
+        firstValueFrom(this.deviceApi.getStoricalData({ ...this.search, measures: 1, range: range }))
+            .then((rows: HistoricDataType[]) => {
+                this.rangeMeasurements.set({
+                    ...this.rangeMeasurements(),
+                    [channelName]: rows.filter((row: HistoricDataType) => row.channel_key === channelName)
+                });
+            })
+            .catch((e: any) => {
+                console.log('errore in computeStoricData: lettura delle medie del range');
+                console.log(e);
+            })
+        ;
     }
 
 
