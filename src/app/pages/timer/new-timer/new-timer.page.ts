@@ -154,7 +154,8 @@ export class NewTimerPage {
                     this.groups = groups;
                 })
                 .catch((e: any) => {
-                    console.log('errore');
+                    console.log('errore nel costruttore della pagina del timer: lettura dei gruppi');
+                    console.log(e);
                 })
 
 
@@ -571,9 +572,9 @@ export class NewTimerPage {
 
     }
 
-    protected toggleSelctedDevice(device: DeviceType, event: CheckboxChangeEvent) {
+    protected toggleSelctedDevice(device: DeviceType & {isOwned: boolean}, event: CheckboxChangeEvent) {
 
-
+        device.isOwned = !!event.checked;
 
         if(!!event.checked) {
             if( !this.selectedDevices.includes(parseInt(''+ device.id)) ) {
@@ -596,9 +597,26 @@ export class NewTimerPage {
     }
 
 
-    protected addDeviceGroups() {
-        // TODO
+    // spunta gli attuatori del gruppo come se si spuntassero uno per uno; poi si possono togliere singolarmente
+    protected addDeviceGroups(group: GroupType) {
 
+        let groupDeviceIDs: number[] =
+            (''+ (group.device_list || ''))
+                .split(',')
+                .map((id: string) => parseInt(id.trim()))
+                .filter((id: number) => Number.isInteger(id) && id > 0)
+        ;
+
+        this.devices
+            .filter((device: DeviceType & {isOwned: boolean}) => groupDeviceIDs.includes(parseInt(''+ device.id)))
+            .filter((device: DeviceType & {isOwned: boolean}) => (''+ device.category.id).trim().toLowerCase().indexOf('actuator') !== -1)
+            .forEach((device: DeviceType & {isOwned: boolean}) => {
+                device.isOwned = true;
+                if( !this.selectedDevices.includes(parseInt(''+ device.id)) ) {
+                    this.selectedDevices.push(parseInt(''+ device.id));
+                }
+            })
+        ;
     }
 
     protected confirmDeviceLinkedTimer() {
