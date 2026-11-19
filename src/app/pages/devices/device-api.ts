@@ -68,6 +68,11 @@ export class DeviceApiService {
         return this.http.post<DiscoveryResult>(`${this.baseUrl}/devices/discover`, {timeoutSeconds});
     }
 
+    // controllo di MAC e IP dei dispositivi nel Core (refreshMacIp), chiesto a ogni avvio o refresh della PWA
+    refreshMacIp(): Observable<unknown> {
+        return this.http.post<unknown>(`${this.baseUrl}/devices/addresses`, {});
+    }
+
     commissionMatter(payload: CommissionMatterRequest): Observable<CommissioningJob> {
         return this.http.post<CommissioningJob>(`${this.baseUrl}/devices/matter/commission`, payload);
     }
