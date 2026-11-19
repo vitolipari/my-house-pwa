@@ -16,8 +16,9 @@ export class DeviceStoreService {
     private readonly deviceApi = inject(DeviceApiService);
 
     readonly devices = signal<DeviceType[]>([]);
-    // ogni DeviceType arrivato dalla WebSocket, per le pagine che a ogni aggiornamento fanno qualcosa in più
-    readonly deviceUpdates = new Subject<DeviceType>();
+    // i valori di ogni dispositivo arrivati dalla WebSocket (id, stati, lastTime, valori, disponibilità, segnale,
+    // batteria), per le pagine che a ogni aggiornamento fanno qualcosa in più
+    readonly deviceUpdates = new Subject<Partial<DeviceType>>();
 
     private loading: Promise<DeviceType[]> | null = null;     // lettura dal Core, in corso o finita; null = da rifare
     private channel: WebSocket | null = null;
@@ -109,17 +110,17 @@ export class DeviceStoreService {
             }
         };
 
-        // dal Core arriva il DeviceType di un dispositivo che ha cambiato lo stato o il valore di un canale: prende il
-        // posto di quello con lo stesso id, poi passa alle pagine iscritte a deviceUpdates
+        // dal Core arrivano i valori di un dispositivo che ha cambiato lo stato o il valore di un canale: si uniscono a
+        // quello con lo stesso id, poi passano alle pagine iscritte a deviceUpdates
         channel.onmessage = (msg: MessageEvent) => {
 
             try {
-                let updatedDevice: DeviceType = JSON.parse(msg.data);
+                let updatedDevice: Partial<DeviceType> = JSON.parse(msg.data);
 
                 this.devices
                     .update((devices: DeviceType[]) => (
                         devices
-                            .map((device: DeviceType) => (device.id === updatedDevice.id) ? updatedDevice : device)
+                            .map((device: DeviceType) => (device.id === updatedDevice.id) ? {...device, ...updatedDevice} : device)
                     ))
                 ;
                 this.deviceUpdates.next(updatedDevice);

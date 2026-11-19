@@ -77,20 +77,23 @@ describe('DeviceStoreService', () => {
             });
     });
 
-    it('un messaggio della WebSocket sostituisce il dispositivo e arriva alle pagine iscritte', () => {
-        let received: DeviceType[] = [];
-        store.deviceUpdates.subscribe((device: DeviceType) => received.push(device));
+    it('i valori arrivati dalla WebSocket si uniscono al dispositivo e arrivano alle pagine iscritte', () => {
+        let received: Partial<DeviceType>[] = [];
+        store.deviceUpdates.subscribe((device: Partial<DeviceType>) => received.push(device));
 
         let loading: Promise<DeviceType[]> = store.loadDevices();
         httpMock.expectOne('/api/core/devices').flush(DEVICES);
 
         return loading
             .then(() => {
-                currentChannel(store).onmessage!({data: JSON.stringify({id: 2, name: 'Presa', status: [0]})});
+                currentChannel(store).onmessage!({data: JSON.stringify({id: 2, status: [0], lastTime: [1795000000000]})});
 
                 expect(store.devices()[0].status).toEqual([0]);
                 expect(store.devices()[1].status).toEqual([0]);
-                expect(received.map((device: DeviceType) => device.id)).toEqual([2]);
+                expect(store.devices()[1].lastTime).toEqual([1795000000000]);
+                // i campi che il messaggio non porta restano quelli della lista
+                expect(store.devices()[1].name).toBe('Presa');
+                expect(received.map((device: Partial<DeviceType>) => device.id)).toEqual([2]);
             })
             .catch((e: any) => {
                 console.log('errore nel test DeviceStoreService: messaggio della WebSocket');

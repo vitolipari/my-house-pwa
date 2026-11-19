@@ -192,12 +192,12 @@ export class RoomPage implements OnInit, OnDestroy {
 
     ngOnInit(): void {
 
-        // il DeviceType di un dispositivo che ha cambiato lo stato o il valore di un canale arriva dalla WebSocket unica
-        // dell'app (DeviceStoreService): prende il posto di quello della stanza con lo stesso id
-        this.deviceUpdates = this.deviceStore.deviceUpdates.subscribe((updatedDevice: DeviceType) => {
+        // i valori di un dispositivo che ha cambiato lo stato o il valore di un canale arrivano dalla WebSocket unica
+        // dell'app (DeviceStoreService): si uniscono a quello della stanza con lo stesso id
+        this.deviceUpdates = this.deviceStore.deviceUpdates.subscribe((updatedDevice: Partial<DeviceType>) => {
             this.room.devices =
                 (this.room.devices || [])
-                    .map((device: DeviceType) => (device.id === updatedDevice.id) ? updatedDevice : device)
+                    .map((device: DeviceType) => (device.id === updatedDevice.id) ? {...device, ...updatedDevice} : device)
             ;
             this.cdr.markForCheck();
         });

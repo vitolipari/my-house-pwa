@@ -463,20 +463,28 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
 
                 console.log(this.device());
                 this.deviceWaiting.set(false);
+
+                // configurazione e stato del dispositivo, per i dettagli tecnici: la lista non li porta, arrivano dalla
+                // cache del Core e si uniscono al dispositivo già mostrato
+                firstValueFrom(this.deviceApi.getDevice(this.search.device))
+                    .then((fullDevice: DeviceType) => {
+                        this.device.update((current: DeviceType) => ({...current, hardware: fullDevice.hardware}));
+                    })
+                    .catch((e: any) => {
+                        console.log('errore in ngOnInit di DeviceDetailsPage: configurazione e stato del dispositivo');
+                        console.log(e);
+                    })
+                ;
             }
             else {
                 // device non passato da navigazione
 
                 if( !!this.route.snapshot.params['id'] ) {
 
-                    // il dispositivo dall'elenco condiviso: letto dal Core solo se nessuna pagina l'ha ancora chiesto
-                    this.deviceStore.loadDevices()
-                        .then((devices: DeviceType[]) => {
-                            let device: DeviceType[] =
-                                devices
-                                    .filter((d: DeviceType) => parseInt(''+ d.id) === parseInt(''+ this.deviceId))
-                            ;
-                            this.device.set( device.reduce(getLastElementOr, null as unknown as DeviceType) );
+                    // il dispositivo completo dalla cache del Core
+                    firstValueFrom(this.deviceApi.getDevice(parseInt(''+ this.deviceId)))
+                        .then((device: DeviceType) => {
+                            this.device.set( device );
                             this.search.device = parseInt(''+ this.device().id);
                             this.openWebSocketComunication();
                             this.setUpSetValueStatus();
@@ -485,7 +493,7 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
                             this.deviceWaiting.set(false);
                         })
                         .catch((e: any) => {
-                            console.log('errore in ngOnInit di DeviceDetailsPage: dispositivo dall\'elenco condiviso');
+                            console.log('errore in ngOnInit di DeviceDetailsPage: dispositivo completo aperto da URL');
                             console.log(e);
                             this.deviceWaiting.set(false);
                         })
@@ -863,12 +871,13 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
 
     private openWebSocketComunication() {
 
-        // il DeviceType di un dispositivo che ha cambiato lo stato o il valore di un canale arriva dalla WebSocket unica
-        // dell'app (DeviceStoreService): se è quello della pagina ne prende il posto
-        this.deviceUpdates = this.deviceStore.deviceUpdates.subscribe((device: DeviceType) => {
+        // i valori di un dispositivo che ha cambiato lo stato o il valore di un canale arrivano dalla WebSocket unica
+        // dell'app (DeviceStoreService): se è quello della pagina si uniscono al suo DeviceType
+        this.deviceUpdates = this.deviceStore.deviceUpdates.subscribe((update: Partial<DeviceType>) => {
 
             try {
-                if(parseInt(''+ device.id) === parseInt(''+ this.device().id)) {
+                if(parseInt(''+ update.id) === parseInt(''+ this.device().id)) {
+                    let device: DeviceType = {...this.device(), ...update};
                     console.log('dati ricevuti');
                     console.log('status di luminosita al acanale '+ device.channel.indexOf('brightness') );
                     console.log( device.status[ device.channel.indexOf('brightness') ] );

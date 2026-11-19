@@ -89,6 +89,11 @@ export class DeviceApiService {
         return this.http.delete<MatterBridgeStatus>(`${this.baseUrl}/devices/matter/bridge/fabric/${fabricIndex}`);
     }
 
+    // dispositivo completo, con configurazione e stato del dispositivo, dalla cache del Core (la lista non li porta)
+    getDevice(deviceId: number | string): Observable<DeviceType> {
+        return this.http.get<DeviceType>(`${this.baseUrl}/device/${deviceId}`);
+    }
+
     loadDeviceStatus(deviceId: number | string): Observable<DeviceType> {
         return this.http.get<DeviceType>(`${this.baseUrl}/device/${deviceId}/status`);
     }

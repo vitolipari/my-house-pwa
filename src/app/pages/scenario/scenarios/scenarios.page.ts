@@ -64,10 +64,10 @@ export class ScenariosPage implements OnInit, OnDestroy {
         this.searchScenarios();
         this.loadRunningScenarios();
 
-        // dalla WebSocket unica dell'app (DeviceStoreService) arriva il DeviceType di un dispositivo che ha cambiato lo
+        // dalla WebSocket unica dell'app (DeviceStoreService) arrivano i valori di un dispositivo che ha cambiato lo
         // stato o il valore di un canale. L'ingresso e l'uscita di uno scenario cambiano sempre un dispositivo che ne fa
         // parte: se il dispositivo è in un evento o in un'azione di uno scenario della lista, gli scenari attivi si rileggono
-        this.deviceUpdates = this.deviceStore.deviceUpdates.subscribe((device: DeviceType) => {
+        this.deviceUpdates = this.deviceStore.deviceUpdates.subscribe((device: Partial<DeviceType>) => {
 
             let deviceID: number = parseInt(''+ device.id);
 
