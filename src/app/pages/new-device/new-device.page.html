@@ -443,6 +443,21 @@
                                                 <div class="heartbeat-flash">scanning...</div>
                                             </div>
                                         }
+                                        @else if( devicesError() ) {
+                                            <!-- scansione fallita: senza questo blocco restava un elenco vuoto -->
+                                            <p class="taxonomy-error">{{ devicesError() }}</p>
+                                            <div class="base-text-style">
+                                                <p-button
+                                                    class="content-single-button-at-right"
+                                                    label="ripeti la scansione"
+                                                    type="button"
+                                                    [rounded]="true"
+                                                    [size]="'small'"
+                                                    [style]="{marginTop: '2rem'}"
+                                                    (click)="loadIpDevices()"
+                                                ></p-button>
+                                            </div>
+                                        }
                                         @else {
                                             <p-listbox
                                                 [options]="devices()"
@@ -727,6 +742,10 @@
                 <p class="base-text-style">
                     Se il sensore è nuovo, premi ora il suo pulsante: viene configurato appena si sveglia (entro 45 secondi).
                 </p>
+            }
+
+            @if( !!saveError() ) {
+                <p class="taxonomy-error" role="alert">{{ saveError() }}</p>
             }
 
             <div id="signup-button">

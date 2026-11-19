@@ -3,6 +3,7 @@ import {PageTitleComponent} from '../../components/page-title.component/page-tit
 import {firstValueFrom} from 'rxjs';
 import {DeviceType, ZoneType} from '../devices/devices.models';
 import {RoomsApiService} from './rooms-api';
+import {DeviceStoreService} from '../devices/device-store';
 import {Router} from '@angular/router';
 import {urlDecode} from '../../utils/string-utils';
 import {LongPressDirective} from '../../directives/long-press.directive';
@@ -37,6 +38,7 @@ export class RoomsPage implements OnInit {
 
     // services
     private readonly roomsApi = inject(RoomsApiService);
+    private readonly deviceStore = inject(DeviceStoreService);
     private readonly router = inject(Router);
     protected readonly inWaiting = signal<boolean>(false);
 
@@ -133,6 +135,8 @@ export class RoomsPage implements OnInit {
         firstValueFrom(this.roomsApi.deleteRooms(this.selectedRooms))
             .then((rooms: ZoneType) => {
 
+                // i dispositivi delle stanze eliminate restano senza stanza: la lista condivisa si rilegge
+                this.deviceStore.forgetDevices();
                 this.router.navigate(['/'], {
                     queryParams: {
                         from: 'MULTI_DELETE_ROOMS'

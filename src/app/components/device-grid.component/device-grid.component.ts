@@ -45,7 +45,9 @@ export class DeviceGridComponent implements OnInit {
 
 
     ngOnInit(): void {
-        this.loadDevicesStatus();
+        // lo stato non si rilegge più blocco per blocco: la lista condivisa resta aggiornata dalla WebSocket, e per un
+        // dispositivo Tuya ogni rilettura costava due chiamate al cloud
+        // this.loadDevicesStatus();
 
         // this.darkModeService.isDarkMode()
     }
@@ -280,18 +282,11 @@ export class DeviceGridComponent implements OnInit {
             }
 
             // clima ------------------------------------------------------------------------------------------------------
-            if(
-                !!d.hardware
-                && !!d.hardware.config
-                && !!d.hardware.config.up_down_sweep
-            ) {
+            // la lista non porta hardware.config: le modalità sono nell'ordine del thing model del climatizzatore (come
+            // MODE_OPTIONS di climate-detail), ventola e alette sono già i valori dei loro canali
+            if( d.channel.includes('air_flow_vertical') ) {
 
-                let allModes = d.hardware.config.mode.range;                        // ["cold","hot","wet","wind","auto"],
-                let allWindSpeed = d.hardware.config.windspeed.range;               // ["strong","high","mid_high","mid","mid_low","low","mute","auto"],
-                let allUpDwonSpeed = d.hardware.config.up_down_sweep.range;         //  ["0","1","2","3"],
-                let allLeftRightSpeed = d.hardware.config.left_right_sweep.range;   //  ["0","1","2","3","4","5","6","7"]
-                let allAirQuality = d.hardware.config.airquality.range;             //  ["great","good","middle","bad","verybad","veryverybad"],
-                let humidity = d.hardware.status.humidity_current.value;
+                let allModes: string[] = ['cold', 'hot', 'wet', 'wind', 'auto'];
 
                 let allModeIconId = ['icon-424', 'manopola-regolazione', 'goccia-stella-rotante', 'icon-488', 'marker-1']; // l'icona icon-488 si può sostituire con Air
                 let allSpeedIcon = ['mute', 'low', 'mid_low', 'mid', 'mid_high', 'high', 'strong', 'auto'];
@@ -309,13 +304,13 @@ export class DeviceGridComponent implements OnInit {
                 ];
                 if((climaChannelIndexes[4] !== -1) && (climaChannelIndexes[6] !== -1) /*&& (climaChannelIndexes[7] !== -1)*/) {
 
-                    let mode = allModeIconId[d.hardware.config.mode.range.lastIndexOf( d.status[d.channel.lastIndexOf('mode')] )];
+                    let mode = allModeIconId[allModes.lastIndexOf( ''+ d.status[d.channel.lastIndexOf('mode')] )];
                     let targetTemperature = d.status[d.channel.lastIndexOf('target_temperature')];
                     let currentTemperature = d.status[d.channel.lastIndexOf('temperature')];
-                    let fanSpeed = d.hardware.config.windspeed.range[ d.hardware.config.windspeed.range.lastIndexOf( d.status[d.channel.lastIndexOf('fan')] ) ];
+                    let fanSpeed = d.status[d.channel.lastIndexOf('fan')];
 
-                    let airFlowVertical = d.hardware.config.up_down_sweep.range[ d.hardware.config.up_down_sweep.range.lastIndexOf( d.status[d.channel.lastIndexOf('air_flow_vertical')] ) ]
-                    let airFlowOrizontal = d.hardware.config.left_right_sweep.range[ d.hardware.config.left_right_sweep.range.lastIndexOf( d.status[d.channel.lastIndexOf('air_flow_horizontal')] ) ]
+                    let airFlowVertical = d.status[d.channel.lastIndexOf('air_flow_vertical')];
+                    let airFlowOrizontal = d.status[d.channel.lastIndexOf('air_flow_horizontal')];
 
                     let airFlowVerticalPosition = d.status[1 + d.channel.lastIndexOf('air_flow_vertical_position')];
                     let airFlowOrizontalPosition = d.status[1 + d.channel.lastIndexOf('air_flow_horizontal_position')];

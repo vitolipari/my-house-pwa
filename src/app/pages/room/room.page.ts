@@ -1,10 +1,10 @@
-import {ChangeDetectorRef, Component, computed, ElementRef, inject, OnInit, signal, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, computed, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
 import {PageTitleComponent} from '../../components/page-title.component/page-title.component';
 import {ActivatedRoute, Router} from '@angular/router';
 import {DeviceSmallType, DeviceType, isSensorDevice, VOID_ZONE, ZoneType} from '../devices/devices.models';
 import {PermissionService} from '../../services/permission.service';
-import {firstValueFrom} from 'rxjs';
-import {DeviceApiService} from '../devices/device-api';
+import {firstValueFrom, Subscription} from 'rxjs';
+import {DeviceStoreService} from '../devices/device-store';
 import {RoomsApiService} from '../rooms/rooms-api';
 import {getLastElementOr} from '../../utils/array-util';
 import {SwitcherComponent} from '../../components/switcher/switcher.component';
@@ -38,7 +38,7 @@ import {DeleteConfirmComponent} from '../../components/delete-confirm-component/
   templateUrl: './room.page.html',
   styleUrl: './room.page.css',
 })
-export class RoomPage implements OnInit {
+export class RoomPage implements OnInit, OnDestroy {
 
 
     // selectedDevices: DeviceType[] = [];
@@ -48,7 +48,8 @@ export class RoomPage implements OnInit {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     private readonly permissionService = inject(PermissionService);
-    private readonly deviceApi = inject(DeviceApiService);
+    private readonly deviceStore = inject(DeviceStoreService);
+    private deviceUpdates: Subscription | null = null;      // aggiornamenti dalla WebSocket unica dell'app
     private readonly roomsApi = inject(RoomsApiService);
     private readonly fb = inject(FormBuilder);
 
@@ -136,7 +137,7 @@ export class RoomPage implements OnInit {
 
                         })
                         .catch((error: unknown) => {
-                            console.log('errore in loadRooms');
+                            console.log('errore in RoomPage: lettura della stanza da URL');
                             console.log(error);
                         });
                 }
@@ -174,7 +175,7 @@ export class RoomPage implements OnInit {
 
                     })
                     .catch((error: unknown) => {
-                        console.log('errore in loadRooms');
+                        console.log('errore in RoomPage: dispositivi della stanza arrivata dalla navigazione');
                         console.log(error);
                     });
 
@@ -191,6 +192,15 @@ export class RoomPage implements OnInit {
 
     ngOnInit(): void {
 
+        // i valori di un dispositivo che ha cambiato lo stato o il valore di un canale arrivano dalla WebSocket unica
+        // dell'app (DeviceStoreService): si uniscono a quello della stanza con lo stesso id
+        this.deviceUpdates = this.deviceStore.deviceUpdates.subscribe((updatedDevice: Partial<DeviceType>) => {
+            this.room.devices =
+                (this.room.devices || [])
+                    .map((device: DeviceType) => (device.id === updatedDevice.id) ? {...device, ...updatedDevice} : device)
+            ;
+            this.cdr.markForCheck();
+        });
 
         // this.devicesLoading.set(true);
 
@@ -218,10 +228,15 @@ export class RoomPage implements OnInit {
             console.log(this.room);
             console.log(this.room.device_list);
             console.log(this.room.device_list.split(','));
+            // i dispositivi della stanza dall'elenco condiviso, invece di una ricerca al Core
             return (
-                firstValueFrom(this.deviceApi.search({ids: this.room.device_list.split(',')}))
-                    .then((devices: DeviceType[]) => {
+                this.deviceStore.loadDevices()
+                    .then((allDevices: DeviceType[]) => {
 
+                        let devices: DeviceType[] =
+                            allDevices
+                                .filter((device: DeviceType) => this.room.device_list.split(',').includes(''+ device.id))
+                        ;
                         console.log('device cercati');
                         console.log(devices);
 
@@ -249,7 +264,7 @@ export class RoomPage implements OnInit {
         this.isDeviceWaiting.set(true);
 
         return (
-            firstValueFrom(this.deviceApi.list())
+            this.deviceStore.loadDevices()
                 .then((devices: DeviceType[]) => {
 
                     console.log('device tutti');
@@ -267,7 +282,7 @@ export class RoomPage implements OnInit {
                     return this.availableDevices;
                 })
                 .catch((error: unknown) => {
-                    console.log('errore in loadAvailableDevices del nuovo gruppo');
+                    console.log('errore in loadAvailableDevices della pagina della stanza');
                     console.log(error);
 
                     this.isDeviceWaiting.set(false);
@@ -349,6 +364,8 @@ export class RoomPage implements OnInit {
         firstValueFrom(this.roomsApi.editRoom( this.room ))
             .then((room: ZoneType) => {
 
+                // dispositivi entrati o usciti dalla stanza: la lista condivisa si rilegge alla prossima pagina che la chiede
+                this.deviceStore.forgetDevices();
                 this.room = {...this.room, ...room};
 
                 this.router.navigate(['rooms-page'], {
@@ -433,12 +450,16 @@ export class RoomPage implements OnInit {
         this.isInDeleteRoomInWaiting.update(() => true);
         firstValueFrom(this.roomsApi.deleteRooms([this.room]))
             .then(() => {
+                // i dispositivi della stanza restano senza stanza: la lista condivisa si rilegge
+                this.deviceStore.forgetDevices();
                 this.isInDeleteRoomInWaiting.update(() => false);
                 this.router.navigate(['/rooms-page']);
                 // window.location.reload();
             })
             .catch((e) => {
+                console.log('errore in confirmDeleteRoom: eliminazione della stanza');
                 console.log(e);
+                this.isInDeleteRoomInWaiting.update(() => false);
             })
         ;
     }
@@ -449,6 +470,8 @@ export class RoomPage implements OnInit {
 
         return firstValueFrom(this.roomsApi.newRoom(this.room))
             .then((newId: number) => {
+                // i dispositivi scelti entrano nella stanza nuova: la lista condivisa si rilegge
+                this.deviceStore.forgetDevices();
                 this.router.navigate(
                     ['/rooms-page'],
                     {
@@ -472,7 +495,18 @@ export class RoomPage implements OnInit {
         this.openConfirmDeletion = true;
     }
     // per <delete-confirm-component>: arrow function, così il componente le chiama senza perdere il this
-    protected readonly deleteRoomByIDs = (ids: number[]) => this.roomsApi.deleteRooms([this.room]);
+    // la lista condivisa si rilegge alla prossima pagina che la chiede, anche se l'eliminazione non riesce
+    protected readonly deleteRoomByIDs = (ids: number[]) => {
+        this.deviceStore.forgetDevices();
+        return this.roomsApi.deleteRooms([this.room]);
+    };
     protected readonly exitToRooms = () => this.router.navigate(['/rooms-page']);
+
+    // uscendo dalla pagina l'iscrizione si chiude, altrimenti a ogni nuova apertura se ne aggiungerebbe un'altra
+    ngOnDestroy(): void {
+        if( !!this.deviceUpdates ) {
+            this.deviceUpdates.unsubscribe();
+        }
+    }
 
 }

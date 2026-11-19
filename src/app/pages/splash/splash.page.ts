@@ -63,12 +63,13 @@ export class SplashPage implements OnInit {
 
                 console.log('fine splash screen');
 
+                // replaceUrl: la splash non resta nella cronologia, così lo swipe indietro non ci torna
                 if (this.authService.isAuthenticated()) {
                     console.log('vado a dashboard');
-                    this.router.navigate(['/dashboard']);
+                    this.router.navigate(['/dashboard'], { replaceUrl: true });
                 } else {
                     console.log('vado a signin');
-                    this.router.navigate(['/access/sign-in']);
+                    this.router.navigate(['/access/sign-in'], { replaceUrl: true });
                 }
 
             })
@@ -78,18 +79,19 @@ export class SplashPage implements OnInit {
 
                 if( e === 'no-token' ) {
                     this.authService.clearLoginData();
-                    this.router.navigate(['/access/sign-in']);
+                    this.router.navigate(['/access/sign-in'], { replaceUrl: true });
                 }
                 else {
 
                     if( e === 'user by token NON esistente!!' ) {
                         this.authService.clearLoginData();
-                        this.router.navigate(['/access/sign-in']);
+                        this.router.navigate(['/access/sign-in'], { replaceUrl: true });
                     }
                     else {
                         this.router.navigate(
                             ['/error'],
                             {
+                                replaceUrl: true,
                                 state: {
                                     code: 'SPLASH_INIT_ERROR',
                                     message: e?.message || 'Errore durante inizializzazione',

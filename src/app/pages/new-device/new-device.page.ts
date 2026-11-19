@@ -6,6 +6,7 @@ import {PageTitleComponent} from '../../components/page-title.component/page-tit
 import {Accordion, AccordionContent, AccordionHeader, AccordionModule, AccordionPanel} from 'primeng/accordion';
 
 import {DeviceApiService} from '../devices/device-api';
+import {DeviceStoreService} from '../devices/device-store';
 import {emoj} from '../../utils/string-utils';
 import {RadioButton, RadioButtonModule} from 'primeng/radiobutton';
 import {getLastElementOr} from '../../utils/array-util';
@@ -865,6 +866,8 @@ export class NewDevicePage implements OnInit {
     readonly newDeviceDataTreePanelOpen = signal<boolean>(false);
     readonly isCopied = signal<boolean>(false);
     readonly inWaiting = signal<boolean>(false);
+    // messaggio del salvataggio non riuscito, mostrato sopra il pulsante conferma
+    readonly saveError = signal<string>('');
     readonly rooms = signal<ZoneType[]>([]);
     readonly isRoomsInWaiting = signal<boolean>(false);
     selectedRoom!: ZoneType;
@@ -872,6 +875,7 @@ export class NewDevicePage implements OnInit {
 
     private readonly fb = inject(FormBuilder);
     private readonly deviceApi = inject(DeviceApiService);
+    private readonly deviceStore = inject(DeviceStoreService);
     private readonly api = inject<ApiUrlService>(ApiUrlService);
     private router = inject(Router);
 
@@ -1704,6 +1708,7 @@ export class NewDevicePage implements OnInit {
 
     addNewDevice() {
         this.inWaiting.set(true);
+        this.saveError.set('');
 
         firstValueFrom(this.api.addNewDevice(this.newDevice()))
             .then((data: any) => {
@@ -1711,6 +1716,8 @@ export class NewDevicePage implements OnInit {
                 console.log( data );
                 this.newDevice.set( data );
                 this.inWaiting.set(false);
+                // dispositivo nuovo: la pagina dei dispositivi rilegge la lista condivisa
+                this.deviceStore.forgetDevices();
                 this.router.navigate(['/devices-page']);
 
             })
@@ -1719,7 +1726,12 @@ export class NewDevicePage implements OnInit {
                 console.log(e);
                 this.inWaiting.set(false);
 
-                // TODO messaggio di errore
+                // il Core manda {error: '...'} (già registrato, non raggiungibile, Gen1 da svegliare);
+                // senza, per esempio con la pagina di Nginx, il dispositivo potrebbe essere stato salvato lo stesso
+                this.saveError.set(
+                    e?.error
+                    ?? 'Salvataggio non riuscito: prima di riprovare controlla nell\'elenco dei dispositivi se è stato aggiunto'
+                );
             })
 
 
