@@ -211,6 +211,7 @@ export class ScenarioPage implements OnInit {
     readonly pathVariables = this.route.snapshot.params; // oggetto con i pathVariables
     readonly routeParamater = this.route.snapshot.queryParams; // oggetto con la query string
     readonly navigationData = this.router.currentNavigation()?.extras.state;    // passato dalla navigazione
+    protected readonly emoj = emoj;
 
 
     @Output() menuToggle = new EventEmitter<boolean>();
@@ -990,5 +991,5 @@ export class ScenarioPage implements OnInit {
         this.scenario.isHolidays = !!event;
     }
 
-    protected readonly emoj = emoj;
+
 }

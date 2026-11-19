@@ -80,6 +80,9 @@
             </div>
 
             <!-- giorni settimana -->
+            <div class="base-text-style row-field">
+                <label for="scenarioName">Giorni della settimana</label>
+            </div>
             <div class="block-row" style="width: 100%; justify-content: space-evenly; margin-bottom: 2rem;">
                 <div class="tag {{ !!scenario.weekDays[0] ? 'enabled' : 'disabled' }}">L</div>
                 <div class="tag {{ !!scenario.weekDays[1] ? 'enabled' : 'disabled' }}">Ma</div>
@@ -92,7 +95,7 @@
 
 
             <!-- giorni festivi -->
-            <div>
+            <div class="base-text-style row-field">
                 <label for="scenarioName">Giorni Festivi</label>
                 <div class="has-holidays {{ !!scenario.isHolidays ? 'active': '' }}">{{ emoj('party_popper') }}</div>
             </div>
@@ -318,6 +321,9 @@
         </div>
 
         <!-- giorni settimana -->
+        <div class="base-text-style row-field">
+            <label for="scenarioName">Giorni della settimana</label>
+        </div>
         <div class="block-row" style="width: 100%; justify-content: space-evenly; margin-bottom: 2rem;">
             <div class="tag {{ !!scenario.weekDays[0] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(0)">L</div>
             <div class="tag {{ !!scenario.weekDays[1] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(1)">Ma</div>
@@ -330,7 +336,8 @@
 
 
         <!-- giorni festivi -->
-        <div>
+        <div class="base-text-style row-field">
+            <label for="scenarioName">Giorni Festivi</label>
             <switcher-component
                 [isReadOnly]="false"
                 [check]="!!scenario.isHolidays"
@@ -759,7 +766,7 @@
                                                 id="number-value-{{ device.id }}"
                                                 aria-describedby="name-help"
                                                 placeholder="valore"
-                                                class="timed-action-input"
+                                                class="fixed-value-input"
                                                 style="max-width: 15rem; padding: 0.5rem;"
                                                 [(ngModel)]="device.value"
                                                 [type]="'number'"
@@ -773,7 +780,7 @@
                                                 id="text-value-{{ device.id }}"
                                                 aria-describedby="name-help"
                                                 placeholder="valore"
-                                                class="timed-action-input"
+                                                class="fixed-value-input"
                                                 style="max-width: 15rem; padding: 0.5rem;"
                                                 [(ngModel)]="device.value"
                                             />

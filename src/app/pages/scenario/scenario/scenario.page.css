@@ -153,7 +153,7 @@
     align-self: center;
     align-items: center;
     width: 100%;
-
+    /*margin-top: 2rem;*/
 }
 
 .block-row > div.tag {
@@ -180,4 +180,16 @@
     background: var(--color-background-3) !important;
     border-color: var(--color-background-2) !important;
     color: var(--p-inputtext-color);
+}
+
+.sub-row,
+.sub-row > *,
+.week-days,
+.week-days,
+.has-holidays,
+.has-holidays.active
+{
+    font-size: var(--tiny-font-size);
+    color: var(--color-text-1);
+    font-family: var(--page-font);
 }
