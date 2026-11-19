@@ -51,6 +51,57 @@
 
             </div>
 
+            <!-- range temporale -->
+            <div>
+                <div class="base-text-style row-field">
+                    <label for="scenarioName">Orario Inizio</label>
+                    <input
+                        pInputText
+                        id="scenarioBeginTime"
+                        placeholder="HH:MM"
+                        class="fixed-value-input"
+                        [(ngModel)]="scenario.beginTime"
+                        [disabled]="true"
+                        [readonly]="true"
+                    />
+                </div>
+                <div class="base-text-style row-field">
+                    <label for="scenarioName">Orario Fine</label>
+                    <input
+                        pInputText
+                        id="scenarioEndTime"
+                        placeholder="HH:MM"
+                        class="fixed-value-input"
+                        [(ngModel)]="scenario.endTime"
+                        [disabled]="true"
+                        [readonly]="true"
+                    />
+                </div>
+            </div>
+
+            <!-- giorni settimana -->
+            <div class="base-text-style row-field">
+                <label for="scenarioName">Giorni della settimana</label>
+            </div>
+            <div class="block-row" style="width: 100%; justify-content: space-evenly; margin-bottom: 2rem;">
+                <div class="tag {{ !!scenario.weekDays[0] ? 'enabled' : 'disabled' }}">L</div>
+                <div class="tag {{ !!scenario.weekDays[1] ? 'enabled' : 'disabled' }}">Ma</div>
+                <div class="tag {{ !!scenario.weekDays[2] ? 'enabled' : 'disabled' }}">Me</div>
+                <div class="tag {{ !!scenario.weekDays[3] ? 'enabled' : 'disabled' }}">G</div>
+                <div class="tag {{ !!scenario.weekDays[4] ? 'enabled' : 'disabled' }}">V</div>
+                <div class="tag {{ !!scenario.weekDays[5] ? 'enabled' : 'disabled' }}">S</div>
+                <div class="tag {{ !!scenario.weekDays[6] ? 'enabled' : 'disabled' }}">D</div>
+            </div>
+
+
+            <!-- giorni festivi -->
+            <div class="base-text-style row-field">
+                <label for="scenarioName">Giorni Festivi</label>
+                <div class="has-holidays {{ !!scenario.isHolidays ? 'active': '' }}">{{ emoj('party_popper') }}</div>
+            </div>
+
+
+
             @if( !scenario.isImmediate ) {
 
                 <div class="base-text-style" style="margin-top: 2rem; font-weight: bold;">Eventi</div>
@@ -242,6 +293,56 @@
 
 
             </div>
+        </div>
+
+
+        <!-- range temporale -->
+        <div>
+            <div class="base-text-style row-field">
+                <label for="scenarioName">Orario Inizio</label>
+                <input
+                    pInputText
+                    id="scenarioBeginTime"
+                    placeholder="HH:MM"
+                    class="fixed-value-input"
+                    [(ngModel)]="scenario.beginTime"
+                />
+            </div>
+            <div class="base-text-style row-field">
+                <label for="scenarioName">Orario Fine</label>
+                <input
+                    pInputText
+                    id="scenarioEndTime"
+                    placeholder="HH:MM"
+                    class="fixed-value-input"
+                    [(ngModel)]="scenario.endTime"
+                />
+            </div>
+        </div>
+
+        <!-- giorni settimana -->
+        <div class="base-text-style row-field">
+            <label for="scenarioName">Giorni della settimana</label>
+        </div>
+        <div class="block-row" style="width: 100%; justify-content: space-evenly; margin-bottom: 2rem;">
+            <div class="tag {{ !!scenario.weekDays[0] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(0)">L</div>
+            <div class="tag {{ !!scenario.weekDays[1] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(1)">Ma</div>
+            <div class="tag {{ !!scenario.weekDays[2] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(2)">Me</div>
+            <div class="tag {{ !!scenario.weekDays[3] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(3)">G</div>
+            <div class="tag {{ !!scenario.weekDays[4] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(4)">V</div>
+            <div class="tag {{ !!scenario.weekDays[5] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(5)">S</div>
+            <div class="tag {{ !!scenario.weekDays[6] ? 'enabled' : 'disabled' }}" (click)="operateWeekDay(6)">D</div>
+        </div>
+
+
+        <!-- giorni festivi -->
+        <div class="base-text-style row-field">
+            <label for="scenarioName">Giorni Festivi</label>
+            <switcher-component
+                [isReadOnly]="false"
+                [check]="!!scenario.isHolidays"
+                (toggle)="setHolidays($event)"
+            ></switcher-component>
         </div>
 
         <div>

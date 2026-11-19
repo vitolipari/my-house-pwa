@@ -229,6 +229,11 @@ export class ScenariosPage implements OnInit, OnDestroy {
             description: scenario.description,
             enabled: !!event,
             isImmediate: scenario.isImmediate,
+            // orario e giorni invariati: senza, la PUT dell'abilitazione fallisce
+            isHolidays: scenario.isHolidays,
+            weekDays: scenario.weekDays,
+            beginTime: scenario.beginTime,
+            endTime: scenario.endTime,
             triggers:
                 scenario.triggers
                     .map((trigger: any) => ({

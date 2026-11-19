@@ -370,6 +370,17 @@
             }
             @else {
 
+                @if( groups.length > 0 ) {
+                    <div class="group-row">
+                        @for( group of groups; track group.id ) {
+                            <div
+                                class="group-chip"
+                                (click)="addDeviceGroups(group)"
+                            >{{ group.name }}</div>
+                        }
+                    </div>
+                }
+
                 @for( device of devices; track device.id ) {
 
                     @if( (''+ device.category.id).trim().toLowerCase().indexOf('actuator') !== -1 ) {

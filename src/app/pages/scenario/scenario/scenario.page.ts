@@ -133,6 +133,11 @@ export class ScenarioPage implements OnInit {
     }
 
     scenario: ScenarioType = {
+        beginTime: "00:00",
+        // endTime escluso: "24:00" è la fine della giornata, come nei timer
+        endTime: "24:00",
+        isHolidays: true,
+        weekDays: [true, true, true, true, true, true, true],
         id: 0,
         name: '',
         description: '',
@@ -206,6 +211,7 @@ export class ScenarioPage implements OnInit {
     readonly pathVariables = this.route.snapshot.params; // oggetto con i pathVariables
     readonly routeParamater = this.route.snapshot.queryParams; // oggetto con la query string
     readonly navigationData = this.router.currentNavigation()?.extras.state;    // passato dalla navigazione
+    protected readonly emoj = emoj;
 
 
     @Output() menuToggle = new EventEmitter<boolean>();
@@ -976,4 +982,14 @@ export class ScenarioPage implements OnInit {
     protected delete() {
         this.openConfirmDeletion = true;
     }
+
+    protected operateWeekDay(number: number) {
+        this.scenario.weekDays[number] = !this.scenario.weekDays[number];
+    }
+
+    protected setHolidays(event: boolean) {
+        this.scenario.isHolidays = !!event;
+    }
+
+
 }

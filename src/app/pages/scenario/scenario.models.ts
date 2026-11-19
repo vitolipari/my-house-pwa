@@ -1,5 +1,9 @@
 
 export type ScenarioType = {
+    isHolidays: boolean;
+    weekDays: boolean[];
+    endTime: string;
+    beginTime: string;
     id: number;
     name: string;
     description: string;
@@ -76,6 +80,11 @@ export type ScenarioDTOType = {
     "description": string;
     "enabled": boolean;
     "isImmediate": boolean;
+    // orario e giorni (Vito, 19/11): weekDays con indice 0 = lunedì, beginTime compreso ed endTime escluso in HH:MM
+    "isHolidays": boolean;
+    "weekDays": boolean[];
+    "beginTime": string;
+    "endTime": string;
     "triggers":
         {
             "device": number;

@@ -119,6 +119,26 @@ SPAN.p-slider-handle,
 }
 
 
+/* gruppi nel pannello dei dispositivi del timer: un tocco spunta i loro attuatori */
+.group-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    width: 100%;
+    margin-bottom: 0.6rem;
+}
+
+.group-chip {
+    cursor: pointer;
+    font-family: var(--page-font);
+    font-size: var(--main-font-size);
+    color: var(--color-text-2);
+    background: var(--color-background-3);
+    border-radius: 100px;
+    padding: 0.1rem 1rem;
+}
+
 .device-row {
     display: flex;
     flex-direction: row;
