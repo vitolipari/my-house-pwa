@@ -23,7 +23,7 @@ import {Drawer} from 'primeng/drawer';
 import {AnelloGiornata} from '../../../components/anello-giornata/anello-giornata';
 import {DatePipe, SlicePipe} from '@angular/common';
 import {DeviceBlockComponent} from '../../../components/device-block/device-block.component/device-block.component';
-import {DeviceApiService} from '../../devices/device-api';
+import {DeviceStoreService} from '../../devices/device-store';
 import {Checkbox, CheckboxChangeEvent} from 'primeng/checkbox';
 import {GroupsApiService} from '../../groups/groups-api';
 import {RadioButton} from 'primeng/radiobutton';
@@ -111,7 +111,7 @@ export class NewTimerPage {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     private readonly permissionService = inject(PermissionService);
-    private readonly deviceApi = inject(DeviceApiService);
+    private readonly deviceStore = inject(DeviceStoreService);
     private readonly groupsApi = inject(GroupsApiService);
 
 
@@ -493,7 +493,7 @@ export class NewTimerPage {
         this.isDeviceWaiting.set(true);
 
         return (
-            firstValueFrom(this.deviceApi.list())
+            this.deviceStore.loadDevices()
                 .then((devices: DeviceType[]) => {
                     this.devices =
                         devices
@@ -521,7 +521,7 @@ export class NewTimerPage {
                     return devices;
                 })
                 .catch((error: unknown) => {
-                    console.log('errore in loadDevices del nuovo gruppo');
+                    console.log('errore in loadDevices della pagina del timer');
                     console.log(error);
 
                     this.isDeviceWaiting.set(false);

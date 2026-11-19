@@ -1,5 +1,5 @@
 import {CommonModule, formatDate} from '@angular/common';
-import {Component, computed, inject, ModelSignal, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, ModelSignal, OnInit, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {firstValueFrom} from 'rxjs';
 import {
@@ -9,6 +9,7 @@ import {
 } from './devices.models';
 import {AuthService} from '../../services/auth';
 import {DeviceApiService} from './device-api';
+import {DeviceStoreService} from './device-store';
 import {UserBlockComponent} from "../../components/user-block.component/user-block.component";
 import {ApiUrlService} from '../../services/api-url-service';
 import {
@@ -58,7 +59,7 @@ export const DEVICE_STATUS_MAX_AGE_MS = 60_000;
     templateUrl: './devices.page.html',
     styleUrls: ['../../../page.css', './devices.page.css']
 })
-export class DevicesPage implements OnInit, OnDestroy {
+export class DevicesPage implements OnInit {
 
 
     isInWaiting = signal(true);
@@ -67,11 +68,12 @@ export class DevicesPage implements OnInit, OnDestroy {
     deviceDataTreePanelOpen = signal<DeviceType | null>(null);
     isCopied = signal<boolean>(false);
     ipDevices: NetworkIdentity[] = [];
-    readonly devices = signal<DeviceType[]>([]);
+    private readonly deviceStore = inject(DeviceStoreService);
+    // elenco condiviso da tutte le pagine: letto una volta e aggiornato dall'unica WebSocket dell'app
+    readonly devices = this.deviceStore.devices;
     // readonly devicesInList = signal<DeviceSmallType[]>([]);
     readonly devicesLoading = signal(true);
     readonly devicesError = signal<string | null>(null);
-    private channel: WebSocket | null = null;     // WebSocket con il Core, aperta in ngOnInit e chiusa in ngOnDestroy
     // readonly isDeviceStatusInWaiting = signal<{ id: number | string; inWaiting: boolean }[]>([{
     //     id: 0,
     //     inWaiting: false
@@ -189,48 +191,6 @@ export class DevicesPage implements OnInit, OnDestroy {
         void this.loadDevices();
         void this.loadGroups();
 
-        let protocol = (location.protocol === 'https:') ? 'wss://' : 'ws://';
-        let channel = new WebSocket(protocol + location.host + '/api/core/');
-        this.channel = channel;
-
-        channel.onopen = (ch: any) => {
-            // channel.send(JSON.stringify({
-            //     app: 'cashcode-vector',
-            //     from: notificId
-            // }))
-            console.log('canale websocket aperto');
-            console.log(ch);
-        }
-
-        // dal Core arriva il DeviceType di un dispositivo che ha cambiato lo stato o il valore di un canale: prende il
-        // posto di quello con lo stesso id, e le liste derivate da `devices` (stanze) si ricalcolano da sole
-        channel.onmessage = (msg: any) => {
-            // console.log('dati ricevuti');
-            // console.log( JSON.parse(msg.data) );
-
-            try {
-                let updatedDevice: DeviceType = JSON.parse(msg.data);
-
-                this.devices
-                    .update((devices: DeviceType[]) => (
-                        devices
-                            .map((device: DeviceType) => (device.id === updatedDevice.id) ? updatedDevice : device)
-                    ))
-                ;
-            }
-            catch (e: any) {
-                console.log('errore in onmessage di DevicesPage: messaggio della WebSocket non valido');
-                console.log(e);
-            }
-        }
-
-    }
-
-    // uscendo dalla pagina la WebSocket si chiude, altrimenti a ogni nuova apertura se ne aggiungerebbe un'altra
-    ngOnDestroy(): void {
-        if( this.channel ) {
-            this.channel.close();
-        }
     }
 
 
@@ -239,14 +199,12 @@ export class DevicesPage implements OnInit, OnDestroy {
         this.devicesLoading.set(true);
         this.devicesError.set(null);
 
-        return firstValueFrom(this.deviceApi.list())
+        // la lista la legge e la tiene DeviceStoreService; `deviceZones` è derivato da `devices`
+        return this.deviceStore.loadDevices()
             .then((devices: DeviceType[]) => {
 
                 console.log('devices arrivati');
                 console.log(devices);
-
-                // `deviceZones` è derivato da `devices`: non va costruito qui.
-                this.devices.set(devices);
 
 
 

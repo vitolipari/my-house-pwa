@@ -3,7 +3,7 @@ import {PageTitleComponent} from '../../components/page-title.component/page-tit
 import {ActivatedRoute, Router} from '@angular/router';
 import {DeviceSmallType, DeviceType, GroupType, isSensorDevice} from '../devices/devices.models';
 import {firstValueFrom} from 'rxjs';
-import {DeviceApiService} from '../devices/device-api';
+import {DeviceStoreService} from '../devices/device-store';
 import {GroupsApiService} from '../groups/groups-api';
 import {getLastElementOr} from '../../utils/array-util';
 import {emoj} from '../../utils/string-utils';
@@ -39,14 +39,14 @@ export class GroupPage implements OnInit {
 
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
-    private readonly deviceApi = inject(DeviceApiService);
+    private readonly deviceStore = inject(DeviceStoreService);
     private readonly groupsApi = inject(GroupsApiService);
 
     readonly group = signal<GroupType>({id: 0, name: '', description: '', device_list: ''});
     readonly isInEdit = signal<boolean>(false);
     readonly groupDataLoading = signal(false);
     readonly devicesLoading = signal(false);
-    readonly devices = signal<DeviceType[]>([]);   // tutti i dispositivi, per la modifica
+    readonly devices = this.deviceStore.devices;   // tutti i dispositivi, per la modifica, aggiornati dalla WebSocket
     readonly devicesError = signal<string | null>(null);
     protected readonly inWaiting = signal<boolean>(false);
 
@@ -101,10 +101,9 @@ export class GroupPage implements OnInit {
         this.devicesLoading.set(true);
         this.devicesError.set(null);
 
-        return firstValueFrom(this.deviceApi.list())
+        return this.deviceStore.loadDevices()
             .then((devices: DeviceType[]) => {
                 console.log('arrivati i dispositivi per la pagina del gruppo');
-                this.devices.set(devices);
                 this.devicesLoading.set(false);
             })
             .catch((error: unknown) => {

@@ -9,6 +9,7 @@ import {PageTitleComponent} from '../../components/page-title.component/page-tit
 import {DeleteConfirmComponent} from '../../components/delete-confirm-component/delete-confirm-component';
 import {PageMenu} from '../../components/page-menu/page-menu';
 import {DeviceApiService} from '../devices/device-api';
+import {DeviceStoreService} from '../devices/device-store';
 import {emoj} from '../../utils/string-utils';
 import {Slider, SliderSlideEndEvent} from 'primeng/slider';
 import {FormsModule} from '@angular/forms';
@@ -17,7 +18,7 @@ import {Checkbox} from 'primeng/checkbox';
 import {SwitcherComponent} from '../../components/switcher/switcher.component';
 import {italianHolidays} from '../../utils/time-utils';
 import moment from 'moment/moment';
-import {firstValueFrom} from 'rxjs';
+import {firstValueFrom, Subscription} from 'rxjs';
 import {ScenarioApiService} from '../scenario/scenario-api';
 import {ScenarioType} from '../scenario/scenario.models';
 import {flattenToKeyValue, getLastElementOr} from '../../utils/array-util';
@@ -149,7 +150,7 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
     protected scenarios: (ScenarioType & { running: boolean; })[] = [];
     protected groups: GroupType[] = [];
     protected room: ZoneType = null as unknown as ZoneType;
-    private webSocketChannel!: WebSocket;
+    private deviceUpdates: Subscription | null = null;      // aggiornamenti dalla WebSocket unica dell'app
 
     protected search: SearchHistoricDataType = {
         device: 0,
@@ -162,6 +163,7 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     private readonly deviceApi = inject(DeviceApiService);
+    private readonly deviceStore = inject(DeviceStoreService);
     readonly scenarioApi: ScenarioApiService = inject(ScenarioApiService);
     // `scenarios` non è un signal: dopo la rilettura degli scenari attivi la pagina va ridisegnata a mano
     private readonly cdr = inject(ChangeDetectorRef);
@@ -467,8 +469,13 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
 
                 if( !!this.route.snapshot.params['id'] ) {
 
-                    firstValueFrom(this.deviceApi.search({ids: [parseInt(''+ this.deviceId)] }))
-                        .then((device: DeviceType[]) => {
+                    // il dispositivo dall'elenco condiviso: letto dal Core solo se nessuna pagina l'ha ancora chiesto
+                    this.deviceStore.loadDevices()
+                        .then((devices: DeviceType[]) => {
+                            let device: DeviceType[] =
+                                devices
+                                    .filter((d: DeviceType) => parseInt(''+ d.id) === parseInt(''+ this.deviceId))
+                            ;
                             this.device.set( device.reduce(getLastElementOr, null as unknown as DeviceType) );
                             this.search.device = parseInt(''+ this.device().id);
                             this.openWebSocketComunication();
@@ -477,6 +484,12 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
                             console.log(this.device());
                             this.deviceWaiting.set(false);
                         })
+                        .catch((e: any) => {
+                            console.log('errore in ngOnInit di DeviceDetailsPage: dispositivo dall\'elenco condiviso');
+                            console.log(e);
+                            this.deviceWaiting.set(false);
+                        })
+                    ;
 
                 }
                 else {
@@ -488,49 +501,58 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
 
 
 
+        // ogni sezione chiude la sua attesa anche quando la lettura non riesce, altrimenti resta vuota
         firstValueFrom(this.deviceApi.getAllGroupByDeviceId(parseInt(''+ this.deviceId)))
             .then((groups: GroupType[]) => {
                 this.groups = groups;
                 this.groupWaiting.set(false);
             })
+            .catch((error: any) => {
+                console.log('errore in ngOnInit di DeviceDetailsPage: lettura dei gruppi del dispositivo');
+                console.log(error);
+                this.groupWaiting.set(false);
+            })
+        ;
 
         firstValueFrom(this.deviceApi.getRoomDeviceId(parseInt(''+ this.deviceId)))
             .then((room: ZoneType) => {
                 this.room = room;
                 this.roomWaiting.set(false);
             })
+            .catch((error: any) => {
+                console.log('errore in ngOnInit di DeviceDetailsPage: lettura della stanza del dispositivo');
+                console.log(error);
+                this.roomWaiting.set(false);
+            })
+        ;
 
 
         firstValueFrom(this.deviceApi.getAllScenarioByDeviceId(parseInt(''+ this.deviceId)))
-            .then((scenarios: ScenarioType[]) => {
+            .then((scenarios: ScenarioType[]) => Promise.all<[ScenarioType[], Promise<number[]>]>([
+                scenarios,
+                firstValueFrom(this.scenarioApi.getRunningScenarios())
+            ]))
+            .then(([scenarios, runningScenariosIDs]: [ScenarioType[], number[]]) => {
 
                 // this.scenarios = scenarios as (ScenarioType & { running: boolean; })[];
 
-                firstValueFrom(this.scenarioApi.getRunningScenarios())
-                    .then((runningScenariosIDs: number[]) => {
-
-                        this.scenarios =
-                            scenarios
-                                .map((sc: ScenarioType) => {
-                                    if( runningScenariosIDs.includes( sc.id ) ) {
-                                        (sc as (ScenarioType & { running: boolean; })).running = true;
-                                    }
-                                    return sc as (ScenarioType & { running: boolean; });
-                                })
-                        ;
-
-                        console.log(this.scenarios);
-                        this.scenariosWaiting.set(false);
-
-
-                    })
-                    .catch((error) => {
-                        console.log('errore in ngOnInit di DeviceDetailsPage: lettura degli scenari attivi');
-                        console.error(error);
-                        return null;
-                    })
+                this.scenarios =
+                    scenarios
+                        .map((sc: ScenarioType) => {
+                            if( runningScenariosIDs.includes( sc.id ) ) {
+                                (sc as (ScenarioType & { running: boolean; })).running = true;
+                            }
+                            return sc as (ScenarioType & { running: boolean; });
+                        })
                 ;
 
+                console.log(this.scenarios);
+                this.scenariosWaiting.set(false);
+            })
+            .catch((error: any) => {
+                console.log('errore in ngOnInit di DeviceDetailsPage: lettura degli scenari del dispositivo e di quelli attivi');
+                console.error(error);
+                this.scenariosWaiting.set(false);
             })
         ;
 
@@ -709,13 +731,19 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
         ;
     }
     // per <delete-confirm-component>: arrow function, così il componente le chiama senza perdere il this
-    protected readonly deleteDeviceByIDs = (ids: number[]) => this.deviceApi.deleteDevices([this.device().id]);
+    // la lista condivisa si rilegge alla prossima pagina che la chiede, anche se l'eliminazione non riesce
+    protected readonly deleteDeviceByIDs = (ids: number[]) => {
+        this.deviceStore.forgetDevices();
+        return this.deviceApi.deleteDevices([this.device().id]);
+    };
     protected readonly exit = () => this.router.navigate(['/devices-page']);
 
     // per <device-edit-component>: arrow function come exit. Il dispositivo arriva dalla cache del Core, con lo stato;
     // la stanza si rilegge con la rotta dell'apertura della pagina, che porta anche i suoi dispositivi
     protected readonly exitOnEdit = (device: DeviceType) => {
 
+        // nome, stanza e voce di catalogo cambiati: la lista condivisa si rilegge alla prossima pagina che la chiede
+        this.deviceStore.forgetDevices();
         this.device.set(device);
         this.openEditDevice = false;
         this.roomWaiting.set(true);
@@ -835,26 +863,16 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
 
     private openWebSocketComunication() {
 
-        let protocol = (location.protocol === 'https:') ? 'wss://' : 'ws://';
-        let channel = new WebSocket(protocol + location.host + '/api/core/');
-        this.webSocketChannel = channel;
-
-        channel.onopen = (ch: any) => {
-            console.log('canale websocket aperto');
-            console.log(ch);
-        }
-
-        // dal Core arriva il DeviceType di un dispositivo che ha cambiato lo stato o il valore di un canale: prende il
-        // posto di quello con lo stesso id, e le liste derivate da `devices` (stanze) si ricalcolano da sole
-        channel.onmessage = (msg: any) => {
+        // il DeviceType di un dispositivo che ha cambiato lo stato o il valore di un canale arriva dalla WebSocket unica
+        // dell'app (DeviceStoreService): se è quello della pagina ne prende il posto
+        this.deviceUpdates = this.deviceStore.deviceUpdates.subscribe((device: DeviceType) => {
 
             try {
-                let device: DeviceType = JSON.parse(msg.data);
                 if(parseInt(''+ device.id) === parseInt(''+ this.device().id)) {
                     console.log('dati ricevuti');
                     console.log('status di luminosita al acanale '+ device.channel.indexOf('brightness') );
                     console.log( device.status[ device.channel.indexOf('brightness') ] );
-                    console.log( JSON.parse(msg.data) );
+                    console.log( device );
                     this.device.set( device );
 
 
@@ -941,20 +959,20 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
                 }
             }
             catch (e: any) {
-                console.log('errore in onmessage di DeviceDetailsPage: messaggio della WebSocket non valido');
+                console.log('errore in DeviceDetailsPage: aggiornamento del dispositivo dalla WebSocket');
                 console.log(e);
             }
-        }
+        });
 
     }
 
-    // uscendo dalla pagina la WebSocket si chiude: aperta, a ogni aggiornamento del dispositivo continuerebbe a
+    // uscendo dalla pagina l'iscrizione si chiude: aperta, a ogni aggiornamento del dispositivo continuerebbe a
     // rileggere gli scenari attivi
 
 
     ngOnDestroy(): void {
-        if( !!this.webSocketChannel ) {
-            this.webSocketChannel.close();
+        if( !!this.deviceUpdates ) {
+            this.deviceUpdates.unsubscribe();
         }
     }
 

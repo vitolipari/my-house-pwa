@@ -4,7 +4,7 @@ import {FormsModule} from '@angular/forms';
 import {InputText} from 'primeng/inputtext';
 import {DeviceType, GroupType} from '../devices/devices.models';
 import {firstValueFrom} from 'rxjs';
-import {DeviceApiService} from '../devices/device-api';
+import {DeviceStoreService} from '../devices/device-store';
 import {emoj} from '../../utils/string-utils';
 import {Button} from 'primeng/button';
 import {GroupsApiService} from '../groups/groups-api';
@@ -54,7 +54,7 @@ export class NewGroupPage implements OnInit {
 
 
     // services
-    private readonly deviceApi = inject(DeviceApiService);
+    private readonly deviceStore = inject(DeviceStoreService);
     private readonly groupsApi = inject(GroupsApiService);
     private readonly router = inject(Router);
     openConfirmDeletion: boolean = false;
@@ -70,7 +70,7 @@ export class NewGroupPage implements OnInit {
         this.devicesLoading.set(true);
         this.devicesError.set(null);
 
-        return firstValueFrom(this.deviceApi.list())
+        return this.deviceStore.loadDevices()
             .then((devices: DeviceType[]) => {
                 this.devices.set(devices);
                 this.devicesLoading.set(false);

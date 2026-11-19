@@ -13,11 +13,12 @@ import {
     ScenarioType
 } from '../scenario.models';
 import {DeviceType} from '../../devices/devices.models';
+import {DeviceStoreService} from '../../devices/device-store';
 import {readScenarioAction} from '../scenario/scenario.page';
 import {LongPressDirective} from '../../../directives/long-press.directive';
 import {Router} from '@angular/router';
 import {ScenarioApiService} from '../scenario-api';
-import {firstValueFrom} from 'rxjs';
+import {firstValueFrom, Subscription} from 'rxjs';
 import {emoj} from '../../../utils/string-utils';
 import {FullTimerType} from '../../timer/timer.models';
 
@@ -53,7 +54,8 @@ export class ScenariosPage implements OnInit, OnDestroy {
     selectedScenarios: number[] = [];
     // signal: arriva dopo la lista e cambia con la WebSocket, quindi la pagina si deve ridisegnare
     protected readonly runningScenarios = signal<number[]>([]);
-    private channel: WebSocket | null = null;     // WebSocket con il Core, aperta in ngOnInit e chiusa in ngOnDestroy
+    private readonly deviceStore = inject(DeviceStoreService);
+    private deviceUpdates: Subscription | null = null;      // aggiornamenti dalla WebSocket unica dell'app
 
 
     ngOnInit(): void {
@@ -62,24 +64,12 @@ export class ScenariosPage implements OnInit, OnDestroy {
         this.searchScenarios();
         this.loadRunningScenarios();
 
-        // dal Core arriva il DeviceType di un dispositivo che ha cambiato lo stato o il valore di un canale. L'ingresso e
-        // l'uscita di uno scenario cambiano sempre un dispositivo che ne fa parte: se il dispositivo è in un evento o in
-        // un'azione di uno scenario della lista, gli scenari attivi si rileggono
-        let protocol: string = (location.protocol === 'https:') ? 'wss://' : 'ws://';
-        let channel: WebSocket = new WebSocket(protocol + location.host + '/api/core/');
-        this.channel = channel;
+        // dalla WebSocket unica dell'app (DeviceStoreService) arriva il DeviceType di un dispositivo che ha cambiato lo
+        // stato o il valore di un canale. L'ingresso e l'uscita di uno scenario cambiano sempre un dispositivo che ne fa
+        // parte: se il dispositivo è in un evento o in un'azione di uno scenario della lista, gli scenari attivi si rileggono
+        this.deviceUpdates = this.deviceStore.deviceUpdates.subscribe((device: DeviceType) => {
 
-        channel.onmessage = (msg: MessageEvent) => {
-
-            let deviceID: number = 0;
-            try {
-                deviceID = parseInt(''+ (JSON.parse(msg.data) as DeviceType).id);
-            }
-            catch (e: any) {
-                console.log('errore in onmessage di ScenariosPage: messaggio della WebSocket non valido');
-                console.log(e);
-                return;
-            }
+            let deviceID: number = parseInt(''+ device.id);
 
             // dispositivi di eventi e azioni: dal Core arrivano come DeviceType
             let scenarioDeviceIDs: number[] = [];
@@ -99,14 +89,14 @@ export class ScenariosPage implements OnInit, OnDestroy {
             }
 
             this.loadRunningScenarios();
-        }
+        });
 
     }
 
-    // uscendo dalla pagina la WebSocket si chiude, altrimenti a ogni nuova apertura se ne aggiungerebbe un'altra
+    // uscendo dalla pagina l'iscrizione si chiude, altrimenti a ogni nuova apertura se ne aggiungerebbe un'altra
     ngOnDestroy(): void {
-        if( !!this.channel ) {
-            this.channel.close();
+        if( !!this.deviceUpdates ) {
+            this.deviceUpdates.unsubscribe();
         }
     }
 

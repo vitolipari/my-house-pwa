@@ -23,7 +23,7 @@ import {debounceTime, distinctUntilChanged, firstValueFrom, map, Subject} from '
 import {ScenarioApiService} from '../scenario-api';
 import {Textarea} from 'primeng/textarea';
 import {DeviceType} from '../../devices/devices.models';
-import {DeviceApiService} from '../../devices/device-api';
+import {DeviceStoreService} from '../../devices/device-store';
 import {emoj} from '../../../utils/string-utils';
 import {Select, SelectModule} from 'primeng/select';
 import {JsonPipe} from '@angular/common';
@@ -198,7 +198,7 @@ export class ScenarioPage implements OnInit {
     private readonly route = inject(ActivatedRoute);
     private readonly permissionService = inject(PermissionService);
     readonly scenarioApi: ScenarioApiService = inject(ScenarioApiService);
-    private readonly deviceApi = inject(DeviceApiService);
+    private readonly deviceStore = inject(DeviceStoreService);
     private readonly destroyRef = inject(DestroyRef);
 
 
@@ -758,11 +758,11 @@ export class ScenarioPage implements OnInit {
     private loadDevices() {
         this.isDeviceLoading.update(() => true);
 
-        firstValueFrom(this.deviceApi.list())
+        this.deviceStore.loadDevices()
             .then((devices: DeviceType[]) => {
 
-
-                this.devices = devices;
+                // copia: setDevices la ordina, e l'elenco condiviso resta com'è
+                this.devices = [...devices];
                 console.log('dispositivi arrivati per lo scenario');
                 console.log(this.devices);
 
