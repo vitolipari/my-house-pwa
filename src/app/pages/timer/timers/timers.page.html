@@ -114,16 +114,19 @@
                                 [attr.cy]="circle.y"
                                 fill="none"
                                 stroke="var(--color-background-1)"
-                                [attr.stroke-width]=" circle.width "
+                                [attr.stroke-width]="circle.width"
                             ></circle>
                             @for(arc of timer.arcs; track $index) {
                                 <path
                                     [attr.d]="arc"
                                     fill="none"
                                     stroke="var(--color-ambient-2)"
-                                    [attr.stroke-width]=" circle.width "
-
+                                    [attr.stroke-width]="circle.width"
                                 ></path>
+                                <!--
+                                    stroke-linecap="round"
+                                    [attr.stroke-linecap]="'round'"
+                                -->
                             }
                         </svg>
                     </div>

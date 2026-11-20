@@ -4,6 +4,13 @@ SPAN.p-slider-handle,
     opacity: 0 !important;
 }
 
+::ng-deep .p-slider
+{
+    background-color: var(--color-ambient-1);
+}
+
+
+
 .block-row {
     display: flex;
     flex-direction: row;

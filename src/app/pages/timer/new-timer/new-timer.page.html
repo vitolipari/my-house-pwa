@@ -75,15 +75,15 @@
                     [attr.cy]="circle.y"
                     fill="none"
                     stroke="var(--color-background-2)"
-                    [attr.stroke-width]="circle.width"
+                    [attr.stroke-width]="2 * circle.width / 3"
                 ></circle>
                 @for(arc of detailsTimer.arcs; track $index) {
                     <path
                         [attr.d]="arc"
                         fill="none"
                         stroke="var(--color-ambient-2)"
-                        [attr.stroke-width]="circle.width"
-
+                        [attr.stroke-width]="2 * circle.width / 3"
+                        stroke-linecap="butt"
                     ></path>
                 }
             </svg>
@@ -91,10 +91,10 @@
             <app-anello-giornata
                 [alba]="6.75"
                 [tramonto]="18.2"
-                [spessore]="circle.width / 5"
+                [spessore]="circle.width / 3"
                 [cx]="circle.x"
                 [cy]="circle.y"
-                [r]="(circle.r - circle.width) * 1.49"
+                [r]="(circle.r - circle.width) * 1.65"
                 [isNeon]="false"
                 [id]="'small-day-arc'"
             ></app-anello-giornata>

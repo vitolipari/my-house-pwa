@@ -7,21 +7,26 @@
     /*  Header  */
 
     /* Colori */
-    --color-background-1: rgb(27, 27, 27);
-    --color-background-2: rgb(33, 33, 33);
-    --color-background-3: rgb(40, 40, 40);
+    --color-background-1: rgb(31, 34, 35);
+    --color-background-2: rgb(32, 40, 50);
+    /*--color-background-3: rgb(42 31 54);*/
+    --color-background-3: rgb(23 25 25);
+
+    /*--color-background-1: rgb(7, 23, 38);*/
+    /*--color-background-2: rgb(32, 38, 42);*/
+    /*--color-background-3: rgb(0, 12, 26);*/
 
 
-    --color-ambient-1: rgb(50, 50, 50);
-    --color-ambient-2: rgb(140, 200, 250);
+    --color-ambient-1: rgb(28, 28, 28);
+    --color-ambient-2: rgb(70 82 84);
     --color-ambient-3: rgb(30, 30, 30);
 
-    --color-text-1: rgb(101, 101, 101);
-    --color-text-2: rgb(128, 128, 128);
     --color-text-0: rgb(80, 80, 80);
+    --color-text-1: rgb(229, 229, 230);
+    --color-text-2: rgb(242, 242, 242);
 
 
-    --color-evident-1: #138;  /* todo */
+    --color-evident-1: rgb(140, 200, 250);
     --color-evident-2: #18f;  /* todo */
 
 

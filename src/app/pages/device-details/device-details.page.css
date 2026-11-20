@@ -62,6 +62,11 @@ SPAN.p-slider-handle,
 {
     opacity: 0 !important;
 }
+::ng-deep .p-slider
+{
+    background-color: var(--color-ambient-1);
+}
+
 
 /* slider verticale: la parte piena cresce dal basso, arrotondata in alto */
 .comand-slider ::ng-deep .p-slider-range {
@@ -277,6 +282,15 @@ p-accordion-content > DIV,
     width: 50%;
     height: 1.5rem;
     padding: 0rem 0rem 0rem 0.5rem;
+}
+
+
+.action-set-value {
+    font-family: var(--page-font);
+    font-size: var(--main-giga-huge-font-size);
+    font-weight: 500;
+    text-shadow: 0rem 0rem 5rem var(--sky-color);
+    margin: 5rem 0rem 3rem 0rem;
 }
 
 
