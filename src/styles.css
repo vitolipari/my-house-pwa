@@ -457,3 +457,7 @@ A > DIV {
 
 
 
+::ng-deepSPAN.p-button-label
+{
+    margin: 0.1rem auto;
+}
