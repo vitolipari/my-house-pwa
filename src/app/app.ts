@@ -11,6 +11,8 @@ import {MobileMenuComponent} from './components/menu-component/mobile-menu.compo
 import {PwaInstallService} from './services/pwa-install';
 import {coreOffline} from './interceptor/offline-cache.interceptor';
 import {SidebarMenu} from './components/sidebar-menu/sidebar-menu';
+import {DeviceApiService} from './pages/devices/device-api';
+import {firstValueFrom} from 'rxjs';
 
 
 // trascinamento verso il basso, in pixel, oltre il quale la pagina si ricarica
@@ -46,6 +48,7 @@ export class App {
     // getComputedStyle(document.body).getPropertyValue("--sky-color");
 
     private router = inject(Router);
+    private readonly deviceApi = inject(DeviceApiService);
 
     readonly isInProfilePage = signal(false);
 
@@ -55,6 +58,19 @@ export class App {
     constructor() {
         this.swUpdateService.init();
         this.pwaInstallService.init();
+
+        // a ogni avvio e a ogni refresh (anche trascinando verso il basso, che ricarica la pagina) il Core ricontrolla
+        // MAC e IP dei dispositivi; la pagina non aspetta la risposta. Senza accesso la rotta risponderebbe 401
+        if( this.authService.isAuthenticated() ) {
+            firstValueFrom(this.deviceApi.refreshMacIp())
+                .then((result: unknown) => result)
+                .catch((error: any) => {
+                    console.log('errore nel costruttore di App: controllo di MAC e IP dei dispositivi');
+                    console.log(error);
+                    return null;
+                })
+            ;
+        }
 
         console.log('chiamo il getLoggedUser');
         // this.user = this.authService.currentUser;
