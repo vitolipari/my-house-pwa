@@ -2,6 +2,7 @@ import {CommonModule} from '@angular/common';
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {firstValueFrom} from 'rxjs';
+import {Select} from 'primeng/select';
 import {PageTitleComponent} from '../../components/page-title.component/page-title.component';
 import {
     WasteCollectionDay,
@@ -20,10 +21,21 @@ const DAY_LABELS: Record<WasteCollectionDay, string> = {
     SUNDAY: 'Domenica'
 };
 
+// i cinque materiali che il Core accetta, con le etichette in minuscolo come quelle di Alexa;
+// il valore vuoto toglie la raccolta dal giorno
+const MATERIAL_OPTIONS: {value: string, label: string}[] = [
+    {value: '', label: 'nessuna raccolta'},
+    {value: 'UMIDO', label: 'umido'},
+    {value: 'CARTA E CARTONE', label: 'carta e cartone'},
+    {value: 'VETRO', label: 'vetro'},
+    {value: 'SECCO', label: 'secco'},
+    {value: 'PLASTICA E ALLUMINIO', label: 'plastica e alluminio'}
+];
+
 @Component({
     selector: 'waste-collection-page',
     standalone: true,
-    imports: [CommonModule, FormsModule, PageTitleComponent],
+    imports: [CommonModule, FormsModule, Select, PageTitleComponent],
     templateUrl: './waste-collection.page.html',
     styleUrls: ['../../../page.css', './waste-collection.page.css']
 })
@@ -45,6 +57,7 @@ export class WasteCollectionPage implements OnInit {
     });
 
     readonly materials: Partial<Record<WasteCollectionDay, string>> = {};
+    protected readonly MATERIAL_OPTIONS = MATERIAL_OPTIONS;
 
     ngOnInit(): void {
         void this.loadSchedule();
@@ -54,27 +67,26 @@ export class WasteCollectionPage implements OnInit {
         return DAY_LABELS[day];
     }
 
-    // salva un giorno alla volta; un materiale vuoto toglie la raccolta da quel giorno
+    // salva un giorno alla volta; «nessuna raccolta» (valore vuoto) toglie la raccolta da quel giorno
     save(day: WasteCollectionDay): Promise<void> {
         if (!this.canEdit() || this.savingDay() !== null) return Promise.resolve();
         this.error.set(null);
         this.savedDay.set(null);
         this.savingDay.set(day);
 
-        const value = this.materials[day]?.trim() || null;
+        let value = this.materials[day]?.trim() || null;
         return (
             firstValueFrom(this.api.update(day, value))
-                .then(updated => {
+                .then((updated: WasteCollectionScheduleEntry) => {
                     this.schedule.update(entries => entries.map(entry => entry.day === day ? updated : entry));
                     this.materials[day] = updated.material ?? '';
                     this.savedDay.set(day);
+                    this.savingDay.set(null);
                 })
-                .catch(error => {
+                .catch((error: any) => {
                     console.log('errore nel salvataggio della raccolta');
                     console.log(error);
                     this.error.set(this.errorMessage(error, 'Impossibile salvare la raccolta'));
-                })
-                .finally(() => {
                     this.savingDay.set(null);
                 })
         );
@@ -85,16 +97,15 @@ export class WasteCollectionPage implements OnInit {
         this.error.set(null);
         return (
             firstValueFrom(this.api.schedule())
-                .then(entries => {
+                .then((entries: WasteCollectionScheduleEntry[]) => {
                     this.schedule.set(entries);
                     for (const entry of entries) this.materials[entry.day] = entry.material ?? '';
+                    this.loading.set(false);
                 })
-                .catch(error => {
+                .catch((error: any) => {
                     console.log('errore nel caricamento del calendario della raccolta');
                     console.log(error);
                     this.error.set(this.errorMessage(error, 'Impossibile caricare il calendario'));
-                })
-                .finally(() => {
                     this.loading.set(false);
                 })
         );

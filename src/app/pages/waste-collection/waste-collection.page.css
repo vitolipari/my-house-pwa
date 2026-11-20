@@ -39,15 +39,8 @@ header p {
     gap: 0.25rem;
 }
 
-input {
-    box-sizing: border-box;
+p-select {
     width: 100%;
-    min-height: 2.6rem;
-    padding: 0.65rem 0.8rem;
-    border: 1px solid rgb(127 127 127 / 45%);
-    border-radius: 0.65rem;
-    color: inherit;
-    background: transparent;
 }
 
 button {
@@ -60,8 +53,7 @@ button {
     cursor: pointer;
 }
 
-button:disabled,
-input:disabled {
+button:disabled {
     cursor: wait;
     opacity: 0.65;
 }
