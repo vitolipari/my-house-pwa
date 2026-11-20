@@ -55,6 +55,9 @@ export type HistoricDataType = {
     "action": string | null;
     "timer": number | null;
     "scenario": number | null;
+    // solo con un range: minimo e massimo veri della fascia, value è la media
+    "minimum"?: string;
+    "maximum"?: string;
 };
 
 export type SearchHistoricDataType = {
@@ -424,6 +427,17 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
                         this.media[channelName] =
                             measures.reduce((a: number, b: number) => a + b, 0) / measures.length
                         ;
+
+                        // la lancetta parte già dal valore attuale, senza aspettare il primo messaggio della WebSocket
+                        this.angolo[channelName] = -1 * (
+                            Math.floor(
+                                (
+                                    (parseFloat(''+ this.device().status[channelIndex]) - this.minimo[channelName])
+                                        *
+                                    (-180 / (this.massimo[channelName] - this.minimo[channelName] || 1))
+                                ) * 100
+                            ) / 100
+                        ) -180;
 
                     })
                 ;
@@ -927,7 +941,8 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
                                     (
                                         (parseFloat(''+ device.status[channelIndex]) - this.minimo[channelName])
                                             *
-                                        (-180 / (this.massimo[channelName] - this.minimo[channelName] || 0))
+                                        // || 1: con minimo uguale a massimo 0 × -∞ dava NaN e la lancetta finiva sul massimo
+                                        (-180 / (this.massimo[channelName] - this.minimo[channelName] || 1))
                                     ) * 100
                                 ) / 100
                             ) -180;
@@ -1049,17 +1064,73 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
 
 
     // Range scelto per il grafico di un canale: il Core manda le medie a fasce di tempo del range e measureCharts
-    // ridisegna il grafico con quelle del canale
+    // ridisegna il grafico con quelle del canale; il gauge prende dal range minimo, massimo e media
     computeStoricData( channelName: string, range: string ) {
 
         this.chartRange.set({ ...this.chartRange(), [channelName]: range });
 
         firstValueFrom(this.deviceApi.getStoricalData({ ...this.search, measures: 1, range: range }))
             .then((rows: HistoricDataType[]) => {
+
+                let channelRows: HistoricDataType[] =
+                    rows
+                        .filter((row: HistoricDataType) => row.channel_key === channelName)
+                ;
+
+                // minimo, massimo e angolo non sono signal: li ridisegna questo set, nello stesso then
                 this.rangeMeasurements.set({
                     ...this.rangeMeasurements(),
-                    [channelName]: rows.filter((row: HistoricDataType) => row.channel_key === channelName)
+                    [channelName]: channelRows
                 });
+
+                // scala del gauge: minimo e massimo veri delle fasce (la media appiattisce i picchi), media delle
+                // medie; il valore attuale resta dentro la scala, come in searchStoricalData
+                let medie: number[] =
+                    channelRows
+                        .map((row: HistoricDataType) => parseFloat(''+ row.value))
+                        .filter((value: number) => !isNaN(value))
+                ;
+                let minimi: number[] =
+                    channelRows
+                        .map((row: HistoricDataType) => parseFloat(''+ row.minimum))
+                        .filter((value: number) => !isNaN(value))
+                ;
+                let massimi: number[] =
+                    channelRows
+                        .map((row: HistoricDataType) => parseFloat(''+ row.maximum))
+                        .filter((value: number) => !isNaN(value))
+                ;
+                let channelIndex: number = this.device().channel.indexOf(channelName);
+                let valore: number = parseFloat(''+ this.device().status[channelIndex]);
+
+                // range senza misure: il gauge resta com'era
+                if( medie.length === 0 ) {
+                    return;
+                }
+
+                this.minimo[channelName] = Math.min(...minimi);
+                if( this.minimo[channelName] >= valore ) {
+                    this.minimo[channelName] = valore;
+                }
+
+                this.massimo[channelName] = Math.max(...massimi);
+                if( this.massimo[channelName] <= valore ) {
+                    this.massimo[channelName] = valore;
+                }
+
+                this.media[channelName] =
+                    medie.reduce((a: number, b: number) => a + b, 0) / medie.length
+                ;
+
+                this.angolo[channelName] = -1 * (
+                    Math.floor(
+                        (
+                            (valore - this.minimo[channelName])
+                                *
+                            (-180 / (this.massimo[channelName] - this.minimo[channelName] || 1))
+                        ) * 100
+                    ) / 100
+                ) -180;
             })
             .catch((e: any) => {
                 console.log('errore in computeStoricData: lettura delle medie del range');

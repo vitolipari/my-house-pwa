@@ -9,6 +9,13 @@
             <stop [attr.offset]="offsetMedia" [attr.stop-color]="colori[1]"/>
             <stop offset="1" [attr.stop-color]="colori[2]"/>
         </linearGradient>
+        <!-- zero: il nero nasconde l'arco, il bianco lo lascia vedere -->
+        <mask [attr.id]="idGradiente +'-zero'">
+            <rect x="-50" y="0" width="200" height="100" fill="white"/>
+            @if( zero ) {
+                <path [attr.d]="zero" fill="none" stroke="black" stroke-width="11%"/>
+            }
+        </mask>
     </defs>
     <circle
         [attr.r]="'90%'"
@@ -17,6 +24,7 @@
         fill="none"
         [attr.stroke]="!!hasColorMagnitude ? 'url(#'+ idGradiente +')' : 'var(--middle-opacity-inverse-theme-color)'"
         [attr.stroke-width]="'10%'"
+        [attr.mask]="'url(#'+ idGradiente +'-zero)'"
     ></circle>
     <text class="gauge-text" x="-30" y="100%">{{ minimum }}</text>
     <text class="gauge-text" x="100" y="100%">{{ maximum }}</text>
