@@ -890,8 +890,8 @@ export class NewDevicePage implements OnInit {
     //     deviceIp: new FormControl()
     // });
 
-    @ViewChild("newDeviceCard", {static: true, read: ElementRef}) newDeviceElement!: ElementRef<HTMLDivElement>;
-    @ViewChild("newDeviceIcon", {static: true, read: ElementRef}) newDeviceIcon!: ElementRef<SVGElement>;
+    // @ViewChild("newDeviceCard", {static: true, read: ElementRef}) newDeviceElement!: ElementRef<HTMLDivElement>;
+    // @ViewChild("newDeviceIcon", {static: true, read: ElementRef}) newDeviceIcon!: ElementRef<SVGElement>;
     @ViewChild("knownDevice", {static: true, read: ElementRef}) knownDeviceElement!: ElementRef<HTMLDivElement>;
     @ViewChild("knownDeviceIcon", {static: true, read: ElementRef}) knownDeviceIcon!: ElementRef<SVGElement>;
     @ViewChild("deviceName", {static: true, read: ElementRef}) deviceName!: ElementRef<HTMLInputElement>;
@@ -1010,14 +1010,14 @@ export class NewDevicePage implements OnInit {
 
         // selezione card
         if( deviceKnowledge === 'newDevice' ) {
-            this.newDeviceElement.nativeElement.style.cssText = '; color: var(--color-text-2);'
-            this.newDeviceIcon.nativeElement.style.cssText = '; opacity: 1;'
+            // this.newDeviceElement.nativeElement.style.cssText = '; color: var(--color-text-2);'
+            // this.newDeviceIcon.nativeElement.style.cssText = '; opacity: 1;'
             this.knownDeviceElement.nativeElement.style.cssText = '; color: var(--color-text-0);'
             this.knownDeviceIcon.nativeElement.style.cssText = '; opacity: 0.3;'
         }
         else {
-            this.newDeviceElement.nativeElement.style.cssText = '; color: var(--color-text-0);'
-            this.newDeviceIcon.nativeElement.style.cssText = '; opacity: 0.3;'
+            // this.newDeviceElement.nativeElement.style.cssText = '; color: var(--color-text-0);'
+            // this.newDeviceIcon.nativeElement.style.cssText = '; opacity: 0.3;'
             this.knownDeviceElement.nativeElement.style.cssText = '; color: var(--color-text-2);'
             this.knownDeviceIcon.nativeElement.style.cssText = '; opacity: 1;'
         }

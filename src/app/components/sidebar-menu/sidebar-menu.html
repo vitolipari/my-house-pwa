@@ -73,15 +73,15 @@
 
 
     <!-- raccolta rifiuti -->
-    class="{{
-            (
-                (router.url.indexOf('/waste-collection') !== -1)
-                || (router.url.indexOf('/waste-collection') !== -1)
-            )
-                ? 'current'
-                : ''
-        }}"---------------------------------------------------------------
     <section
+        class="{{
+                (
+                    (router.url.indexOf('/waste-collection') !== -1)
+                    || (router.url.indexOf('/waste-collection') !== -1)
+                )
+                    ? 'current'
+                    : ''
+            }}"---------------------------------------------------------------
         (click)="gotoPage('/waste-collection')"
     >
         <svg
@@ -91,7 +91,7 @@
         </svg>
         <label>Rifiuti</label>
     </section>
-    -->
+
 
 
 
