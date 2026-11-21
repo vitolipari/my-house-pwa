@@ -1,0 +1,102 @@
+<section class="card">
+
+    <!-- stato del robot: il nome per i codici già osservati, altrimenti il codice del modello Tuya -->
+    <div class="row">
+        <div class="label">stato</div>
+
+        @if( device.status[ device.channel.indexOf('status') ] === null ) {
+            <div class="value">—</div>
+        }
+        @else {
+            <div class="value">{{ STATUS_LABELS[ ''+ device.status[ device.channel.indexOf('status') ] ] || device.status[ device.channel.indexOf('status') ] }}</div>
+        }
+    </div>
+
+    <div class="row">
+        <div class="label">batteria</div>
+
+        @if( device.status[ device.channel.indexOf('battery_level') ] === null ) {
+            <div class="value">—</div>
+        }
+        @else {
+            <div class="value">
+                {{ device.status[ device.channel.indexOf('battery_level') ] }}<span class="unit">%</span>
+            </div>
+        }
+    </div>
+
+    <!-- pulizia: avvio e pausa su cleaning, ritorno alla base con il modo chargego; quello attuale è il bottone pieno -->
+    <div class="row">
+        <div class="label">pulizia</div>
+
+        <div class="modes">
+            <p-button
+                label="avvia"
+                [size]="'small'"
+                [rounded]="true"
+                [outlined]="device.status[ device.channel.indexOf('cleaning') ] !== true"
+                [disabled]="!!inWaiting()"
+                (click)="setValue('cleaning', 'true')"
+            ></p-button>
+
+            <p-button
+                label="pausa"
+                [size]="'small'"
+                [rounded]="true"
+                [outlined]="device.status[ device.channel.indexOf('cleaning') ] !== false"
+                [disabled]="!!inWaiting()"
+                (click)="setValue('cleaning', 'false')"
+            ></p-button>
+
+            <p-button
+                label="base"
+                [size]="'small'"
+                [rounded]="true"
+                [outlined]="device.status[ device.channel.indexOf('mode') ] !== 'chargego'"
+                [disabled]="!!inWaiting()"
+                (click)="setValue('mode', 'chargego')"
+            ></p-button>
+        </div>
+    </div>
+
+    <!-- modo: quello attuale è il bottone pieno -->
+    <div class="row">
+        <div class="label">modo</div>
+
+        <div class="modes">
+            @for( mode of MODE_OPTIONS; track mode.value ) {
+                <p-button
+                    [label]="mode.label"
+                    [size]="'small'"
+                    [rounded]="true"
+                    [outlined]="device.status[ device.channel.indexOf('mode') ] !== mode.value"
+                    [disabled]="!!inWaiting()"
+                    (click)="setValue('mode', mode.value)"
+                ></p-button>
+            }
+        </div>
+    </div>
+
+    <!-- aspirazione: quella attuale è il bottone pieno -->
+    <div class="row">
+        <div class="label">aspirazione</div>
+
+        <div class="modes">
+            @for( suction of SUCTION_OPTIONS; track suction.value ) {
+                <p-button
+                    [label]="suction.label"
+                    [size]="'small'"
+                    [rounded]="true"
+                    [outlined]="device.status[ device.channel.indexOf('suction') ] !== suction.value"
+                    [disabled]="!!inWaiting()"
+                    (click)="setValue('suction', suction.value)"
+                ></p-button>
+            }
+        </div>
+    </div>
+
+    @if( !!errorMessage() ) {
+        <div class="message error" role="alert">{{ errorMessage() }}</div>
+    }
+
+</section>

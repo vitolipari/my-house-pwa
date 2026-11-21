@@ -1,0 +1,42 @@
+:host {
+    display: block;
+}
+
+.card {
+    display: grid;
+    gap: 1.2rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 0.9rem;
+}
+
+.label {
+    color: var(--color-text-2, #667085);
+    font-size: 0.92rem;
+}
+
+.row {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.value {
+    font-family: var(--orbitron-font);
+    font-size: 1.4rem;
+}
+
+.unit {
+    margin-left: 0.2rem;
+    font-size: 0.5em;
+}
+
+.modes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.message.error {
+    color: #b42318;
+}

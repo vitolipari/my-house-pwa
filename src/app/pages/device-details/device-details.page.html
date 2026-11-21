@@ -100,6 +100,7 @@
         @case ('COLOR_DIMMER')
         @case ('AIR_CONDITIONER')
         @case ('THERMOSTAT')
+        @case ('ROBOT_VACUUM')
         @case ('TV')
         @case ('DOOR')
         @case ('GATE')
@@ -249,6 +250,10 @@
         @case ('THERMOSTAT')
         {
             <thermostat-detail-component [device]="device()" />
+        }
+        @case ('ROBOT_VACUUM')
+        {
+            <robot-vacuum-detail-component [device]="device()" />
         }
         @case ('BINARY_STATE_SENSOR')
         {

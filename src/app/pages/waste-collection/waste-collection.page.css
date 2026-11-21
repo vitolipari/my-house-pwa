@@ -25,12 +25,12 @@ header p {
 
 .day-card {
     display: grid;
-    grid-template-columns: minmax(8rem, 1fr) minmax(10rem, 2fr) auto auto;
+    grid-template-columns: minmax(8rem, 1fr) minmax(10rem, 2fr);
     align-items: center;
     gap: 0.8rem;
     padding: 1rem;
     border: 1px solid rgb(127 127 127 / 25%);
-    border-radius: 0.9rem;
+    border-radius: 0.4rem;
     background: rgb(255 255 255 / 7%);
 }
 
@@ -39,31 +39,18 @@ header p {
     gap: 0.25rem;
 }
 
-input {
-    box-sizing: border-box;
+p-select {
     width: 100%;
-    min-height: 2.6rem;
-    padding: 0.65rem 0.8rem;
-    border: 1px solid rgb(127 127 127 / 45%);
-    border-radius: 0.65rem;
-    color: inherit;
-    background: transparent;
 }
 
-button {
-    min-height: 2.6rem;
-    padding: 0.6rem 1rem;
-    border: 0;
-    border-radius: 0.65rem;
-    color: white;
-    background: #215ac5;
-    cursor: pointer;
-}
-
-button:disabled,
-input:disabled {
-    cursor: wait;
-    opacity: 0.65;
+#edit-button {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 1rem;
+    height: 4rem;
+    margin-bottom: 2rem;
 }
 
 .message {
@@ -75,11 +62,6 @@ input:disabled {
 .error {
     color: #b42318;
     background: rgb(180 35 24 / 12%);
-}
-
-.saved {
-    color: #087443;
-    font-size: 0.85rem;
 }
 
 .visually-hidden {
@@ -101,9 +83,5 @@ input:disabled {
 
     .day-card label {
         grid-column: 1 / -1;
-    }
-
-    .saved {
-        justify-self: end;
     }
 }

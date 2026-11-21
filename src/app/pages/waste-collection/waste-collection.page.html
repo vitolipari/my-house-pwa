@@ -1,6 +1,8 @@
 <page-title
     [title]="'Raccolta rifiuti'"
     [hasPlusButton]="false"
+    [hasEditButton]="( currentMode === Mode.DETAILS ) && canEdit()"
+    (editButtonClick)="currentMode = Mode.EDIT"
     [iconID]="'timer_icon_1'"
 ></page-title>
 
@@ -22,40 +24,47 @@
                 <article class="day-card">
                     <div class="day-copy">
                         <strong>{{ dayLabel(entry.day) }}</strong>
-                        @if (!canEdit()) {
-                            <span>{{ entry.material || 'Nessuna raccolta configurata' }}</span>
+                        @if( currentMode === Mode.DETAILS ) {
+                            <span>{{ ( entry.material || 'nessuna raccolta' ) | lowercase }}</span>
                         }
                     </div>
 
-                    @if (canEdit()) {
+                    @if( currentMode === Mode.EDIT ) {
                         <label>
                             <span class="visually-hidden">Materiale per {{ dayLabel(entry.day) }}</span>
-                            <input
-                                type="text"
-                                maxlength="80"
-                                placeholder="es. umido"
+                            <p-select
+                                [options]="MATERIAL_OPTIONS"
                                 [(ngModel)]="materials[entry.day]"
-                                [disabled]="savingDay() !== null"
-                            >
+                                optionLabel="label"
+                                optionValue="value"
+                                placeholder="nessuna raccolta"
+                                [disabled]="!!inWaiting()"
+                            ></p-select>
                         </label>
-                        <button
-                            type="button"
-                            (click)="save(entry.day)"
-                            [disabled]="savingDay() !== null"
-                        >
-                            @if (savingDay() === entry.day) {
-                                Salvataggio…
-                            } @else {
-                                Salva
-                            }
-                        </button>
-                        @if (savedDay() === entry.day) {
-                            <span class="saved" role="status">Salvato</span>
-                        }
                     }
                 </article>
             }
         </section>
+
+        <!-- un solo salvataggio per tutta la settimana -->
+        @if( currentMode === Mode.EDIT ) {
+            <div id="edit-button">
+                @if (!!inWaiting()) {
+                    <svg class="svg-icon inside-button" style="position: static; top: 1rem; left: 1.5rem;">
+                        <use href="#orologio-1-1"></use>
+                    </svg>
+                }
+                <p-button
+                    label="{{ !!inWaiting() ? 'in attesa' : 'salva' }}"
+                    type="submit"
+                    [disabled]="!!inWaiting()"
+                    [rounded]="true"
+                    [size]="'small'"
+                    [style]="{padding: '0px 20px 0px '+ ( !inWaiting() ? '20px' : '32px' ), marginTop: '2rem'}"
+                    (click)="save()"
+                ></p-button>
+            </div>
+        }
     }
 
     @if (!loading() && !canEdit()) {

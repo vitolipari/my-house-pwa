@@ -2,7 +2,10 @@ import {CommonModule} from '@angular/common';
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {firstValueFrom} from 'rxjs';
+import {Button} from 'primeng/button';
+import {Select} from 'primeng/select';
 import {PageTitleComponent} from '../../components/page-title.component/page-title.component';
+import {getLastElementOr} from '../../utils/array-util';
 import {
     WasteCollectionDay,
     WasteCollectionScheduleEntry
@@ -20,22 +23,40 @@ const DAY_LABELS: Record<WasteCollectionDay, string> = {
     SUNDAY: 'Domenica'
 };
 
+// i cinque materiali che il Core accetta, con le etichette in minuscolo come quelle di Alexa;
+// il valore vuoto toglie la raccolta dal giorno
+const MATERIAL_OPTIONS: {value: string, label: string}[] = [
+    {value: '', label: 'nessuna raccolta'},
+    {value: 'UMIDO', label: 'umido'},
+    {value: 'CARTA E CARTONE', label: 'carta e cartone'},
+    {value: 'VETRO', label: 'vetro'},
+    {value: 'SECCO', label: 'secco'},
+    {value: 'PLASTICA E ALLUMINIO', label: 'plastica e alluminio'}
+];
+
 @Component({
     selector: 'waste-collection-page',
     standalone: true,
-    imports: [CommonModule, FormsModule, PageTitleComponent],
+    imports: [CommonModule, FormsModule, Button, Select, PageTitleComponent],
     templateUrl: './waste-collection.page.html',
     styleUrls: ['../../../page.css', './waste-collection.page.css']
 })
 export class WasteCollectionPage implements OnInit {
+
+    Mode = {
+        DETAILS: 'DETAILS',
+        EDIT: 'EDIT'
+    }
+
+    currentMode: string = this.Mode.DETAILS;
+
     private readonly api = inject(WasteCollectionApiService);
     private readonly auth = inject(AuthService);
 
     readonly schedule = signal<WasteCollectionScheduleEntry[]>([]);
     readonly loading = signal(true);
     readonly error = signal<string | null>(null);
-    readonly savingDay = signal<WasteCollectionDay | null>(null);
-    readonly savedDay = signal<WasteCollectionDay | null>(null);
+    readonly inWaiting = signal<boolean>(false);
     readonly canEdit = computed(() => {
         const rawRoles = this.auth.currentUser()?.roles ?? [];
         const roles = Array.isArray(rawRoles)
@@ -45,6 +66,7 @@ export class WasteCollectionPage implements OnInit {
     });
 
     readonly materials: Partial<Record<WasteCollectionDay, string>> = {};
+    protected readonly MATERIAL_OPTIONS = MATERIAL_OPTIONS;
 
     ngOnInit(): void {
         void this.loadSchedule();
@@ -54,28 +76,39 @@ export class WasteCollectionPage implements OnInit {
         return DAY_LABELS[day];
     }
 
-    // salva un giorno alla volta; un materiale vuoto toglie la raccolta da quel giorno
-    save(day: WasteCollectionDay): Promise<void> {
-        if (!this.canEdit() || this.savingDay() !== null) return Promise.resolve();
-        this.error.set(null);
-        this.savedDay.set(null);
-        this.savingDay.set(day);
+    // manda al Core i soli giorni cambiati, con il PUT di un giorno, e torna al dettaglio;
+    // «nessuna raccolta» (valore vuoto) toglie la raccolta da quel giorno
+    save(): Promise<void> {
 
-        const value = this.materials[day]?.trim() || null;
+        this.error.set(null);
+        this.inWaiting.set(true);
+
+        let changedEntries: WasteCollectionScheduleEntry[] = this.schedule()
+            .filter((entry: WasteCollectionScheduleEntry) => (entry.material ?? '') !== this.materials[entry.day])
+        ;
+
         return (
-            firstValueFrom(this.api.update(day, value))
-                .then(updated => {
-                    this.schedule.update(entries => entries.map(entry => entry.day === day ? updated : entry));
-                    this.materials[day] = updated.material ?? '';
-                    this.savedDay.set(day);
+            Promise.all(
+                changedEntries
+                    .map((entry: WasteCollectionScheduleEntry) => firstValueFrom(this.api.update(entry.day, this.materials[entry.day] || null)))
+            )
+                .then((updatedEntries: WasteCollectionScheduleEntry[]) => {
+                    this.schedule.update((entries: WasteCollectionScheduleEntry[]) =>
+                        entries
+                            .map((entry: WasteCollectionScheduleEntry) =>
+                                updatedEntries
+                                    .filter((updated: WasteCollectionScheduleEntry) => updated.day === entry.day)
+                                    .reduce(getLastElementOr, entry)
+                            )
+                    );
+                    this.inWaiting.set(false);
+                    this.currentMode = this.Mode.DETAILS;
                 })
-                .catch(error => {
+                .catch((error: any) => {
                     console.log('errore nel salvataggio della raccolta');
                     console.log(error);
                     this.error.set(this.errorMessage(error, 'Impossibile salvare la raccolta'));
-                })
-                .finally(() => {
-                    this.savingDay.set(null);
+                    this.inWaiting.set(false);
                 })
         );
     }
@@ -85,16 +118,15 @@ export class WasteCollectionPage implements OnInit {
         this.error.set(null);
         return (
             firstValueFrom(this.api.schedule())
-                .then(entries => {
+                .then((entries: WasteCollectionScheduleEntry[]) => {
                     this.schedule.set(entries);
                     for (const entry of entries) this.materials[entry.day] = entry.material ?? '';
+                    this.loading.set(false);
                 })
-                .catch(error => {
+                .catch((error: any) => {
                     console.log('errore nel caricamento del calendario della raccolta');
                     console.log(error);
                     this.error.set(this.errorMessage(error, 'Impossibile caricare il calendario'));
-                })
-                .finally(() => {
                     this.loading.set(false);
                 })
         );
