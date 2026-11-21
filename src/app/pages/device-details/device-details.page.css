@@ -26,12 +26,14 @@ DIV
     width: 100%;
     justify-content: space-around;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .top-part> DIV {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin: 1rem;
 }
 
 .icon {
