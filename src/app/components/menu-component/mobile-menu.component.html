@@ -64,20 +64,6 @@
 </section>
 
 
-<!-- raccolta rifiuti ---------------------------------------------------------------
-<section
-    (click)="gotoPage('/waste-collection')"
->
-    <svg
-        class="svg-icon"
-    >
-        <use href="#timer_icon_1"></use>
-    </svg>
-    <label>Raccolta</label>
-</section>
--->
-
-
 
 <!-- stanze ------------------------------------------------------------------------->
 @if (hasPermission('READ_ROOMS')) {
@@ -166,22 +152,32 @@
 
 
 
+<!-- raccolta rifiuti ---------------------------------------------------------------
+-->
+<section
+    (click)="gotoPage('/waste-collection')"
+>
+    <svg
+        class="svg-icon"
+    >
+        <use href="#icon-102"></use>
+    </svg>
+    <label>Rifiuti</label>
+</section>
 
-<!--stanze-->
 
 
 
-<!--impostazioni-->
+
+<!--impostazioni
+
 <section
     (click)="gotoPage('')"
 >
     <svg
         class="svg-icon"
     >
-        <!--        <use href="#settings_icon_1"></use>-->
-<!--        <use href="#settings_icon_2"></use>-->
         <use href="#icon-407"></use>
-        <!--                <use href="#settings_icon_3"></use>-->
     </svg>
     <label>Impostazioni</label>
 </section>
@@ -194,20 +190,18 @@
     <svg
         class="svg-icon"
     >
-        <!--        <use href="#settings_icon_1"></use>-->
-<!--        <use href="#settings_icon_2"></use>-->
         <use href="#Help"></use>
-        <!--                <use href="#settings_icon_3"></use>-->
     </svg>
     <label>Help</label>
 </section>
+-->
 
 
 
 
 <!--credentials-->
 <section
-    (click)="gotoPage('')"
+    (click)="gotoPage('/credentials')"
 >
     <img
         [src]="lipariStudiosImage()"
