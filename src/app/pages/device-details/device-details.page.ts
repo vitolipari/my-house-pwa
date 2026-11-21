@@ -36,6 +36,7 @@ import {ClimateDetailComponent} from '../../components/climate-detail/climate-de
 import {BinarySensorDetailComponent} from '../../components/binary-sensor-detail/binary-sensor-detail.component';
 import {CurtainDetailComponent} from '../../components/curtain-detail/curtain-detail.component';
 import {ThermostatDetailComponent} from '../../components/thermostat-detail/thermostat-detail.component';
+import {RobotVacuumDetailComponent} from '../../components/robot-vacuum-detail/robot-vacuum-detail.component';
 import {DeviceEditComponent} from '../../components/device-edit/device-edit.component';
 import {GaugeMeteredComponent} from '../../components/gauge-metered.component/gauge-metered.component';
 import {GaugeComponent} from '../../components/gauge.component/gauge.component';
@@ -103,6 +104,7 @@ const CHART_MEASURES_PER_CHANNEL: number = 360;
         BinarySensorDetailComponent,
         CurtainDetailComponent,
         ThermostatDetailComponent,
+        RobotVacuumDetailComponent,
         DeviceEditComponent,
         GaugeMeteredComponent,
         GaugeComponent,
