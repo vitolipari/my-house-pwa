@@ -2,6 +2,7 @@ import {Routes} from '@angular/router';
 import {routeAccessGuard} from './guards/route-access.guard';
 import {guestGuard} from './guards/guest.guard';
 import {NewDevicePage} from './pages/new-device/new-device.page';
+import {CredentialsPage} from './pages/credentials/credentials.page';
 
 
 
@@ -344,6 +345,16 @@ export const routes: Routes = [
         canActivate: [routeAccessGuard],
         loadComponent: () =>
             import('./pages/waste-collection/waste-collection.page').then(m => m.WasteCollectionPage)
+    },
+
+
+
+    // ------------------------------------------------------------------------
+    {
+        path: 'credentials',
+        canActivate: [routeAccessGuard],
+        loadComponent: () =>
+            import('./pages/credentials/credentials.page').then(m => m.CredentialsPage)
     },
 
 

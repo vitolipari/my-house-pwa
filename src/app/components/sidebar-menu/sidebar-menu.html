@@ -126,8 +126,8 @@
 <div>
     <!--credentials-->
     <img
-        class="lipariStudiosLogo {{ ((router.url === '') || (router.url === '/')) ? 'current': '' }}"
-        (click)="gotoPage('')"
+        class="lipariStudiosLogo {{ ((router.url === '/credentials') || (router.url === '/credentials')) ? 'current': '' }}"
+        (click)="gotoPage('/credentials')"
         [src]="lipariStudiosImage()"
     >
 </div>
