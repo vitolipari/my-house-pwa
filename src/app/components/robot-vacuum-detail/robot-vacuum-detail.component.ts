@@ -19,6 +19,13 @@ const SUCTION_OPTIONS: {value: string, label: string}[] = [
     {value: 'strong', label: 'forte'}
 ];
 
+// nomi dei codici di status osservati il 21/11 durante una pulizia; gli altri codici si mostrano così come arrivano
+const STATUS_LABELS: Record<string, string> = {
+    '1': 'pulizia automatica',
+    '4': 'rientro alla base',
+    '5': 'in carica'
+};
+
 
 // dettaglio dedicato del robot aspirapolvere: stato, batteria, avvio, pausa e ritorno alla base, modo e aspirazione.
 // L'accensione resta alla pagina e lo stato aggiornato arriva dalla sua WebSocket
@@ -41,6 +48,7 @@ export class RobotVacuumDetailComponent {
     // il template legge solo i membri del componente: le costanti di modulo si riespongono qui, come nel termostato
     protected readonly MODE_OPTIONS = MODE_OPTIONS;
     protected readonly SUCTION_OPTIONS = SUCTION_OPTIONS;
+    protected readonly STATUS_LABELS = STATUS_LABELS;
 
 
     // unico metodo dei comandi: SET:<valore> sul canale (SET:true e SET:false su cleaning per avvio e pausa);

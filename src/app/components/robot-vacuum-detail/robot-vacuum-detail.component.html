@@ -1,6 +1,6 @@
 <section class="card">
 
-    <!-- stato del robot (codice del modello Tuya, significato da osservare) e batteria -->
+    <!-- stato del robot: il nome per i codici già osservati, altrimenti il codice del modello Tuya -->
     <div class="row">
         <div class="label">stato</div>
 
@@ -8,7 +8,7 @@
             <div class="value">—</div>
         }
         @else {
-            <div class="value">{{ device.status[ device.channel.indexOf('status') ] }}</div>
+            <div class="value">{{ STATUS_LABELS[ ''+ device.status[ device.channel.indexOf('status') ] ] || device.status[ device.channel.indexOf('status') ] }}</div>
         }
     </div>
 
