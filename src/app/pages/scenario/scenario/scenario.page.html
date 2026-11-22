@@ -716,15 +716,45 @@
 
 
                             <div style="flex: 0;">
+                                <div class="timed-action-comand">
                                 @switch (device.channelType) {
                                     @case('boolean') {
-                                        <div class="timed-action-comand">
                                             <switcher-component
                                                 [isReadOnly]="false"
                                                 [check]="!!device.value"
                                                 (toggle)="device.value = !!$event"
                                                 [style]="'margin-bottom: 0.5rem;'"
                                             ></switcher-component>
+                                        }
+                                        @case('number') {
+                                            <div>
+                                                <input
+                                                    pInputText
+                                                    id="number-value-{{ device.id }}"
+                                                    aria-describedby="name-help"
+                                                    placeholder="valore"
+                                                    class="timed-action-input"
+                                                    style="max-width: 15rem; padding: 0.5rem; min-width: 3.6rem;"
+                                                    [(ngModel)]="device.value"
+                                                    [type]="'number'"
+                                                />
+                                            </div>
+                                        }
+                                        @case('string') {
+                                            <div>
+                                                <input
+                                                    pInputText
+                                                    id="text-value-{{ device.id }}"
+                                                    aria-describedby="name-help"
+                                                    placeholder="valore"
+                                                    class="fixed-value-input"
+                                                    style="max-width: 15rem; padding: 0.5rem;"
+                                                    [(ngModel)]="device.value"
+                                                />
+                                            </div>
+                                        }
+                                    }
+
                                             <div>
                                                 <div>
                                                     <svg class="svg-icon"><use href="#icon-196"></use></svg>
@@ -757,36 +787,8 @@
                                                     <div class="timed-action-unit">sec</div>
                                                 </div>
                                             </div>
+
                                         </div>
-                                    }
-                                    @case('number') {
-                                        <div>
-                                            <input
-                                                pInputText
-                                                id="number-value-{{ device.id }}"
-                                                aria-describedby="name-help"
-                                                placeholder="valore"
-                                                class="timed-action-input"
-                                                style="max-width: 15rem; padding: 0.5rem; min-width: 3.6rem;"
-                                                [(ngModel)]="device.value"
-                                                [type]="'number'"
-                                            />
-                                        </div>
-                                    }
-                                    @case('string') {
-                                        <div>
-                                            <input
-                                                pInputText
-                                                id="text-value-{{ device.id }}"
-                                                aria-describedby="name-help"
-                                                placeholder="valore"
-                                                class="fixed-value-input"
-                                                style="max-width: 15rem; padding: 0.5rem;"
-                                                [(ngModel)]="device.value"
-                                            />
-                                        </div>
-                                    }
-                                }
                             </div>
 
 
