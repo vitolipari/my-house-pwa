@@ -41,6 +41,7 @@
         <div
             class="valore-lancetta"
             style=""
+            [style.transform]=" (angolo < -90) ? 'rotate(180deg)' : '' "
         >
             {{ value }}
         </div>
