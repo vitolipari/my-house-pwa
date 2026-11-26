@@ -89,7 +89,7 @@ export class TimerWheel implements OnInit {
   rotation = 0;
   lastAngle = 0;
   dragging = false;
-  velocity = 10;
+  velocity = 0;
   inertiaFrame?: number;
   buttonStateActive: boolean = false;
   deactivationButtonStateActive: boolean = false;
@@ -101,6 +101,12 @@ export class TimerWheel implements OnInit {
   // FISICA
   friction = 0.985;  // 0.985; // <— più basso = si ferma prima
   velocityThreshold = 0.5;  // 0.06
+
+  // inerzia solo dopo un giro lungo, con il dito ancora in movimento al rilascio: sui piccoli movimenti disturba
+  rotazioneMinimaInerzia: number = 90;   // gradi fra la pressione e il rilascio
+  pausaMassimaInerzia: number = 100;     // ms fra l'ultimo movimento e il rilascio
+  rotazioneTrascinamento: number = 0;
+  ultimoMovimento: number = 0;
 
   segments = Array.from({ length: (MINUTES_IN_A_DAY / this._minuteScale) });
 
@@ -140,8 +146,10 @@ export class TimerWheel implements OnInit {
   onPointerDown(e: PointerEvent) {
     this.stopInertia();
     this.dragging = true;
+    this.velocity = 0;
+    this.rotazioneTrascinamento = 0;
     this.lastAngle = this.getAngle(e);
-    this.dialRef.nativeElement.setPointerCapture(e.pointerId);
+    this.svgRef.nativeElement.setPointerCapture(e.pointerId);
   }
 
   onPointerMove(e: PointerEvent) {
@@ -162,6 +170,8 @@ export class TimerWheel implements OnInit {
 
       this.velocity = delta;
       this.lastAngle = angle;
+      this.rotazioneTrascinamento += delta;
+      this.ultimoMovimento = performance.now();
 
       this.emit();
 
@@ -169,7 +179,19 @@ export class TimerWheel implements OnInit {
   }
 
   onPointerUp() {
+    if( !this.dragging ) {
+      return;
+    }
+
     this.dragging = false;
+
+    // piccoli movimenti e rilascio da fermo: niente inerzia
+    if( Math.abs(this.rotazioneTrascinamento) < this.rotazioneMinimaInerzia ) {
+      this.velocity = 0;
+    }
+    if( (performance.now() - this.ultimoMovimento) > this.pausaMassimaInerzia ) {
+      this.velocity = 0;
+    }
 
     if (this.enableSnap) {
       const snapped = this.snapRotation(this.rotation);
@@ -185,7 +207,9 @@ export class TimerWheel implements OnInit {
 
     // soglia per l'inerzia
 
-    this.startInertia();
+    if( this.velocity !== 0 ) {
+      this.startInertia();
+    }
   }
 
   /* ================= INERZIA ================= */

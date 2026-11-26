@@ -1,8 +1,17 @@
 
+<!--
+  il trascinamento parte da tutto il quadrante, non solo dai segmenti;
+  la pressione lunga non apre il menu contestuale (Android, modalità dispositivo di DevTools)
+-->
 <svg
   #svg
   id="dial"
   [attr.viewBox]="'0 0 '+ (2 * center.x) +' '+ (2 * center.y)"
+  (pointerdown)="onPointerDown($event)"
+  (pointermove)="onPointerMove($event)"
+  (pointerup)="onPointerUp()"
+  (pointercancel)="onPointerUp()"
+  (contextmenu)="$event.preventDefault()"
 >
 
   <!--
@@ -22,10 +31,6 @@
     id="wheel"
     #wheel
     [attr.transform]="'rotate(' + rotation + ' '+ (center.x) +' '+ (center.y) +')'"
-    (pointerdown)="onPointerDown($event)"
-    (pointermove)="onPointerMove($event)"
-    (pointerup)="onPointerUp()"
-    (pointerleave)="onPointerUp()"
   >
     @for (segment of elements; let i = $index; track segment) {
         <rect
