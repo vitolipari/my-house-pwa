@@ -43,6 +43,7 @@ export class TimerWheel implements OnInit {
   @Input()
   set minuteScale(v: number) {
     this._minuteScale = v;
+    this.snapDegrees = 360 * v / MINUTES_IN_A_DAY;
 
     let dayTimerBits: boolean[] = base64ToBits( this.rawDayTimer, MINUTES_IN_A_DAY);
     this.createSegments(dayTimerBits);
@@ -81,7 +82,7 @@ export class TimerWheel implements OnInit {
 
   // SNAP CONFIG
   enableSnap = true;
-  snapDegrees = 360 / ((24 * 60) * this._minuteScale); // = 3.75° se 15min
+  snapDegrees: number = 0;   // gradi di un segmento, dal setter di minuteScale (3.75° con 15 min); con 0 non aggancia
 
   // STATE
   // rotation = 360 * this._minuteScale / MINUTES_IN_A_DAY;
@@ -286,7 +287,9 @@ export class TimerWheel implements OnInit {
 
     if( !isNaN( this.rotation ) /*&& (this.rotation > 0)*/ ) {
 
-      let currentMinuteIndex: number = Math.round(this.rotation / ((360 / (MINUTES_IN_A_DAY / this._minuteScale))));
+      // da 360° meno mezzo segmento l'arrotondamento darebbe l'indice dopo l'ultimo: 360° è il segmento 0, come dopo lo snap
+      let segmenti: number = MINUTES_IN_A_DAY / this._minuteScale;
+      let currentMinuteIndex: number = Math.round(this.rotation / (360 / segmenti)) % segmenti;
       this.rotationChange.emit(currentMinuteIndex);
       // console.log('emesso '+ currentMinuteIndex);
 
@@ -368,8 +371,12 @@ export class TimerWheel implements OnInit {
     [hh, mm] = time.split(':');
 
     let currentMinuteIndex: number = Math.round(this.rotation / ((360 / (MINUTES_IN_A_DAY / this._minuteScale))));
-    let minuteIndex = Math.round(((parseInt( hh ) * 60) + (parseInt(mm))) / this._minuteScale);
-    this.rotation = minuteIndex * this._minuteScale;
+
+    // il segmento che contiene l'ora: con Math.floor l'indice resta nell'intervallo anche a fine giornata (23:55 con 10 minuti dà 23:50)
+    let minuteIndex: number = Math.floor(((parseInt( hh ) * 60) + (parseInt(mm))) / this._minuteScale);
+
+    // rotation è in gradi, come in emit()
+    this.rotation = minuteIndex * 360 / (MINUTES_IN_A_DAY / this._minuteScale);
 
     return minuteIndex;
   }
