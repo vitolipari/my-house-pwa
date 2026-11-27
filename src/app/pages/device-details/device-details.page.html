@@ -160,6 +160,7 @@
                     <div style="margin-right: 1rem; width: 30%; flex: 0;">Ritardo</div>
                     <slider-lines
                         [middleStepsLevel]="4"
+                        [middleStepsCenter]="false"
                         [steps]="[
                             {value: 0, label: '0sec'},
                             {value: 16, label: '16sec'},
@@ -189,7 +190,7 @@
                     <div style="margin-right: 1rem; width: 30%; flex: 0;">Durata</div>
                     <progress-lines-blocks
                         [n]="30"
-                        [colors]="['var(--color-evident-1)', 'var(--color-evident-2)']"
+                        [colors]="['var(--color-evident-2)', 'var(--color-evident-1)']"
                         [currentLabel]="actionDurationLabel"
                         (valueChange)="onSetDuration($event)"
                     ></progress-lines-blocks>
@@ -609,9 +610,13 @@
 
                 <progressive-average-chart-component
                     [data]="chart.values"
-                    [ths]="chart.ths"
+                    [ths]="
+                        (chart.channelKey === 'humidity')
+                            ? 60
+                            : chart.ths
+                    "
                     [thsColor]="chart.thsColor"
-                    [thsGradient]="historicChartOptions.colorGradient"
+                    [thsGradient]="(chart.channelKey === 'humidity')"
                     [color]="historicChartOptions.color"
                     [width]="historicChartOptions.trendWidth"
                     [height]="historicChartOptions.trendHeight"
