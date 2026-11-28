@@ -88,116 +88,118 @@
     </div>
 
 
-    <!-- comando accensione -->
-    @switch (device().type.id) {
+    <!-- comando accensione: sempre sul canale output (anche ritardo e durata); il robot Matter non lo ha -->
+    @if( device().channel.includes('output') ) {
+        @switch (device().type.id) {
 
-        @case ('SWITCH')
-        @case ('METERED_SWITCH')
-        @case ('METERED_DIMMER')
-        @case ('POWER_METER')
-        @case ('SENSING_AIR_CONDITIONER')
-        @case ('DIMMER')
-        @case ('COLOR_DIMMER')
-        @case ('AIR_CONDITIONER')
-        @case ('THERMOSTAT')
-        @case ('ROBOT_VACUUM')
-        @case ('TV')
-        @case ('DOOR')
-        @case ('GATE')
-        @case ('ENERGY_METER')
-        {
-            <div class="comand-slider-container">
-                <div class="action-comand-container {{ !!isRunning(device()) ? 'is-running' : '' }}">
+            @case ('SWITCH')
+            @case ('METERED_SWITCH')
+            @case ('METERED_DIMMER')
+            @case ('POWER_METER')
+            @case ('SENSING_AIR_CONDITIONER')
+            @case ('DIMMER')
+            @case ('COLOR_DIMMER')
+            @case ('AIR_CONDITIONER')
+            @case ('THERMOSTAT')
+            @case ('ROBOT_VACUUM')
+            @case ('TV')
+            @case ('DOOR')
+            @case ('GATE')
+            @case ('ENERGY_METER')
+            {
+                <div class="comand-slider-container">
+                    <div class="action-comand-container {{ !!isRunning(device()) ? 'is-running' : '' }}">
 
-                    @if( !!isDeviceActionInWaiting() ) {
-                        <svg class="action-comand">
-                            <use href="#orologio-1-1"></use>
-                        </svg>
-                    }
-                    @else {
-                        @if( !!isRunning(device()) ) {
-                            <svg
-                                class="action-comand is-running"
-                                (click)="switchAction(device(), false)"
-                            >
-                                <use
-                                    href="#circle-inside-circle"
-                                ></use>
+                        @if( !!isDeviceActionInWaiting() ) {
+                            <svg class="action-comand">
+                                <use href="#orologio-1-1"></use>
                             </svg>
                         }
                         @else {
-                            <svg
-                                class="action-comand"
-                                (click)="switchAction(device(), true)"
-                            >
-                                <use
-                                    href="#line-inside-circle"
-                                ></use>
-                            </svg>
+                            @if( !!isRunning(device()) ) {
+                                <svg
+                                    class="action-comand is-running"
+                                    (click)="switchAction(device(), false)"
+                                >
+                                    <use
+                                        href="#circle-inside-circle"
+                                    ></use>
+                                </svg>
+                            }
+                            @else {
+                                <svg
+                                    class="action-comand"
+                                    (click)="switchAction(device(), true)"
+                                >
+                                    <use
+                                        href="#line-inside-circle"
+                                    ></use>
+                                </svg>
+                            }
                         }
-                    }
 
-                </div>
+                    </div>
 
-                <!--
-                <div class="actionTimed-container">
-                    <label for="actionDelayInput">fra</label>
-                    <input
-                        #actionDelayInput
-                        pInputText
-                        id="actionDelay"
-                        type="number"
-                        class="fixed-value-input"
-                        [(ngModel)]="actionDelay"
-                    />
-                    <div>sec.</div>
-                </div>
-                -->
-                <div
-                    class="actionTimed-container"
-                    style="height: 5rem; margin-bottom: 2rem; overflow: hidden;"
-                >
-                    <div style="margin-right: 1rem; width: 30%; flex: 0;">Ritardo</div>
-                    <slider-lines
-                        [middleStepsLevel]="4"
-                        [middleStepsCenter]="false"
-                        [steps]="[
-                            {value: 0, label: '0sec'},
-                            {value: 16, label: '16sec'},
-                            {value: 32, label: '32sec'},
-                            {value: 60, label: '1min'},
-                            {value: 120, label: '2min'},
-                            {value: 300, label: '5min'},
-                            {value: 600, label: '10min'},
-                            {value: 900, label: '15min'},
-                            {value: 1800, label: '30min'},
-                            {value: 3600, label: '1h'},
-                            {value: 9000, label: '2h 30min'}
-                        ]"
-                        [min]="0"
-                        [max]="(60 * 60 * 2) + (60 * 30)"
-                        (valueChange)="onSetDelay($event)"
-                        [currentLabel]="actionDelayLabel"
-                        [scale]="'LOGARITMIC'"
-                    ></slider-lines>
-                </div>
+                    <!--
+                    <div class="actionTimed-container">
+                        <label for="actionDelayInput">fra</label>
+                        <input
+                            #actionDelayInput
+                            pInputText
+                            id="actionDelay"
+                            type="number"
+                            class="fixed-value-input"
+                            [(ngModel)]="actionDelay"
+                        />
+                        <div>sec.</div>
+                    </div>
+                    -->
+                    <div
+                        class="actionTimed-container"
+                        style="height: 5rem; margin-bottom: 2rem; overflow: hidden;"
+                    >
+                        <div style="margin-right: 1rem; width: 30%; flex: 0;">Ritardo</div>
+                        <slider-lines
+                            [middleStepsLevel]="4"
+                            [middleStepsCenter]="false"
+                            [steps]="[
+                                {value: 0, label: '0sec'},
+                                {value: 16, label: '16sec'},
+                                {value: 32, label: '32sec'},
+                                {value: 60, label: '1min'},
+                                {value: 120, label: '2min'},
+                                {value: 300, label: '5min'},
+                                {value: 600, label: '10min'},
+                                {value: 900, label: '15min'},
+                                {value: 1800, label: '30min'},
+                                {value: 3600, label: '1h'},
+                                {value: 9000, label: '2h 30min'}
+                            ]"
+                            [min]="0"
+                            [max]="(60 * 60 * 2) + (60 * 30)"
+                            (valueChange)="onSetDelay($event)"
+                            [currentLabel]="actionDelayLabel"
+                            [scale]="'LOGARITMIC'"
+                        ></slider-lines>
+                    </div>
 
 
-                <div
-                    class="actionTimed-container"
-                    style="height: 5rem; margin-bottom: 2rem; overflow: hidden;"
-                >
-                    <div style="margin-right: 1rem; width: 30%; flex: 0;">Durata</div>
-                    <progress-lines-blocks
-                        [n]="30"
-                        [colors]="['var(--color-evident-2)', 'var(--color-evident-1)']"
-                        [currentLabel]="actionDurationLabel"
-                        (valueChange)="onSetDuration($event)"
-                    ></progress-lines-blocks>
+                    <div
+                        class="actionTimed-container"
+                        style="height: 5rem; margin-bottom: 2rem; overflow: hidden;"
+                    >
+                        <div style="margin-right: 1rem; width: 30%; flex: 0;">Durata</div>
+                        <progress-lines-blocks
+                            [n]="30"
+                            [colors]="['var(--color-evident-2)', 'var(--color-evident-1)']"
+                            [currentLabel]="actionDurationLabel"
+                            (valueChange)="onSetDuration($event)"
+                        ></progress-lines-blocks>
+                    </div>
                 </div>
-            </div>
+            }
+
         }
-
     }
 
 
