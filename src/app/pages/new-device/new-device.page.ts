@@ -1819,9 +1819,10 @@ export class NewDevicePage implements OnInit {
                     return;
                 }
                 this.matterDetectedType.set(job.device.detectedDeviceType);
+                // niente IP: l'indirizzo del commissioning è l'IPv6 link-local visto dal controller, con interfaccia
+                // e porta; MAC e IPv4 li ricava il Core dallo stato del nodo
                 this.newDevice.update(() => ({
                     ...this.newDevice(),
-                    ip: job.device!.address ?? '',
                     hardware: {...this.newDevice().hardware, id: job.device!.matterNodeId!}
                 }));
                 this.navigateToNextStepFrom(this.sections.commissioning);
