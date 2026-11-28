@@ -723,7 +723,7 @@
                 </div>
                 <svg
                     id="open-newDevice-data-tree-panel-button-icon"
-                    (click)="openNewDeviceDateTree()"
+                    (click)="newDeviceDataTreePanelOpen.set(true)"
                 >
                     <use href="#icon-215"></use>
                 </svg>
@@ -776,7 +776,7 @@
 @if( newDeviceDataTreePanelOpen() ) {
     <div
         class="floating-panel-backpan"
-        (click)="newDeviceDataTreePanelClose()"
+        (click)="newDeviceDataTreePanelOpen.set(false)"
     >
         <div
             class="floating-panel"
