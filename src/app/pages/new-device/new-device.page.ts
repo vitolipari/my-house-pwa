@@ -1530,6 +1530,7 @@ export class NewDevicePage implements OnInit {
         return '';
     }
 
+
     // tipi compatibili con la voce scelta; con Matter solo quelli che il Core sa registrare
     compatibleTypeDefinitions(): DeviceTypeDefinition[] {
         const compatibleTypes = this.selectedCatalogItem()?.compatibleTypes ?? [];
