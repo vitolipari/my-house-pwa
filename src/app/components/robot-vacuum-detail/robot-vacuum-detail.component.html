@@ -25,7 +25,31 @@
         }
     </div>
 
-    <!-- pulizia: avvio e pausa su cleaning, ritorno alla base con il modo chargego; quello attuale è il bottone pieno -->
+    <!-- robot Matter: fase con il nome del robot e stanza della mappa -->
+    @if( device.channel.includes('phase') ) {
+        <div class="row">
+            <div class="label">fase</div>
+            <div class="value">{{ device.status[ device.channel.indexOf('phase') ] ?? '—' }}</div>
+        </div>
+    }
+
+    @if( device.channel.includes('current_area') ) {
+        <div class="row">
+            <div class="label">stanza</div>
+            <div class="value">{{ device.status[ device.channel.indexOf('current_area') ] ?? '—' }}</div>
+        </div>
+    }
+
+    <!-- robot Matter: l'errore compare solo se c'è (senza il canale indexOf dà -1 e il valore è vuoto) -->
+    @if( !!device.status[ device.channel.indexOf('error') ] && device.status[ device.channel.indexOf('error') ] !== 'NoError' ) {
+        <div class="row">
+            <div class="label">errore</div>
+            <div class="value">{{ device.status[ device.channel.indexOf('error') ] }}</div>
+        </div>
+    }
+
+    <!-- pulizia: avvio e pausa su cleaning, ritorno alla base con il modo chargego; quello attuale è il bottone pieno
+         (per il robot Matter la base è piena durante il rientro, in carica e sulla base) -->
     <div class="row">
         <div class="label">pulizia</div>
 
@@ -52,19 +76,19 @@
                 label="base"
                 [size]="'small'"
                 [rounded]="true"
-                [outlined]="device.status[ device.channel.indexOf('mode') ] !== 'chargego'"
+                [outlined]="device.status[ device.channel.indexOf('mode') ] !== 'chargego' && !BASE_STATUSES.includes(''+ device.status[ device.channel.indexOf('status') ])"
                 [disabled]="!!inWaiting()"
                 (click)="setValue('mode', 'chargego')"
             ></p-button>
         </div>
     </div>
 
-    <!-- modo: quello attuale è il bottone pieno -->
+    <!-- modo: quello attuale è il bottone pieno; il robot Matter ha i suoi modi di pulizia -->
     <div class="row">
         <div class="label">modo</div>
 
         <div class="modes">
-            @for( mode of MODE_OPTIONS; track mode.value ) {
+            @for( mode of (device.family === 'matter' ? MATTER_MODE_OPTIONS : MODE_OPTIONS); track mode.value ) {
                 <p-button
                     [label]="mode.label"
                     [size]="'small'"
@@ -77,23 +101,25 @@
         </div>
     </div>
 
-    <!-- aspirazione: quella attuale è il bottone pieno -->
-    <div class="row">
-        <div class="label">aspirazione</div>
+    <!-- aspirazione: quella attuale è il bottone pieno; il robot Matter non ha il canale -->
+    @if( device.channel.includes('suction') ) {
+        <div class="row">
+            <div class="label">aspirazione</div>
 
-        <div class="modes">
-            @for( suction of SUCTION_OPTIONS; track suction.value ) {
-                <p-button
-                    [label]="suction.label"
-                    [size]="'small'"
-                    [rounded]="true"
-                    [outlined]="device.status[ device.channel.indexOf('suction') ] !== suction.value"
-                    [disabled]="!!inWaiting()"
-                    (click)="setValue('suction', suction.value)"
-                ></p-button>
-            }
+            <div class="modes">
+                @for( suction of SUCTION_OPTIONS; track suction.value ) {
+                    <p-button
+                        [label]="suction.label"
+                        [size]="'small'"
+                        [rounded]="true"
+                        [outlined]="device.status[ device.channel.indexOf('suction') ] !== suction.value"
+                        [disabled]="!!inWaiting()"
+                        (click)="setValue('suction', suction.value)"
+                    ></p-button>
+                }
+            </div>
         </div>
-    </div>
+    }
 
     @if( !!errorMessage() ) {
         <div class="message error" role="alert">{{ errorMessage() }}</div>

@@ -793,7 +793,8 @@ const MATTER_SUPPORTED_TYPES: string[] = [
     'METERED_SWITCH',
     'DIMMER',
     'METERED_DIMMER',
-    'TEMPERATURE_HUMIDITY_SENSOR'
+    'TEMPERATURE_HUMIDITY_SENSOR',
+    'ROBOT_VACUUM'
 ];
 
 // letture del job di commissioning, una al secondo: il Core attende il nodo fino a 120 s
