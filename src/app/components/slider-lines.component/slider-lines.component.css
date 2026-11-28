@@ -1,0 +1,41 @@
+:host {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.label-value {
+    font-family: var(--mono-font);
+    font-size: var(--micro-font-size);
+    fill: var(--color-text-1);
+    color: var(--color-text-1);
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.scorrimento {
+    scrollbar-width: none;
+    cursor: grab;
+    user-select: none;
+}
+
+.scorrimento::-webkit-scrollbar {
+    display: none;
+}
+
+/* linea fissa sopra lo scorrimento: non intercetta il puntatore, così il trascinamento continua a funzionare */
+.indicatore {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+}
+
+.value-label {
+    text-align: center;
+    font-size: var(--main-font-size);
+    font-family: var(--page-font);
+    color: var(--color-text-1);
+    font-weight: 500;
+}

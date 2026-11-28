@@ -88,7 +88,8 @@
     </div>
 
 
-    <!-- comando accensione -->
+    <!-- comando accensione: sempre sul canale output (anche ritardo e durata); il robot Matter non lo ha -->
+    @if( device().channel.includes('output') ) {
     @switch (device().type.id) {
 
         @case ('SWITCH')
@@ -138,6 +139,8 @@
                     }
 
                 </div>
+
+                    <!--
                 <div class="actionTimed-container">
                     <label for="actionDelayInput">fra</label>
                     <input
@@ -150,21 +153,53 @@
                     />
                     <div>sec.</div>
                 </div>
-                <div class="actionTimed-container">
-                    <label for="actionDurationInput">durata</label>
-                    <input
-                        #actionDurationInput
-                        pInputText
-                        id="actionDuration"
-                        type="number"
-                        class="fixed-value-input"
-                        [(ngModel)]="actionDuration"
-                    />
-                    <div>sec.</div>
+                    -->
+                    <div
+                        class="actionTimed-container"
+                        style="height: 5rem; margin-bottom: 2rem; overflow: hidden;"
+                    >
+                        <div style="margin-right: 1rem; width: 30%; flex: 0;">Ritardo</div>
+                        <slider-lines
+                            [middleStepsLevel]="4"
+                            [middleStepsCenter]="false"
+                            [steps]="[
+                                {value: 0, label: '0sec'},
+                                {value: 16, label: '16sec'},
+                                {value: 32, label: '32sec'},
+                                {value: 60, label: '1min'},
+                                {value: 120, label: '2min'},
+                                {value: 300, label: '5min'},
+                                {value: 600, label: '10min'},
+                                {value: 900, label: '15min'},
+                                {value: 1800, label: '30min'},
+                                {value: 3600, label: '1h'},
+                                {value: 9000, label: '2h 30min'}
+                            ]"
+                            [min]="0"
+                            [max]="(60 * 60 * 2) + (60 * 30)"
+                            (valueChange)="onSetDelay($event)"
+                            [currentLabel]="actionDelayLabel"
+                            [scale]="'LOGARITMIC'"
+                        ></slider-lines>
+                    </div>
+
+
+                    <div
+                        class="actionTimed-container"
+                        style="height: 5rem; margin-bottom: 2rem; overflow: hidden;"
+                    >
+                        <div style="margin-right: 1rem; width: 30%; flex: 0;">Durata</div>
+                        <progress-lines-blocks
+                            [n]="30"
+                            [colors]="['var(--color-evident-2)', 'var(--color-evident-1)']"
+                            [currentLabel]="actionDurationLabel"
+                            (valueChange)="onSetDuration($event)"
+                        ></progress-lines-blocks>
                 </div>
             </div>
         }
 
+    }
     }
 
 
@@ -500,7 +535,7 @@
                             [angolo]="angolo[chart.channelKey]"
                             [value]="device().status[ device().channel.indexOf(chart.channelKey) ] +' '+ chart.measureUnit"
                             [hasColorMagnitude]="true"
-                            [colori]="['#00f', '#0f0', '#ff0', '#f00']"
+                            [colori]="['#0af', '#3fb', '#ff0', '#f50']"
                         ></gauge>
                     }
                     @case('humidity') {
@@ -577,9 +612,13 @@
 
                 <progressive-average-chart-component
                     [data]="chart.values"
-                    [ths]="chart.ths"
+                    [ths]="
+                        (chart.channelKey === 'humidity')
+                            ? 60
+                            : chart.ths
+                    "
                     [thsColor]="chart.thsColor"
-                    [thsGradient]="historicChartOptions.colorGradient"
+                    [thsGradient]="(chart.channelKey === 'humidity')"
                     [color]="historicChartOptions.color"
                     [width]="historicChartOptions.trendWidth"
                     [height]="historicChartOptions.trendHeight"

@@ -1,0 +1,9 @@
+/*
+  il componente prende la larghezza del contenitore (in una riga flex, lo spazio che resta);
+  container-type serve alle unità cqw dello spessore delle tacche
+*/
+:host {
+    display: block;
+    flex: 1;
+    container-type: inline-size;
+}

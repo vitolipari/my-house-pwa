@@ -43,6 +43,7 @@ export class TimerWheel implements OnInit {
   @Input()
   set minuteScale(v: number) {
     this._minuteScale = v;
+    this.snapDegrees = 360 * v / MINUTES_IN_A_DAY;
 
     let dayTimerBits: boolean[] = base64ToBits( this.rawDayTimer, MINUTES_IN_A_DAY);
     this.createSegments(dayTimerBits);
@@ -81,7 +82,7 @@ export class TimerWheel implements OnInit {
 
   // SNAP CONFIG
   enableSnap = true;
-  snapDegrees = 360 / ((24 * 60) * this._minuteScale); // = 3.75° se 15min
+  snapDegrees: number = 0;   // gradi di un segmento, dal setter di minuteScale (3.75° con 15 min); con 0 non aggancia
 
   // STATE
   // rotation = 360 * this._minuteScale / MINUTES_IN_A_DAY;
@@ -89,7 +90,7 @@ export class TimerWheel implements OnInit {
   rotation = 0;
   lastAngle = 0;
   dragging = false;
-  velocity = 10;
+  velocity = 0;
   inertiaFrame?: number;
   buttonStateActive: boolean = false;
   deactivationButtonStateActive: boolean = false;
@@ -101,6 +102,12 @@ export class TimerWheel implements OnInit {
   // FISICA
   friction = 0.985;  // 0.985; // <— più basso = si ferma prima
   velocityThreshold = 0.5;  // 0.06
+
+  // inerzia solo dopo un giro lungo, con il dito ancora in movimento al rilascio: sui piccoli movimenti disturba
+  rotazioneMinimaInerzia: number = 90;   // gradi fra la pressione e il rilascio
+  pausaMassimaInerzia: number = 100;     // ms fra l'ultimo movimento e il rilascio
+  rotazioneTrascinamento: number = 0;
+  ultimoMovimento: number = 0;
 
   segments = Array.from({ length: (MINUTES_IN_A_DAY / this._minuteScale) });
 
@@ -140,8 +147,10 @@ export class TimerWheel implements OnInit {
   onPointerDown(e: PointerEvent) {
     this.stopInertia();
     this.dragging = true;
+    this.velocity = 0;
+    this.rotazioneTrascinamento = 0;
     this.lastAngle = this.getAngle(e);
-    this.dialRef.nativeElement.setPointerCapture(e.pointerId);
+    this.svgRef.nativeElement.setPointerCapture(e.pointerId);
   }
 
   onPointerMove(e: PointerEvent) {
@@ -162,6 +171,8 @@ export class TimerWheel implements OnInit {
 
       this.velocity = delta;
       this.lastAngle = angle;
+      this.rotazioneTrascinamento += delta;
+      this.ultimoMovimento = performance.now();
 
       this.emit();
 
@@ -169,7 +180,19 @@ export class TimerWheel implements OnInit {
   }
 
   onPointerUp() {
+    if( !this.dragging ) {
+      return;
+    }
+
     this.dragging = false;
+
+    // piccoli movimenti e rilascio da fermo: niente inerzia
+    if( Math.abs(this.rotazioneTrascinamento) < this.rotazioneMinimaInerzia ) {
+      this.velocity = 0;
+    }
+    if( (performance.now() - this.ultimoMovimento) > this.pausaMassimaInerzia ) {
+      this.velocity = 0;
+    }
 
     if (this.enableSnap) {
       const snapped = this.snapRotation(this.rotation);
@@ -185,7 +208,9 @@ export class TimerWheel implements OnInit {
 
     // soglia per l'inerzia
 
+    if( this.velocity !== 0 ) {
     this.startInertia();
+  }
   }
 
   /* ================= INERZIA ================= */
@@ -262,7 +287,9 @@ export class TimerWheel implements OnInit {
 
     if( !isNaN( this.rotation ) /*&& (this.rotation > 0)*/ ) {
 
-      let currentMinuteIndex: number = Math.round(this.rotation / ((360 / (MINUTES_IN_A_DAY / this._minuteScale))));
+      // da 360° meno mezzo segmento l'arrotondamento darebbe l'indice dopo l'ultimo: 360° è il segmento 0, come dopo lo snap
+      let segmenti: number = MINUTES_IN_A_DAY / this._minuteScale;
+      let currentMinuteIndex: number = Math.round(this.rotation / (360 / segmenti)) % segmenti;
       this.rotationChange.emit(currentMinuteIndex);
       // console.log('emesso '+ currentMinuteIndex);
 
@@ -344,8 +371,12 @@ export class TimerWheel implements OnInit {
     [hh, mm] = time.split(':');
 
     let currentMinuteIndex: number = Math.round(this.rotation / ((360 / (MINUTES_IN_A_DAY / this._minuteScale))));
-    let minuteIndex = Math.round(((parseInt( hh ) * 60) + (parseInt(mm))) / this._minuteScale);
-    this.rotation = minuteIndex * this._minuteScale;
+
+    // il segmento che contiene l'ora: con Math.floor l'indice resta nell'intervallo anche a fine giornata (23:55 con 10 minuti dà 23:50)
+    let minuteIndex: number = Math.floor(((parseInt( hh ) * 60) + (parseInt(mm))) / this._minuteScale);
+
+    // rotation è in gradi, come in emit()
+    this.rotation = minuteIndex * 360 / (MINUTES_IN_A_DAY / this._minuteScale);
 
     return minuteIndex;
   }

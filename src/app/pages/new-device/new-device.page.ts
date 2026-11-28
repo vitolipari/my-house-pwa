@@ -793,7 +793,8 @@ const MATTER_SUPPORTED_TYPES: string[] = [
     'METERED_SWITCH',
     'DIMMER',
     'METERED_DIMMER',
-    'TEMPERATURE_HUMIDITY_SENSOR'
+    'TEMPERATURE_HUMIDITY_SENSOR',
+    'ROBOT_VACUUM'
 ];
 
 // letture del job di commissioning, una al secondo: il Core attende il nodo fino a 120 s
@@ -1529,33 +1530,25 @@ export class NewDevicePage implements OnInit {
         return '';
     }
 
+
+    // tipi compatibili con la voce scelta; con Matter solo quelli che il Core sa registrare
     compatibleTypeDefinitions(): DeviceTypeDefinition[] {
         const compatibleTypes = this.selectedCatalogItem()?.compatibleTypes ?? [];
         return compatibleTypes
-            .filter((id: string) => this.isTypeAvailableForIntegration(id))
+            .filter((id: string) => this.integration !== 'matter' || MATTER_SUPPORTED_TYPES.includes(id))
             .map(id => this.taxonomy().types.find(type => type.id === id))
             .filter((type): type is DeviceTypeDefinition => type !== undefined);
     }
 
-    // voci del catalogo con almeno un tipo registrabile per la famiglia scelta (con Matter, per esempio,
-    // la Tapparella non compare)
+    // voci del catalogo con almeno un tipo registrabile per la famiglia scelta: con Matter solo i tipi che il Core
+    // sa registrare (la Tapparella, per esempio, non compare), le altre famiglie non hanno limiti qui
     selectableCatalog(): DeviceCatalogItem[] {
         return this.catalog()
             .filter((item: DeviceCatalogItem) => (
                 item.compatibleTypes
-                    .some((id: string) => this.isTypeAvailableForIntegration(id))
+                    .some((id: string) => this.integration !== 'matter' || MATTER_SUPPORTED_TYPES.includes(id))
             ))
         ;
-    }
-
-    // con Matter solo i tipi che il Core sa registrare; le altre famiglie non hanno limiti qui
-    private isTypeAvailableForIntegration(typeID: string): boolean {
-
-        if( this.integration !== 'matter' ) {
-            return true;
-        }
-
-        return MATTER_SUPPORTED_TYPES.includes(typeID);
     }
 
 
@@ -1688,14 +1681,6 @@ export class NewDevicePage implements OnInit {
             console.log('errore sincrono in copyNewDeviceData');
             console.log(error);
         }
-    }
-
-    openNewDeviceDateTree() {
-        this.newDeviceDataTreePanelOpen.set(true);
-    }
-
-    newDeviceDataTreePanelClose() {
-        this.newDeviceDataTreePanelOpen.set(false);
     }
 
     // Shelly di prima generazione (H&T a batteria): se è nuovo, il Core lo configura quando si sveglia
@@ -1835,9 +1820,10 @@ export class NewDevicePage implements OnInit {
                     return;
                 }
                 this.matterDetectedType.set(job.device.detectedDeviceType);
+                // niente IP: l'indirizzo del commissioning è l'IPv6 link-local visto dal controller, con interfaccia
+                // e porta; MAC e IPv4 li ricava il Core dallo stato del nodo
                 this.newDevice.update(() => ({
                     ...this.newDevice(),
-                    ip: job.device!.address ?? '',
                     hardware: {...this.newDevice().hardware, id: job.device!.matterNodeId!}
                 }));
                 this.navigateToNextStepFrom(this.sections.commissioning);

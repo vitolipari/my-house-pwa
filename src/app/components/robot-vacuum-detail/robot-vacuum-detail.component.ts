@@ -19,16 +19,36 @@ const SUCTION_OPTIONS: {value: string, label: string}[] = [
     {value: 'strong', label: 'forte'}
 ];
 
-// nomi dei codici di status osservati il 21/11 durante una pulizia; gli altri codici si mostrano così come arrivano
+// modi di pulizia del robot Matter (Ecovacs DEEBOT T50 OMNI Gen3, letti il 28/11): il valore è l'etichetta del robot.
+// Il ritorno alla base resta il bottone «base» (SET:chargego), l'aspirazione via Matter non c'è
+const MATTER_MODE_OPTIONS: {value: string, label: string}[] = [
+    {value: 'Vacuum & Mop', label: 'aspira e lava'},
+    {value: 'Vacuum-Only', label: 'solo aspira'},
+    {value: 'Mopping', label: 'solo lava'},
+    {value: 'Mop after Vacuum', label: 'aspira poi lava'}
+];
+
+// stati Matter in cui il robot va alla base o ci sta: il bottone «base» è pieno (per il Medion vale il modo chargego)
+const BASE_STATUSES: string[] = ['SeekingCharger', 'Charging', 'Docked'];
+
+// nomi dei codici di status osservati il 21/11 durante una pulizia e degli stati Matter del robot Ecovacs;
+// gli altri codici si mostrano così come arrivano
 const STATUS_LABELS: Record<string, string> = {
     '1': 'pulizia automatica',
     '4': 'rientro alla base',
-    '5': 'in carica'
+    '5': 'in carica',
+    'Stopped': 'fermo',
+    'Running': 'in pulizia',
+    'Paused': 'in pausa',
+    'Error': 'errore',
+    'SeekingCharger': 'rientro alla base',
+    'Charging': 'in carica',
+    'Docked': 'sulla base'
 };
 
 
-// dettaglio dedicato del robot aspirapolvere: stato, batteria, avvio, pausa e ritorno alla base, modo e aspirazione.
-// L'accensione resta alla pagina e lo stato aggiornato arriva dalla sua WebSocket
+// dettaglio dedicato del robot aspirapolvere: stato, batteria, avvio, pausa e ritorno alla base, modo e aspirazione;
+// per il robot Matter anche fase, stanza ed errore. L'accensione resta alla pagina e lo stato aggiornato arriva dalla sua WebSocket
 @Component({
     selector: 'robot-vacuum-detail-component',
     standalone: true,
@@ -48,6 +68,8 @@ export class RobotVacuumDetailComponent {
     // il template legge solo i membri del componente: le costanti di modulo si riespongono qui, come nel termostato
     protected readonly MODE_OPTIONS = MODE_OPTIONS;
     protected readonly SUCTION_OPTIONS = SUCTION_OPTIONS;
+    protected readonly MATTER_MODE_OPTIONS = MATTER_MODE_OPTIONS;
+    protected readonly BASE_STATUSES = BASE_STATUSES;
     protected readonly STATUS_LABELS = STATUS_LABELS;
 
 

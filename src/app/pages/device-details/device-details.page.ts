@@ -42,6 +42,10 @@ import {GaugeMeteredComponent} from '../../components/gauge-metered.component/ga
 import {GaugeComponent} from '../../components/gauge.component/gauge.component';
 import {Select} from 'primeng/select';
 import {CHANNEL_MAPPING} from '../scenario/scenario/scenario.page';
+import {SliderLinesComponent} from '../../components/slider-lines.component/slider-lines.component';
+import {
+    ProgressLinesBlocksComponent
+} from '../../components/progress-lines-blocks.component/progress-lines-blocks.component';
 
 
 export type HistoricDataType = {
@@ -96,19 +100,20 @@ const CHART_MEASURES_PER_CHANNEL: number = 360;
         DatePipe,
         DatePicker,
         InputText,
-        DataWidgetComponent,
+        // DataWidgetComponent,
         DataTrendChartComponent,
         ProgressiveAverageChartComponent,
-        DataCurrentChartComponent,
+        // DataCurrentChartComponent,
         ClimateDetailComponent,
         BinarySensorDetailComponent,
-        CurtainDetailComponent,
         ThermostatDetailComponent,
         RobotVacuumDetailComponent,
         DeviceEditComponent,
         GaugeMeteredComponent,
         GaugeComponent,
         Select,
+        SliderLinesComponent,
+        ProgressLinesBlocksComponent,
         // Checkbox,
         // SwitcherComponent
     ],
@@ -254,6 +259,9 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
     massimo: any = {};
     angolo: any = {};
     media: any = {};
+
+    actionDelayLabel: string = '';
+    actionDurationLabel: string = '';
 
     protected readonly CHART_TYPES = CHART_TYPES;
 
@@ -1146,4 +1154,39 @@ export class DeviceDetailsPage implements OnInit, OnDestroy {
     channelNameMap( name: string ): string {
         return this.CHANNEL_NAME_MAPPING[name as keyof typeof this.CHANNEL_NAME_MAPPING] || name;
     }
+
+    protected onSetDelay(event: number) {
+
+        let sec = event % 60;
+        let min = Math.floor(event / (60)) % 60;
+        let h = Math.floor(event / (60 * 60));
+
+        this.actionDelayLabel = '';
+        this.actionDelayLabel += ( h > 0 ) ? `${ h }h` : '';
+        this.actionDelayLabel += ( min > 0 ) ? ` ${ min }min ` : ' ';
+        this.actionDelayLabel += `${ sec }sec`;
+
+        this.actionDelay = event;
+    }
+
+    protected onSetDuration(event: number) {
+
+        let range = (event / 100) * 60 * 60 * 4;
+
+
+        let sec = Math.floor(range % 60);
+        let min = Math.floor(range / (60)) % 60;
+        let h = Math.floor(range / (60 * 60));
+
+        this.actionDurationLabel = '';
+        this.actionDurationLabel += ( h > 0 ) ? `${ h }h` : '';
+        this.actionDurationLabel += ( min > 0 ) ? ` ${ min }min ` : ' ';
+        this.actionDurationLabel += `${ sec }sec`;
+
+        this.actionDuration = range;
+
+    }
+
+
+
 }
